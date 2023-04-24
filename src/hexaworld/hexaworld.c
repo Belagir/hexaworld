@@ -28,19 +28,22 @@
 //
 // -------------------------------------------------------------------------------------------------
 
-#define HEXAGON_SIDES_NB 6u     ///< number of sides of an hexagon. tough.
+#define HEXAGON_SIDES_NB (6u)     ///< number of sides of an hexagon. tough.
 
-#define SQRT_OF_3 1.73205f      ///< approximation of the square root of 3
-#define THREE_HALVES 1.5f       ///< not an *approximation* of 3 / 2
+#define SQRT_OF_3 (1.73205f)      ///< approximation of the square root of 3
+#define THREE_HALVES (1.5f)       ///< not an *approximation* of 3 / 2
 
-#define ITERATION_NB_TELLURIC 3u    ///< number of automaton iteration for the telluric layer
-#define ITERATION_NB_LANDMASS 6u    ///< number of automaton iteration for the landmass layer
-#define ITERATION_NB_ALTITUDE 1u    ///< number of automaton iteration for the altitude layer
+#define ITERATION_NB_TELLURIC (3u)    ///< number of automaton iteration for the telluric layer
+#define ITERATION_NB_LANDMASS (6u)    ///< number of automaton iteration for the landmass layer
+#define ITERATION_NB_ALTITUDE (10u)    ///< number of automaton iteration for the altitude layer
 
-#define TELLURIC_VECTOR_DIRECTIONS_NB 6     ///< number of possible directions for a telluric vector
+#define TELLURIC_VECTOR_DIRECTIONS_NB (6)     ///< number of possible directions for a telluric vector
 #define TELLURIC_VECTOR_UNIT_ANGLE (((2.0f) * (PI)) / (TELLURIC_VECTOR_DIRECTIONS_NB))      ///< telluric vector minimum angle 
 
-#define LANDMASS_SEEDING_CHANCE 0x03    ///< the greater, the bigger the chance a land tile is seeded.
+#define LANDMASS_SEEDING_CHANCE (0x03)    ///< the greater, the bigger the chance a land tile is seeded.
+
+#define ALTITUDE_MAX (3000)  ///< maximum altitude, in meters
+#define ALTITUDE_MIN (-2000)  ///< minimum altitude, in meters
 
 // -------------------------------------------------------------------------------------------------
 // ---- TYPE DEFINITIONS ---------------------------------------------------------------------------
@@ -220,7 +223,7 @@ static const layer_calls_t hexaworld_layers_functions[HEXAW_LAYERS_NUMBER] = {
     /// landmass layer calls
     { &landmass_draw,        &landmass_seed,        &landmass_apply,        &landmass_flag_gen,        ITERATION_NB_LANDMASS, LAYER_GEN_ITERATE_ABSOLUTE },
     /// altitude layer calls
-    { &altitude_draw,        &altitude_seed,        &altitude_apply,        NULL,                      ITERATION_NB_ALTITUDE, LAYER_GEN_ITERATE_ABSOLUTE },
+    { &altitude_draw,        &altitude_seed,        &altitude_apply,        NULL,                      ITERATION_NB_ALTITUDE, LAYER_GEN_ITERATE_RELATIVE },
 };
 
 // -------------------------------------------------------------------------------------------------
@@ -310,7 +313,7 @@ void hexaworld_genlayer(hexaworld_t *world, hexaworld_layer_t layer) {
 
     iteration_number = hexaworld_layers_functions[layer].automaton_iter;
     if (hexaworld_layers_functions[layer].iteration_flavour == LAYER_GEN_ITERATE_RELATIVE) {
-        iteration_number *= world->width;
+        iteration_number *= (world->width / 10);
     }
 
     // applying the overall generation function N times
@@ -545,19 +548,67 @@ static void landmass_flag_gen(void *target_cell, void *neighbors[DIRECTIONS_NB])
 
 // -------------------------------------------------------------------------------------------------
 static void altitude_draw(hexa_cell_t *cell, hexagon_shape_t *target_shape) {
+    Color base_color = { 0u };
+    f32 color_intensity = 0.0f;
 
+    base_color = DARKBLUE;
+    color_intensity = (f32) cell->altitude / (f32) ALTITUDE_MIN;
+
+    if (cell->altitude > 0) {
+        base_color = DARKGREEN;
+        color_intensity = (f32) cell->altitude / (f32) ALTITUDE_MAX;
+    }
+    base_color.a = 32u + (u8) ((color_intensity) * (f32) (225u-32u));
+
+    DrawPoly(*((Vector2*) &target_shape->center), HEXAGON_SIDES_NB, target_shape->radius, 0.0f, base_color);
 }
 
 // -------------------------------------------------------------------------------------------------
 static void altitude_seed(hexaworld_t *world) {
+    hexa_cell_t *tmp_cell = NULL;
+
+    for (size_t x = 0u ; x < world->width ; x++) {
+        for (size_t y = 0u ; y < world->height ; y++) {
+            tmp_cell = world->tiles[x] + y;
+
+            if (hexa_cell_has_flag(tmp_cell, HEXAW_FLAG_MOUNTAIN)) {
+                tmp_cell->altitude = ALTITUDE_MAX;
+            } else if (hexa_cell_has_flag(tmp_cell, HEXAW_FLAG_UNDERWATER_CANYONS)) {
+                tmp_cell->altitude = ALTITUDE_MIN;
+            } else if (tmp_cell->altitude > 0) {
+                tmp_cell->altitude = ALTITUDE_MAX / 4;
+            } else {
+                tmp_cell->altitude = ALTITUDE_MIN / 4;
+            }
+        }
+    }
 
 }
 
 // -------------------------------------------------------------------------------------------------
 static void altitude_apply(void *target_cell, void *neighbors[DIRECTIONS_NB]) {
+    hexa_cell_t *cell = (hexa_cell_t *) target_cell;
 
+    i32 maximum_altitude = (i32) 0x80000000;
+    i32 minimum_altitude = (i32) 0x7FFFFFFF;
+
+    hexa_cell_t *tmp_cell = NULL;
+
+    for (size_t i = 0u ; i < DIRECTIONS_NB ; i++) {
+        tmp_cell = ((hexa_cell_t *) neighbors[i]);
+
+        if (tmp_cell->altitude < minimum_altitude) {
+            minimum_altitude = tmp_cell->altitude;
+        }
+        if (tmp_cell->altitude > maximum_altitude) {
+            maximum_altitude = tmp_cell->altitude;
+        }
+    }
+
+    if ((cell->altitude > minimum_altitude) && (cell->altitude < maximum_altitude)) {
+        cell->altitude = (maximum_altitude + minimum_altitude) / 2;
+    }
 }
-
 
 // -------------------------------------------------------------------------------------------------
 // -------------------------------------------------------------------------------------------------
@@ -580,8 +631,8 @@ static hexagon_shape_t hexagon_position_in_rectangle(f32 boundaries[4u], u32 x, 
     shape.radius = (boundaries[3u] / ((f32) height*THREE_HALVES));
 
     shape.center = (vector_2d_cartesian_t) { 
-            boundaries[0u] + ((((float) x+0.5f) + (0.5f * (f32) (y & 0x01))) * SQRT_OF_3 * (shape.radius)), 
-            boundaries[1u] + ((((float) y+0.5f)) * THREE_HALVES * (shape.radius)) 
+            boundaries[0u] + ((((f32) x+0.5f) + (0.5f * (f32) (y & 0x01))) * SQRT_OF_3 * (shape.radius)), 
+            boundaries[1u] + ((((f32) y+0.5f)) * THREE_HALVES * (shape.radius)) 
     };
 
     return shape;
