@@ -36,8 +36,13 @@
  * @brief Possible flags held in a cell. (They claim they're innocent)
  */
 typedef enum hexaworld_cell_flag_t {
-    HEXAW_TELLURIC_RIDGE,       ///< Two plates are clashing here, and forming mountains
-    HEXAW_TELLURIC_RIFT,        ///< Two plates are growing from the ocean's floor, forming a deep crevasse.
+    HEXAW_FLAG_TELLURIC_RIDGE,      ///< Two plates are clashing here, and forming mountains
+    HEXAW_FLAG_TELLURIC_RIFT,       ///< Two plates are growing from the ocean's floor, forming a deep crevasse
+
+    HEXAW_FLAG_MOUNTAIN,            ///< Some mountains are forming here, above the water
+    HEXAW_FLAG_ISLES,               ///< Some isles have been created by a tectonic force
+    HEXAW_FLAG_CANYONS,             ///< Some old tectonic event or river dug a long path here
+    HEXAW_FLAG_UNDERWATER_CANYONS,  ///< Tectonic forces are at work here and create some heavy drop on the ocean floor
 
     HEXAW_FLAGS_NB,     ///< Total number of flags
 } hexaworld_cell_flag_t;
@@ -121,11 +126,13 @@ static void telluric_vector_flag_gen(void *target_cell, void *neighbors[DIRECTIO
 // -------------------------------------------------------------------------------------------------
 // -- LANDMASS -------------------------------------------------------------------------------------
 
-static void landmass_vector_draw(hexa_cell_t *cell, hexagon_shape_t *target_shape);
+static void landmass_draw(hexa_cell_t *cell, hexagon_shape_t *target_shape);
 
-static void landmass_vector_seed(hexaworld_t *world);
+static void landmass_seed(hexaworld_t *world);
 
-static void landmass_vector_apply(void *target_cell, void *neighbors[DIRECTIONS_NB]);
+static void landmass_apply(void *target_cell, void *neighbors[DIRECTIONS_NB]);
+
+static void landmass_flag_gen(void *target_cell, void *neighbors[DIRECTIONS_NB]);
 
 // -------------------------------------------------------------------------------------------------
 // -------------------------------------------------------------------------------------------------
@@ -176,9 +183,9 @@ static void hexaworld_draw_grid(hexaworld_t *world, f32 rectangle_target[4u]);
  */
 static const layer_calls_t hexaworld_layers_functions[HEXAW_LAYERS_NUMBER] = {
     /// telluric layer calls
-    { &telluric_vector_draw, &telluric_vector_seed, telluric_vector_apply, telluric_vector_flag_gen, 50u },
+    { &telluric_vector_draw, &telluric_vector_seed, &telluric_vector_apply, &telluric_vector_flag_gen, 50u },
     /// landmass layer calls
-    { &landmass_vector_draw, &landmass_vector_seed, landmass_vector_apply, NULL, 0u }
+    { &landmass_draw,        &landmass_seed,        &landmass_apply,        &landmass_flag_gen,        2u }
 };
 
 // -------------------------------------------------------------------------------------------------
@@ -301,9 +308,9 @@ static void telluric_vector_draw(hexa_cell_t *cell, hexagon_shape_t *target_shap
     vector_2d_cartesian_t translated_vec = { 0u };
     Color tile_color = WHITE;
 
-    if (hexa_cell_has_flag(cell, HEXAW_TELLURIC_RIDGE)) {
+    if (hexa_cell_has_flag(cell, HEXAW_FLAG_TELLURIC_RIDGE)) {
         tile_color = ORANGE;
-    } else if (hexa_cell_has_flag(cell, HEXAW_TELLURIC_RIFT)) {
+    } else if (hexa_cell_has_flag(cell, HEXAW_FLAG_TELLURIC_RIFT)) {
         tile_color = YELLOW;
     }
 
@@ -402,9 +409,9 @@ static void telluric_vector_flag_gen(void *target_cell, void *neighbors[DIRECTIO
     pushed_from_cell = neighbors[pushed_from_cell_index];
 
     if (!float_equal(cell->telluric_vector.angle, pushed_against_cell->telluric_vector.angle, 1u)) {
-        hexa_cell_set_flag(cell, HEXAW_TELLURIC_RIDGE);
+        hexa_cell_set_flag(cell, HEXAW_FLAG_TELLURIC_RIDGE);
     } else if (!float_equal(cell->telluric_vector.angle, pushed_from_cell->telluric_vector.angle, 1u)) {
-        hexa_cell_set_flag(cell, HEXAW_TELLURIC_RIFT);
+        hexa_cell_set_flag(cell, HEXAW_FLAG_TELLURIC_RIFT);
     }
 }
 
@@ -412,24 +419,74 @@ static void telluric_vector_flag_gen(void *target_cell, void *neighbors[DIRECTIO
 // -- LANDMASS -------------------------------------------------------------------------------------
 
 // -------------------------------------------------------------------------------------------------
-static void landmass_vector_draw(hexa_cell_t *cell, hexagon_shape_t *target_shape) {
+static void landmass_draw(hexa_cell_t *cell, hexagon_shape_t *target_shape) {
     Color tile_color = BLUE;
 
-    if (cell->altitude > 0) {
+    if (hexa_cell_has_flag(cell, HEXAW_FLAG_UNDERWATER_CANYONS)) {
+        tile_color = DARKBLUE;
+    } else if (hexa_cell_has_flag(cell, HEXAW_FLAG_MOUNTAIN)) {
+        tile_color = DARKGREEN;
+    } else if (hexa_cell_has_flag(cell, HEXAW_FLAG_CANYONS)) {
+        tile_color = LIME;
+    } else if (cell->altitude > 0) {
         tile_color = GREEN;
     }
 
+
     DrawPoly(*((Vector2*) &target_shape->center), HEXAGON_SIDES_NB, target_shape->radius, 0.0f, tile_color);
+
+    if (hexa_cell_has_flag(cell, HEXAW_FLAG_ISLES)) {
+        DrawCircleV(*((Vector2*) &target_shape->center), target_shape->radius/2, GREEN);   
+    }
 }
 
 // -------------------------------------------------------------------------------------------------
-static void landmass_vector_seed(hexaworld_t *world) {
-    
+static void landmass_seed(hexaworld_t *world) {
+    for (size_t x = 0u ; x < world->width ; x++) {
+        for (size_t y = 0u ; y < world->height ; y++) {
+            if (hexa_cell_has_flag(world->tiles[x] + y, HEXAW_FLAG_TELLURIC_RIDGE)) {
+                world->tiles[x][y].altitude = 1;
+            } else if (!hexa_cell_has_flag(world->tiles[x] + y, HEXAW_FLAG_TELLURIC_RIFT)){
+                world->tiles[x][y].altitude = (rand() & 0x03) != 0;
+            }
+        }
+    }
 }
 
 // -------------------------------------------------------------------------------------------------
-static void landmass_vector_apply(void *target_cell, void *neighbors[DIRECTIONS_NB]) {
+static void landmass_apply(void *target_cell, void *neighbors[DIRECTIONS_NB]) {
+    hexa_cell_t *cell = (hexa_cell_t *) target_cell;
 
+    u32 counter = 0u;
+
+    for (size_t i = 0u ; i < DIRECTIONS_NB ; i++) {
+        counter += ((hexa_cell_t *) neighbors[i])->altitude;
+    }
+
+    cell->altitude = (counter > (DIRECTIONS_NB / 2));
+}
+
+// -------------------------------------------------------------------------------------------------
+static void landmass_flag_gen(void *target_cell, void *neighbors[DIRECTIONS_NB]) {
+    hexa_cell_t *cell = (hexa_cell_t *) target_cell;
+
+    const u32 is_above_sea_level = cell->altitude;
+    const u32 is_a_ridge = hexa_cell_has_flag(cell, HEXAW_FLAG_TELLURIC_RIDGE);
+    const u32 is_a_rift = hexa_cell_has_flag(cell, HEXAW_FLAG_TELLURIC_RIFT);
+
+    if (is_above_sea_level) {
+        if (is_a_ridge) {
+            hexa_cell_set_flag(cell, HEXAW_FLAG_MOUNTAIN);
+        } else if (is_a_rift) {
+            hexa_cell_set_flag(cell, HEXAW_FLAG_CANYONS);
+        }
+    } else {
+        if (is_a_ridge) {
+            hexa_cell_set_flag(cell, HEXAW_FLAG_ISLES);
+        } else if (is_a_rift) {
+            hexa_cell_set_flag(cell, HEXAW_FLAG_UNDERWATER_CANYONS);
+        }
+    }
 }
 
 // -------------------------------------------------------------------------------------------------
