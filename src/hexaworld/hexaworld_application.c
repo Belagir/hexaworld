@@ -52,6 +52,13 @@ typedef struct hexaworld_raylib_app_t {
  */
 static void draw_hexmap_to_texture(hexaworld_t *world, RenderTexture2D *target, f32 window_rectangle[4u], hexaworld_layer_t layer);
 
+/**
+ * @brief (Re-)generates all the layers of a world.
+ * 
+ * @param world target world.
+ */
+static void generate_world(hexaworld_t *world);
+
 // -------------------------------------------------------------------------------------------------
 // ---- HEADER FUNCTIONS DEFINITIONS ---------------------------------------------------------------
 // -------------------------------------------------------------------------------------------------
@@ -94,9 +101,7 @@ void hexaworld_raylib_app_init(hexaworld_raylib_app_t *hexapp, i32 random_seed) 
     srand(random_seed);
 
     // generate ALL the LAYERS !
-    for (size_t i_layer = 0u ; i_layer < HEXAW_LAYERS_NUMBER ; i_layer++) {
-        hexaworld_genlayer(hexapp->hexaworld, i_layer);
-    }
+    generate_world(hexapp->hexaworld);
 }
 
 // -------------------------------------------------------------------------------------------------
@@ -122,7 +127,12 @@ void hexaworld_raylib_app_run(hexaworld_raylib_app_t *hexapp, u32 target_fps) {
     while (!WindowShouldClose()) {
 
         if (IsKeyPressed(KEY_ENTER)) {
-            layer_counter = (layer_counter + 1u) % HEXAW_LAYERS_NUMBER;
+            if (IsKeyDown(KEY_LEFT_SHIFT)) {
+                generate_world(hexapp->hexaworld);
+            } else {
+                layer_counter = (layer_counter + 1u) % HEXAW_LAYERS_NUMBER;
+            }
+
             draw_hexmap_to_texture(hexapp->hexaworld, &world_buffer, window_rectangle, layer_counter);
         }
 
@@ -155,3 +165,11 @@ static void draw_hexmap_to_texture(hexaworld_t *world, RenderTexture2D *target, 
     SetTextureFilter(target->texture, TEXTURE_FILTER_TRILINEAR);
 }
 
+// -------------------------------------------------------------------------------------------------
+static void generate_world(hexaworld_t *world) {
+    hexaworld_raze(world);
+    
+    for (size_t i_layer = 0u ; i_layer < HEXAW_LAYERS_NUMBER ; i_layer++) {
+        hexaworld_genlayer(world, i_layer);
+    }
+}

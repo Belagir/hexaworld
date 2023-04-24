@@ -33,7 +33,7 @@
 #define SQRT_OF_3 1.73205f      ///< approximation of the square root of 3
 #define THREE_HALVES 1.5f       ///< not an *approximation* of 3 / 2
 
-#define ITERATION_NB_TELLURIC 12u   ///< number of automaton iteration for the telluric layer
+#define ITERATION_NB_TELLURIC 3u    ///< number of automaton iteration for the telluric layer
 #define ITERATION_NB_LANDMASS 6u    ///< number of automaton iteration for the landmass layer
 #define ITERATION_NB_ALTITUDE 1u    ///< number of automaton iteration for the altitude layer
 
@@ -335,6 +335,15 @@ void hexaworld_genlayer(hexaworld_t *world, hexaworld_layer_t layer) {
                 world->height, 
                 sizeof(**world->tiles)
         );
+    }
+}
+
+// -------------------------------------------------------------------------------------------------
+void hexaworld_raze(hexaworld_t *world) {
+    for (size_t x = 0u ; x < world->width ; x++) {
+        for (size_t y = 0u ; y < world->height ; y++) {
+            world->tiles[x][y] = (hexa_cell_t) { 0u };
+        }
     }
 }
 

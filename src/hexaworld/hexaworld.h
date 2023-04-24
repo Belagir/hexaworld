@@ -62,4 +62,11 @@ void hexaworld_draw(hexaworld_t *world, hexaworld_layer_t layer, f32 rectangle_t
  */
 void hexaworld_genlayer(hexaworld_t *world, hexaworld_layer_t layer);
 
+/**
+ * @brief Sets all the layer's data to a blank state.
+ * 
+ * @param world target world.
+ */
+void hexaworld_raze(hexaworld_t *world);
+
 #endif
