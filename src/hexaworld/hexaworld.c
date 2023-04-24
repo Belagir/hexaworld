@@ -20,13 +20,27 @@
 // ---- FILE CONSTANTS -----------------------------------------------------------------------------
 // -------------------------------------------------------------------------------------------------
 
-#define HEXAGON_SIDES_NB 6u                 ///< number of sides of an hexagon. tough.
+// ------------ GENERATION TWEAKS ------------------------------------------------------------------
+//
+// mountains length             : ITERATION_NB_TELLURIC
+// mountains / rifts density    : TELLURIC_VECTOR_DIRECTIONS_NB
+// continents size              : LANDMASS_SEEDING_CHANCE and ITERATION_NB_LANDMASS
+//
+// -------------------------------------------------------------------------------------------------
 
-#define SQRT_OF_3 1.73205f                  ///< approximation of the square root of 3
-#define THREE_HALVES 1.5f                   ///< not an *approximation* of 3 / 2
+#define HEXAGON_SIDES_NB 6u     ///< number of sides of an hexagon. tough.
+
+#define SQRT_OF_3 1.73205f      ///< approximation of the square root of 3
+#define THREE_HALVES 1.5f       ///< not an *approximation* of 3 / 2
+
+#define ITERATION_NB_TELLURIC 12u   ///< number of automaton iteration for the telluric layer
+#define ITERATION_NB_LANDMASS 6u    ///< number of automaton iteration for the landmass layer
+#define ITERATION_NB_ALTITUDE 1u    ///< number of automaton iteration for the altitude layer
 
 #define TELLURIC_VECTOR_DIRECTIONS_NB 6     ///< number of possible directions for a telluric vector
 #define TELLURIC_VECTOR_UNIT_ANGLE (((2.0f) * (PI)) / (TELLURIC_VECTOR_DIRECTIONS_NB))      ///< telluric vector minimum angle 
+
+#define LANDMASS_SEEDING_CHANCE 0x03    ///< the greater, the bigger the chance a land tile is seeded.
 
 // -------------------------------------------------------------------------------------------------
 // ---- TYPE DEFINITIONS ---------------------------------------------------------------------------
@@ -135,6 +149,15 @@ static void landmass_apply(void *target_cell, void *neighbors[DIRECTIONS_NB]);
 static void landmass_flag_gen(void *target_cell, void *neighbors[DIRECTIONS_NB]);
 
 // -------------------------------------------------------------------------------------------------
+// -- ALTITUDE -------------------------------------------------------------------------------------
+
+static void altitude_draw(hexa_cell_t *cell, hexagon_shape_t *target_shape);
+
+static void altitude_seed(hexaworld_t *world);
+
+static void altitude_apply(void *target_cell, void *neighbors[DIRECTIONS_NB]);
+
+// -------------------------------------------------------------------------------------------------
 // -------------------------------------------------------------------------------------------------
 
 /**
@@ -183,9 +206,11 @@ static void hexaworld_draw_grid(hexaworld_t *world, f32 rectangle_target[4u]);
  */
 static const layer_calls_t hexaworld_layers_functions[HEXAW_LAYERS_NUMBER] = {
     /// telluric layer calls
-    { &telluric_vector_draw, &telluric_vector_seed, &telluric_vector_apply, &telluric_vector_flag_gen, 50u },
+    { &telluric_vector_draw, &telluric_vector_seed, &telluric_vector_apply, &telluric_vector_flag_gen, ITERATION_NB_TELLURIC },
     /// landmass layer calls
-    { &landmass_draw,        &landmass_seed,        &landmass_apply,        &landmass_flag_gen,        2u }
+    { &landmass_draw,        &landmass_seed,        &landmass_apply,        &landmass_flag_gen,        ITERATION_NB_LANDMASS },
+    /// altitude layer calls
+    { &altitude_draw,        &altitude_seed,        &altitude_apply,        NULL,                      ITERATION_NB_ALTITUDE },
 };
 
 // -------------------------------------------------------------------------------------------------
@@ -447,7 +472,7 @@ static void landmass_seed(hexaworld_t *world) {
             if (hexa_cell_has_flag(world->tiles[x] + y, HEXAW_FLAG_TELLURIC_RIDGE)) {
                 world->tiles[x][y].altitude = 1;
             } else if (!hexa_cell_has_flag(world->tiles[x] + y, HEXAW_FLAG_TELLURIC_RIFT)){
-                world->tiles[x][y].altitude = (rand() & 0x03) != 0;
+                world->tiles[x][y].altitude = (rand() & LANDMASS_SEEDING_CHANCE) != 0;
             }
         }
     }
@@ -488,6 +513,25 @@ static void landmass_flag_gen(void *target_cell, void *neighbors[DIRECTIONS_NB])
         }
     }
 }
+
+// -------------------------------------------------------------------------------------------------
+// -- ALTITUDE -------------------------------------------------------------------------------------
+
+// -------------------------------------------------------------------------------------------------
+static void altitude_draw(hexa_cell_t *cell, hexagon_shape_t *target_shape) {
+
+}
+
+// -------------------------------------------------------------------------------------------------
+static void altitude_seed(hexaworld_t *world) {
+
+}
+
+// -------------------------------------------------------------------------------------------------
+static void altitude_apply(void *target_cell, void *neighbors[DIRECTIONS_NB]) {
+
+}
+
 
 // -------------------------------------------------------------------------------------------------
 // -------------------------------------------------------------------------------------------------
