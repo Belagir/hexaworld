@@ -90,9 +90,8 @@ void hexaworld_raylib_app_destroy(hexaworld_raylib_app_t **hexapp) {
 
 // -------------------------------------------------------------------------------------------------
 void hexaworld_raylib_app_init(hexaworld_raylib_app_t *hexapp, i32 random_seed) {
-    srand(random_seed);
-
     InitWindow(hexapp->window_width, hexapp->window_height, HEXAPP_WINDOW_TITLE);
+    srand(random_seed);
 
     // generate ALL the LAYERS !
     for (size_t i_layer = 0u ; i_layer < HEXAW_LAYERS_NUMBER ; i_layer++) {
@@ -128,7 +127,14 @@ void hexaworld_raylib_app_run(hexaworld_raylib_app_t *hexapp, u32 target_fps) {
         }
 
         BeginDrawing();
-        DrawTexture(world_buffer.texture, 0, 0, WHITE);
+        DrawTexturePro(
+                world_buffer.texture, 
+                (Rectangle) { 0.0f, 0.0f, world_buffer.texture.width, -world_buffer.texture.height }, 
+                (Rectangle) { 0.0f, 0.0f, GetScreenWidth(), GetScreenHeight() },
+                (Vector2)   { 0.0f, 0.0f },
+                0.0f,
+                WHITE
+        );
         EndDrawing();
     }
 

@@ -17,13 +17,13 @@ i32 main(u32 argc, char const *argv[]) {
 
     // fetching commad-line args
     while (index_args < argc) {
-        if ((strcmp(argv[index_args], "-s") == 0) && ((index_args+1u) < argc)) {
+        if ((strcmp(argv[index_args], "-s") == 0) && ((index_args + 1u) < argc)) {
             index_args += 1u;
             seed = strtoul(argv[index_args], NULL, 0);
-        } else if ((strcmp(argv[index_args], "-x") == 0) && ((index_args+1u) < argc)) {
+        } else if ((strcmp(argv[index_args], "-x") == 0) && ((index_args + 1u) < argc)) {
             index_args += 1u;
             width = strtoul(argv[index_args], NULL, 0);
-        } else if ((strcmp(argv[index_args], "-y") == 0) && ((index_args+1u) < argc)) {
+        } else if ((strcmp(argv[index_args], "-y") == 0) && ((index_args + 1u) < argc)) {
             index_args += 1u;
             height = strtoul(argv[index_args], NULL, 0);
         } else {

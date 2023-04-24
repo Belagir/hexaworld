@@ -378,6 +378,8 @@ static void telluric_vector_apply(void *target_cell, void *neighbors[NB_DIRECTIO
 
 // -------------------------------------------------------------------------------------------------
 static void telluric_vector_flag_gen(void *target_cell, void *neighbors[NB_DIRECTIONS]) {
+    hexa_cell_t *cell = (hexa_cell_t *) target_cell;
+    
     
 }
 
@@ -423,10 +425,10 @@ static u32 hexa_cell_has_flag(hexa_cell_t *cell, u32 flag) {
 static hexagon_shape_t hexagon_position_in_rectangle(f32 boundaries[4u], u32 x, u32 y, u32 width, u32 height) {
     hexagon_shape_t shape = { 0u };
 
-    shape.radius = (boundaries[2u] / (f32) width) / 2.0f;
+    shape.radius = (boundaries[3u] / (f32) height) / 2.0f;
 
     shape.center = (vector_2d_cartesian_t) { 
-            boundaries[0u] + ((((float) x+1.0f) + (0.5f * (f32) (y & 0x01))) * SQRT_OF_3 * (shape.radius)), 
+            boundaries[0u] + ((((float) x+0.5f) + (0.5f * (f32) (y & 0x01))) * SQRT_OF_3 * (shape.radius)), 
             boundaries[1u] + ((((float) y+1.0f)) * THREE_HALVES * (shape.radius)) 
     };
 
@@ -440,9 +442,10 @@ static void hexaworld_draw_grid(hexaworld_t *world, f32 rectangle_target[4u]) {
     for (size_t x = 0u ; x < world->width ; x++) {
         for (size_t y = 0u ; y < world->height ; y++) {
             shape = hexagon_position_in_rectangle(
-                rectangle_target,
-                x, y,
-                world->width, world->height);
+                    rectangle_target,
+                    x, y,
+                    world->width, world->height
+            );
             DrawPolyLines(*((Vector2*) &shape.center), HEXAGON_SIDES_NB, shape.radius, 0.0f, BLACK);
         }
     }
