@@ -47,6 +47,14 @@
 // -------------------------------------------------------------------------------------------------
 
 /**
+ * @brief Describes wether a cell automaton should iterates an absolute number of times or a number of times relative to the array size.
+ */
+typedef enum layer_gen_iteration_type_t {
+    LAYER_GEN_ITERATE_ABSOLUTE,
+    LAYER_GEN_ITERATE_RELATIVE,
+} layer_gen_iteration_type_t;
+
+/**
  * @brief Possible flags held in a cell. (They claim they're innocent)
  */
 typedef enum hexaworld_cell_flag_t {
@@ -120,6 +128,8 @@ typedef struct layer_calls_t {
     apply_to_cell_func_t flag_gen_func;
     /// number of times the automaton applies the `automaton_func` toeach cell of the world
     u32 automaton_iter;
+    /// way the automaton should iterate over the array
+    layer_gen_iteration_type_t iteration_flavour;
 } layer_calls_t;
 
 // -------------------------------------------------------------------------------------------------
@@ -206,11 +216,11 @@ static void hexaworld_draw_grid(hexaworld_t *world, f32 rectangle_target[4u]);
  */
 static const layer_calls_t hexaworld_layers_functions[HEXAW_LAYERS_NUMBER] = {
     /// telluric layer calls
-    { &telluric_vector_draw, &telluric_vector_seed, &telluric_vector_apply, &telluric_vector_flag_gen, ITERATION_NB_TELLURIC },
+    { &telluric_vector_draw, &telluric_vector_seed, &telluric_vector_apply, &telluric_vector_flag_gen, ITERATION_NB_TELLURIC, LAYER_GEN_ITERATE_RELATIVE },
     /// landmass layer calls
-    { &landmass_draw,        &landmass_seed,        &landmass_apply,        &landmass_flag_gen,        ITERATION_NB_LANDMASS },
+    { &landmass_draw,        &landmass_seed,        &landmass_apply,        &landmass_flag_gen,        ITERATION_NB_LANDMASS, LAYER_GEN_ITERATE_ABSOLUTE },
     /// altitude layer calls
-    { &altitude_draw,        &altitude_seed,        &altitude_apply,        NULL,                      ITERATION_NB_ALTITUDE },
+    { &altitude_draw,        &altitude_seed,        &altitude_apply,        NULL,                      ITERATION_NB_ALTITUDE, LAYER_GEN_ITERATE_ABSOLUTE },
 };
 
 // -------------------------------------------------------------------------------------------------
@@ -294,13 +304,20 @@ void hexaworld_draw(hexaworld_t *world, hexaworld_layer_t layer, f32 rectangle_t
 
 // -------------------------------------------------------------------------------------------------
 void hexaworld_genlayer(hexaworld_t *world, hexaworld_layer_t layer) {
+    size_t iteration_number = 0u;
+
     hexaworld_layers_functions[layer].seed_func(world);
+
+    iteration_number = hexaworld_layers_functions[layer].automaton_iter;
+    if (hexaworld_layers_functions[layer].iteration_flavour == LAYER_GEN_ITERATE_RELATIVE) {
+        iteration_number *= world->width;
+    }
 
     // applying the overall generation function N times
     otomaton_set_apply_function(world->automaton, hexaworld_layers_functions[layer].automaton_func);
     otomaton_apply(
             world->automaton, 
-            hexaworld_layers_functions[layer].automaton_iter, 
+            iteration_number, 
             (void **) world->tiles, 
             world->width, 
             world->height, 
@@ -551,11 +568,11 @@ static u32 hexa_cell_has_flag(hexa_cell_t *cell, u32 flag) {
 static hexagon_shape_t hexagon_position_in_rectangle(f32 boundaries[4u], u32 x, u32 y, u32 width, u32 height) {
     hexagon_shape_t shape = { 0u };
 
-    shape.radius = (boundaries[3u] / (f32) height) / 2.0f;
+    shape.radius = (boundaries[3u] / ((f32) height*THREE_HALVES));
 
     shape.center = (vector_2d_cartesian_t) { 
             boundaries[0u] + ((((float) x+0.5f) + (0.5f * (f32) (y & 0x01))) * SQRT_OF_3 * (shape.radius)), 
-            boundaries[1u] + ((((float) y+1.0f)) * THREE_HALVES * (shape.radius)) 
+            boundaries[1u] + ((((float) y+0.5f)) * THREE_HALVES * (shape.radius)) 
     };
 
     return shape;
