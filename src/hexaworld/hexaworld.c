@@ -11,6 +11,7 @@
 #include "hexaworld.h"
 
 #include <stdlib.h>
+#include <math.h>
 #include <raylib.h>
 
 #include <cellotomaton.h>
@@ -24,7 +25,7 @@
 #define SQRT_OF_3 1.73205f                  ///< approximation of the square root of 3
 #define THREE_HALVES 1.5f                   ///< not an *approximation* of 3 / 2
 
-#define TELLURIC_VECTOR_DIRECTIONS_NB 8     ///< number of possible directions for a telluric vector
+#define TELLURIC_VECTOR_DIRECTIONS_NB 6     ///< number of possible directions for a telluric vector
 #define TELLURIC_VECTOR_UNIT_ANGLE (((2.0f) * (PI)) / (TELLURIC_VECTOR_DIRECTIONS_NB))      ///< telluric vector minimum angle 
 
 // -------------------------------------------------------------------------------------------------
@@ -36,7 +37,6 @@
  */
 typedef enum hexaworld_cell_flag_t {
     HEXAW_TELLURIC_RIDGE,       ///< Two plates are clashing here, and forming mountains
-    HEXAW_TELLURIC_FRACTURE,    ///< Two plates are sliding against each other here, favorising volcanic activity
     HEXAW_TELLURIC_RIFT,        ///< Two plates are growing from the ocean's floor, forming a deep crevasse.
 
     HEXAW_FLAGS_NB,     ///< Total number of flags
@@ -114,9 +114,9 @@ static void telluric_vector_draw(hexa_cell_t *cell, hexagon_shape_t *target_shap
 
 static void telluric_vector_seed(hexaworld_t *world);
 
-static void telluric_vector_apply(void *target_cell, void *neighbors[NB_DIRECTIONS]);
+static void telluric_vector_apply(void *target_cell, void *neighbors[DIRECTIONS_NB]);
 
-static void telluric_vector_flag_gen(void *target_cell, void *neighbors[NB_DIRECTIONS]);
+static void telluric_vector_flag_gen(void *target_cell, void *neighbors[DIRECTIONS_NB]);
 
 // -------------------------------------------------------------------------------------------------
 // -- LANDMASS -------------------------------------------------------------------------------------
@@ -125,7 +125,7 @@ static void landmass_vector_draw(hexa_cell_t *cell, hexagon_shape_t *target_shap
 
 static void landmass_vector_seed(hexaworld_t *world);
 
-static void landmass_vector_apply(void *target_cell, void *neighbors[NB_DIRECTIONS]);
+static void landmass_vector_apply(void *target_cell, void *neighbors[DIRECTIONS_NB]);
 
 // -------------------------------------------------------------------------------------------------
 // -------------------------------------------------------------------------------------------------
@@ -299,6 +299,15 @@ void hexaworld_genlayer(hexaworld_t *world, hexaworld_layer_t layer) {
 // -------------------------------------------------------------------------------------------------
 static void telluric_vector_draw(hexa_cell_t *cell, hexagon_shape_t *target_shape) {
     vector_2d_cartesian_t translated_vec = { 0u };
+    Color tile_color = WHITE;
+
+    if (hexa_cell_has_flag(cell, HEXAW_TELLURIC_RIDGE)) {
+        tile_color = ORANGE;
+    } else if (hexa_cell_has_flag(cell, HEXAW_TELLURIC_RIFT)) {
+        tile_color = YELLOW;
+    }
+
+    DrawPoly(*((Vector2*) (&target_shape->center)), HEXAGON_SIDES_NB, target_shape->radius, 0.0f, tile_color);
 
     translated_vec = vector2d_polar_to_cartesian(cell->telluric_vector);
     DrawLineV(
@@ -330,7 +339,7 @@ static void telluric_vector_seed(hexaworld_t *world) {
 }
 
 // -------------------------------------------------------------------------------------------------
-static void telluric_vector_apply(void *target_cell, void *neighbors[NB_DIRECTIONS]) {
+static void telluric_vector_apply(void *target_cell, void *neighbors[DIRECTIONS_NB]) {
     hexa_cell_t *cell = (hexa_cell_t *) target_cell;
 
     u32 angle_counter[TELLURIC_VECTOR_DIRECTIONS_NB] = { 0u };
@@ -349,7 +358,7 @@ static void telluric_vector_apply(void *target_cell, void *neighbors[NB_DIRECTIO
     }
 
     // computing the most represented angle 
-    for (size_t i = 0u ; i < NB_DIRECTIONS; i++) {
+    for (size_t i = 0u ; i < DIRECTIONS_NB; i++) {
         // capturing the neighboring cell
         tmp_cell = (hexa_cell_t *) neighbors[i];
         // if the neighboring cell is unset, we ignore it
@@ -377,10 +386,26 @@ static void telluric_vector_apply(void *target_cell, void *neighbors[NB_DIRECTIO
 }
 
 // -------------------------------------------------------------------------------------------------
-static void telluric_vector_flag_gen(void *target_cell, void *neighbors[NB_DIRECTIONS]) {
+static void telluric_vector_flag_gen(void *target_cell, void *neighbors[DIRECTIONS_NB]) {
     hexa_cell_t *cell = (hexa_cell_t *) target_cell;
-    
-    
+
+    hexa_cell_t *pushed_against_cell = NULL;
+    size_t pushed_against_cell_index = 0u;
+
+    hexa_cell_t *pushed_from_cell = NULL;
+    size_t pushed_from_cell_index = 0u;
+
+    pushed_against_cell_index = (size_t) (((cell->telluric_vector.angle / (2*PI))) * DIRECTIONS_NB);
+    pushed_against_cell = neighbors[pushed_against_cell_index];
+
+    pushed_from_cell_index = (size_t) (((fmod(cell->telluric_vector.angle+PI, (2*PI)) / (2*PI))) * DIRECTIONS_NB);
+    pushed_from_cell = neighbors[pushed_from_cell_index];
+
+    if (!float_equal(cell->telluric_vector.angle, pushed_against_cell->telluric_vector.angle, 1u)) {
+        hexa_cell_set_flag(cell, HEXAW_TELLURIC_RIDGE);
+    } else if (!float_equal(cell->telluric_vector.angle, pushed_from_cell->telluric_vector.angle, 1u)) {
+        hexa_cell_set_flag(cell, HEXAW_TELLURIC_RIFT);
+    }
 }
 
 // -------------------------------------------------------------------------------------------------
@@ -399,11 +424,11 @@ static void landmass_vector_draw(hexa_cell_t *cell, hexagon_shape_t *target_shap
 
 // -------------------------------------------------------------------------------------------------
 static void landmass_vector_seed(hexaworld_t *world) {
-
+    
 }
 
 // -------------------------------------------------------------------------------------------------
-static void landmass_vector_apply(void *target_cell, void *neighbors[NB_DIRECTIONS]) {
+static void landmass_vector_apply(void *target_cell, void *neighbors[DIRECTIONS_NB]) {
 
 }
 

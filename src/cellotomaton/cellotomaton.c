@@ -49,7 +49,7 @@ typedef struct target_array_t {
  * @param[in] y vertical position of the center tile
  * @param[in] array all the tiles
  */
-static void get_neighbors(void *neighbors_tiles[NB_DIRECTIONS], size_t x, size_t y, target_array_t *array);
+static void get_neighbors(void *neighbors_tiles[DIRECTIONS_NB], size_t x, size_t y, target_array_t *array);
 
 /**
  * @brief Copies the content and size properties of an array to another.
@@ -65,7 +65,7 @@ static void copy_array(target_array_t *dest, target_array_t *source);
 
 // -------------------------------------------------------------------------------------------------
 void otomaton_apply(cell_automaton_t *automaton, u32 iteration_nb, void **array, size_t width, size_t height, size_t stride) {
-    void *neighbors_tiles[NB_DIRECTIONS] = { 0u };
+    void *neighbors_tiles[DIRECTIONS_NB] = { 0u };
     target_array_t target_array = { 0u }; 
     target_array_t buffered_array = { 0u };
 
@@ -129,7 +129,7 @@ void otomaton_set_apply_function(cell_automaton_t *automaton, apply_to_cell_func
 // -------------------------------------------------------------------------------------------------
 
 // -------------------------------------------------------------------------------------------------
-static void get_neighbors(void *neighbors_tiles[NB_DIRECTIONS], size_t x, size_t y, target_array_t *array) {
+static void get_neighbors(void *neighbors_tiles[DIRECTIONS_NB], size_t x, size_t y, target_array_t *array) {
     size_t coord_w = (x - 1u) * (x > 0) + (array->width - 1u) * (x == 0);
     size_t coord_e = (x + 1u) % (array->width);
 

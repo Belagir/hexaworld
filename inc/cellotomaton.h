@@ -14,17 +14,17 @@
 #include <unstandard.h>
 
 /**
- * @brief Possible directions from a hexagonal cell to another.
+ * @brief Possible directions from a hexagonal cell to another. Ordered along the unit circle.
  * 
  */
 typedef enum cell_direction_t {
+    DIRECTION_E,    ///< Right cell
+    DIRECTION_SE,   ///< Bottom right cell
+    DIRECTION_SW,   ///< Bottom left cell
+    DIRECTION_W,    ///< Left cell
     DIRECTION_NW,   ///< Top left cell
     DIRECTION_NE,   ///< Top right cell
-    DIRECTION_W,    ///< Left cell
-    DIRECTION_E,    ///< Right cell
-    DIRECTION_SW,   ///< Bottom left cell
-    DIRECTION_SE,   ///< Bottom right cell
-    NB_DIRECTIONS,  ///< Number of possible directions
+    DIRECTIONS_NB,  ///< Number of possible directions
 } cell_direction_t;
 
 /**
@@ -38,7 +38,7 @@ typedef struct cell_automaton_t cell_automaton_t;
  * @param[inout] target targeted cell which state will change.
  * @param[in] neighbors neighboring cells ordered through their direction.
  */
-typedef void (*apply_to_cell_func_t)(void *target, void *neighbors[NB_DIRECTIONS]);
+typedef void (*apply_to_cell_func_t)(void *target, void *neighbors[DIRECTIONS_NB]);
 
 /**
  * @brief Applies the automaton on an anonymous bidimensional array. The array is modified by the operation.
