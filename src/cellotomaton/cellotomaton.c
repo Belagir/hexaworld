@@ -67,7 +67,8 @@ static void copy_array(target_array_t *dest, target_array_t *source);
 void otomaton_apply(cell_automaton_t *automaton, u32 iteration_nb, void **array, size_t width, size_t height, size_t stride) {
     void *neighbors_tiles[DIRECTIONS_NB] = { 0u };
     target_array_t target_array = { 0u }; 
-    target_array_t buffered_array = { 0u };
+    target_array_t pendulum_buffers[2u] = { 0u };
+    size_t active_buffer_index = 0u;
 
     // contengency
     if ((!automaton) || !(automaton->func)) {
@@ -77,28 +78,26 @@ void otomaton_apply(cell_automaton_t *automaton, u32 iteration_nb, void **array,
     // creating a wrapper for our inputed array
     target_array = (target_array_t) { .tiles = array, .width = width, .height = height, .stride = stride };
 
-    // allocating our buffer
-    buffered_array.tiles = malloc(width * sizeof(*buffered_array.tiles));
-    for (size_t i = 0 ; i < width ; i++) {
-        buffered_array.tiles[i] = malloc(height * stride);
+    for (size_t i = 0u ; i < 2u ; i++) {
+        pendulum_buffers[i].tiles = malloc(width * sizeof(*pendulum_buffers[i].tiles));
+        for (size_t j = 0u ; j < width ; j++) {
+            pendulum_buffers[i].tiles[j] = malloc(height * stride);
+        }
+        copy_array(&pendulum_buffers[i], &target_array);
     }
 
-    // running the automaton on the buffer, then copying the buffer to the original array...
     for (size_t i = 0u ; i < iteration_nb ; i++) {
-        copy_array(&buffered_array, &target_array);
         for (size_t x = 0u ; x < width ; x += 1u) {
             for (size_t y = 0u ; y < height*stride ; y += stride) {
-                get_neighbors(neighbors_tiles, x, y, &buffered_array);
-                automaton->func(target_array.tiles[x] + y, neighbors_tiles);
+                get_neighbors(neighbors_tiles, x, y, pendulum_buffers + (!active_buffer_index));
+                automaton->func(pendulum_buffers[active_buffer_index].tiles[x] + y, neighbors_tiles);
             }
         }
+
+        active_buffer_index = !active_buffer_index;
     }
 
-    // freeing our buffer
-    for (size_t i = 0 ; i < width ; i++) {
-        free(buffered_array.tiles[i]);
-    }
-    free(buffered_array.tiles);
+        copy_array(&target_array, &pendulum_buffers[!active_buffer_index]);
 }
 
 // -------------------------------------------------------------------------------------------------
