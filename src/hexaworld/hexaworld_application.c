@@ -109,6 +109,7 @@ void hexaworld_raylib_app_run(hexaworld_raylib_app_t *hexapp, u32 target_fps) {
     f32 window_rectangle[4u] = { 0u };
     RenderTexture2D world_buffer = { 0u };
     u32 layer_counter = 0u;
+    u32 layer_changed = 1u;
 
     if (!IsWindowReady()) {
         return;
@@ -122,18 +123,23 @@ void hexaworld_raylib_app_run(hexaworld_raylib_app_t *hexapp, u32 target_fps) {
     window_rectangle[3u] = (f32) GetScreenHeight();
 
     world_buffer = LoadRenderTexture(window_rectangle[2u], window_rectangle[3u]);
-    draw_hexmap_to_texture(hexapp->hexaworld, &world_buffer, window_rectangle, HEXAW_LAYER_TELLURIC);
 
     while (!WindowShouldClose()) {
 
-        if (IsKeyPressed(KEY_ENTER)) {
-            if (IsKeyDown(KEY_LEFT_SHIFT)) {
-                generate_world(hexapp->hexaworld);
-            } else {
-                layer_counter = (layer_counter + 1u) % HEXAW_LAYERS_NUMBER;
-            }
+        if (IsKeyPressed(KEY_ENTER) && IsKeyDown(KEY_LEFT_SHIFT)) {
+            generate_world(hexapp->hexaworld);
+            layer_changed = 1u;
+        } else if (IsKeyPressed(KEY_RIGHT)) {
+            layer_counter = (layer_counter + 1u) % HEXAW_LAYERS_NUMBER;
+            layer_changed = 1u;
+        } else if (IsKeyPressed(KEY_LEFT)) {
+            layer_counter = (layer_counter - 1u) % HEXAW_LAYERS_NUMBER;
+            layer_changed = 1u;
+        }
 
+        if (layer_changed) {
             draw_hexmap_to_texture(hexapp->hexaworld, &world_buffer, window_rectangle, layer_counter);
+            layer_changed = 0u;
         }
 
         BeginDrawing();
