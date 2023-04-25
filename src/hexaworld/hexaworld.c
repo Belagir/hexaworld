@@ -38,7 +38,7 @@
 #define ITERATION_NB_ALTITUDE (10u)    ///< number of automaton iteration for the altitude layer
 
 #define TELLURIC_VECTOR_SEEDING_INV_CHANCE (0x40)  ///< the greater, the bigger the chance a telluric tile is NOT seeded.
-#define TELLURIC_VECTOR_DIRECTIONS_NB (6)     ///< number of possible directions for a telluric vector
+#define TELLURIC_VECTOR_DIRECTIONS_NB (32)     ///< number of possible directions for a telluric vector
 #define TELLURIC_VECTOR_UNIT_ANGLE (((2.0f) * (PI)) / (TELLURIC_VECTOR_DIRECTIONS_NB))      ///< telluric vector minimum angle 
 
 #define LANDMASS_SEEDING_CHANCE (0x03)    ///< the greater, the bigger the chance a land tile is seeded.

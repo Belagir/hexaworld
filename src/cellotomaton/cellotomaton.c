@@ -83,7 +83,7 @@ void otomaton_apply(cell_automaton_t *automaton, u32 iteration_nb, void **array,
         buffered_array.tiles[i] = malloc(height * stride);
     }
 
-    // running the automaton on the buffer, the copying the buffer to the original array...
+    // running the automaton on the buffer, then copying the buffer to the original array...
     for (size_t i = 0u ; i < iteration_nb ; i++) {
         copy_array(&buffered_array, &target_array);
         for (size_t x = 0u ; x < width ; x += 1u) {
