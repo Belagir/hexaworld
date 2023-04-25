@@ -23,7 +23,7 @@
 // ------------ GENERATION TWEAKS ------------------------------------------------------------------
 //
 // mountains length             : ITERATION_NB_TELLURIC
-// mountains / rifts density    : TELLURIC_VECTOR_DIRECTIONS_NB
+// mountains / rifts density    : TELLURIC_VECTOR_DIRECTIONS_NB and TELLURIC_VECTOR_SEEDING_INV_CHANCE
 // continents size              : LANDMASS_SEEDING_CHANCE and ITERATION_NB_LANDMASS
 //
 // -------------------------------------------------------------------------------------------------
@@ -33,10 +33,11 @@
 #define SQRT_OF_3 (1.73205f)      ///< approximation of the square root of 3
 #define THREE_HALVES (1.5f)       ///< not an *approximation* of 3 / 2
 
-#define ITERATION_NB_TELLURIC (3u)    ///< number of automaton iteration for the telluric layer
+#define ITERATION_NB_TELLURIC (2u)    ///< number of automaton iteration for the telluric layer
 #define ITERATION_NB_LANDMASS (6u)    ///< number of automaton iteration for the landmass layer
 #define ITERATION_NB_ALTITUDE (10u)    ///< number of automaton iteration for the altitude layer
 
+#define TELLURIC_VECTOR_SEEDING_INV_CHANCE (0x40)  ///< the greater, the bigger the chance a telluric tile is NOT seeded.
 #define TELLURIC_VECTOR_DIRECTIONS_NB (6)     ///< number of possible directions for a telluric vector
 #define TELLURIC_VECTOR_UNIT_ANGLE (((2.0f) * (PI)) / (TELLURIC_VECTOR_DIRECTIONS_NB))      ///< telluric vector minimum angle 
 
@@ -384,18 +385,18 @@ static void telluric_vector_draw(hexa_cell_t *cell, hexagon_shape_t *target_shap
 static void telluric_vector_seed(hexaworld_t *world) {
     for (size_t x = 0u ; x < world->width ; x++) {
         for (size_t y = 0u ; y < world->height ; y++) {
-            world->tiles[x][y].telluric_vector = (vector_2d_polar_t) { 
-                    .angle = 0.0f,
-                    .magnitude = 0.0f
-            };
+            if ((rand() % TELLURIC_VECTOR_SEEDING_INV_CHANCE) == 0) {
+                world->tiles[x][y].telluric_vector = (vector_2d_polar_t) {
+                        .angle = (rand() % TELLURIC_VECTOR_DIRECTIONS_NB) * TELLURIC_VECTOR_UNIT_ANGLE,
+                        .magnitude = 1.0f
+                };
+            } else {
+                world->tiles[x][y].telluric_vector = (vector_2d_polar_t) { 
+                        .angle = 0.0f,
+                        .magnitude = 0.0f
+                };
+            }
         }
-    }
-
-    for (size_t i = 0u ; i < TELLURIC_VECTOR_DIRECTIONS_NB ; i++) {
-        world->tiles[rand() % world->width][rand() % world->height].telluric_vector = (vector_2d_polar_t) {
-                .angle = i * TELLURIC_VECTOR_UNIT_ANGLE,
-                .magnitude = 1.0f
-        };
     }
 }
 
@@ -410,8 +411,9 @@ static void telluric_vector_apply(void *target_cell, void *neighbors[DIRECTIONS_
     size_t angle_index = 0u;
 
     // the objective is to set the telluric vector's direction to the most represented direction around it
-    // to make the seeds gros into zones. Once a cell's direction is set, it cannot change. We use the 
-    // magnitude as a flag to know if a vector is set.
+    // to make the seeds grow into zones. Once a cell's direction is set, it cannot change. We use the 
+    // magnitude as a flag to know if a vector is set, because all telluric vectors must have a magnitude 
+    // of 1.
 
     // if the current cell already has a direction, nothing is to be done
     if (!float_equal(cell->telluric_vector.magnitude, 0.0f, 1u)) {

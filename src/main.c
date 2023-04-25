@@ -15,7 +15,7 @@ i32 main(u32 argc, char const *argv[]) {
     u32 width = 20u;
     u32 height = 20u;
 
-    // fetching commad-line args
+    // fetching command-line args
     while (index_args < argc) {
         if ((strcmp(argv[index_args], "-s") == 0) && ((index_args + 1u) < argc)) {
             index_args += 1u;

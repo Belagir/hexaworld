@@ -6,3 +6,7 @@ build
 *.*~
 
 *.o
+
+massif.out.*
+callgrind.out.*
+cachegrind.out.*
