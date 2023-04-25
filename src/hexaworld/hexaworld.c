@@ -35,7 +35,8 @@
 
 #define ITERATION_NB_TELLURIC (2u)    ///< number of automaton iteration for the telluric layer
 #define ITERATION_NB_LANDMASS (6u)    ///< number of automaton iteration for the landmass layer
-#define ITERATION_NB_ALTITUDE (10u)    ///< number of automaton iteration for the altitude layer
+#define ITERATION_NB_ALTITUDE (10u)   ///< number of automaton iteration for the altitude layer
+#define ITERATION_NB_WINDS (1u)       ///< number of automaton iteration for the winds layer
 
 #define TELLURIC_VECTOR_SEEDING_INV_CHANCE (0x40)  ///< the greater, the bigger the chance a telluric tile is NOT seeded.
 #define TELLURIC_VECTOR_DIRECTIONS_NB (32)     ///< number of possible directions for a telluric vector
@@ -45,6 +46,10 @@
 
 #define ALTITUDE_MAX (3000)  ///< maximum altitude, in meters
 #define ALTITUDE_MIN (-2000)  ///< minimum altitude, in meters
+
+#define WINDS_VECTOR_DIRECTIONS_NB (32)
+#define WINDS_VECTOR_UNIT_ANGLE (((2.0f) * (PI)) / (WINDS_VECTOR_DIRECTIONS_NB))      ///< winds vector minimum angle 
+
 
 // -------------------------------------------------------------------------------------------------
 // ---- TYPE DEFINITIONS ---------------------------------------------------------------------------
@@ -84,6 +89,10 @@ typedef struct hexa_cell_t {
     vector_2d_polar_t telluric_vector;
     /// mean altitude of the tile
     i32 altitude;
+    /// mean wind direction and force
+    vector_2d_polar_t winds_vector;
+    /// mean pressure
+    f32 pressure;
 } hexa_cell_t;
 
 /**
@@ -172,6 +181,15 @@ static void altitude_seed(hexaworld_t *world);
 static void altitude_apply(void *target_cell, void *neighbors[DIRECTIONS_NB]);
 
 // -------------------------------------------------------------------------------------------------
+// -- WINDS ----------------------------------------------------------------------------------------
+
+static void winds_draw(hexa_cell_t *cell, hexagon_shape_t *target_shape);
+
+static void winds_seed(hexaworld_t *world);
+
+static void winds_apply(void *target_cell, void *neighbors[DIRECTIONS_NB]);
+
+// -------------------------------------------------------------------------------------------------
 // -------------------------------------------------------------------------------------------------
 
 /**
@@ -225,6 +243,8 @@ static const layer_calls_t hexaworld_layers_functions[HEXAW_LAYERS_NUMBER] = {
     { &landmass_draw,        &landmass_seed,        &landmass_apply,        &landmass_flag_gen,        ITERATION_NB_LANDMASS, LAYER_GEN_ITERATE_ABSOLUTE },
     /// altitude layer calls
     { &altitude_draw,        &altitude_seed,        &altitude_apply,        NULL,                      ITERATION_NB_ALTITUDE, LAYER_GEN_ITERATE_RELATIVE },
+    /// wind layers calls
+    { &winds_draw,           &winds_seed,           &winds_apply,           NULL,                      ITERATION_NB_WINDS,    LAYER_GEN_ITERATE_ABSOLUTE },
 };
 
 // -------------------------------------------------------------------------------------------------
@@ -610,6 +630,47 @@ static void altitude_apply(void *target_cell, void *neighbors[DIRECTIONS_NB]) {
     if ((cell->altitude > minimum_altitude) && (cell->altitude < maximum_altitude)) {
         cell->altitude = (maximum_altitude + minimum_altitude) / 2;
     }
+}
+
+// -------------------------------------------------------------------------------------------------
+// -- WINDS -------------------------------------------------------------------------------------------
+
+// -------------------------------------------------------------------------------------------------
+static void winds_draw(hexa_cell_t *cell, hexagon_shape_t *target_shape) {
+    vector_2d_cartesian_t translated_vec = { 0u };
+
+    translated_vec = vector2d_polar_to_cartesian(cell->winds_vector);
+    DrawLineV(
+            *((Vector2*) (&target_shape->center)), 
+            (Vector2) { 
+                    .x = target_shape->center.v + translated_vec.v * target_shape->radius, 
+                    .y = target_shape->center.w + translated_vec.w * target_shape->radius },
+            DARKBLUE
+    );
+}
+
+// -------------------------------------------------------------------------------------------------
+static void winds_seed(hexaworld_t *world) {
+    // reap the storm ?
+    f32 starting_angle = ((f32) (rand() % WINDS_VECTOR_DIRECTIONS_NB)) * (WINDS_VECTOR_UNIT_ANGLE);
+    
+    for (size_t x = 0u ; x < world->width ; x++) {
+        for (size_t y = 0u ; y < world->height ; y++) {
+            world->tiles[x][y].winds_vector = (vector_2d_polar_t) {
+                    .angle = starting_angle,
+                    .magnitude = 1.0f
+            };
+            world->tiles[x][y].pressure = 0.0f;
+        }
+    }
+
+}
+
+// -------------------------------------------------------------------------------------------------
+static void winds_apply(void *target_cell, void *neighbors[DIRECTIONS_NB]) {
+    hexa_cell_t *cell = (hexa_cell_t *) target_cell;
+
+    
 }
 
 // -------------------------------------------------------------------------------------------------
