@@ -36,7 +36,7 @@
 #define ITERATION_NB_TELLURIC (2u)    ///< number of automaton iteration for the telluric layer
 #define ITERATION_NB_LANDMASS (6u)    ///< number of automaton iteration for the landmass layer
 #define ITERATION_NB_ALTITUDE (10u)   ///< number of automaton iteration for the altitude layer
-#define ITERATION_NB_WINDS (10u)       ///< number of automaton iteration for the winds layer
+#define ITERATION_NB_WINDS (1u)       ///< number of automaton iteration for the winds layer
 
 #define TELLURIC_VECTOR_SEEDING_INV_CHANCE (0x40)  ///< the greater, the bigger the chance a telluric tile is NOT seeded.
 #define TELLURIC_VECTOR_DIRECTIONS_NB (32)     ///< number of possible directions for a telluric vector
@@ -49,7 +49,6 @@
 
 #define WINDS_VECTOR_DIRECTIONS_NB (32)
 #define WINDS_VECTOR_UNIT_ANGLE (((2.0f) * (PI)) / (WINDS_VECTOR_DIRECTIONS_NB))      ///< winds vector minimum angle 
-
 
 // -------------------------------------------------------------------------------------------------
 // ---- TYPE DEFINITIONS ---------------------------------------------------------------------------
@@ -91,8 +90,6 @@ typedef struct hexa_cell_t {
     i32 altitude;
     /// mean wind direction and force
     vector_2d_polar_t winds_vector;
-    /// mean pressure
-    f32 pressure;
 } hexa_cell_t;
 
 /**
@@ -623,6 +620,16 @@ static void altitude_apply(void *target_cell, void *neighbors[DIRECTIONS_NB]) {
 static void winds_draw(hexa_cell_t *cell, hexagon_shape_t *target_shape) {
     vector_2d_cartesian_t translated_vec = { 0u };
 
+    DrawPoly(*(
+            (Vector2*) &target_shape->center), 
+            HEXAGON_SIDES_NB, 
+            target_shape->radius, 
+            0.0f, 
+            (Color) { 200u, 200u, 200u, (u8) (((f32) (cell->altitude * (cell->altitude > 0)) / (f32) ALTITUDE_MAX) * 255u )}
+    );
+
+    DrawCircle(target_shape->center.v, target_shape->center.w, (target_shape->radius/2)*(1.0f-cell->winds_vector.magnitude), (Color) { 0x6e, 0xBA, 0xFF, 0xFF });
+
     translated_vec = vector2d_polar_to_cartesian(cell->winds_vector);
     DrawLineV(
             *((Vector2*) (&target_shape->center)), 
@@ -644,7 +651,6 @@ static void winds_seed(hexaworld_t *world) {
                     .angle = starting_angle,
                     .magnitude = 1.0f
             };
-            world->tiles[x][y].pressure = 0.0f;
         }
     }
 
@@ -659,11 +665,12 @@ static void winds_apply(void *target_cell, void *neighbors[DIRECTIONS_NB]) {
     f32 y_axis_sum = 0.0f;
     f32 mean_weight = 0.0f;
     f32 mean_angle = 0.0f;
+    f32 normalized_altitude_diff = 0.0f;
 
     // since the angle is not always divisible by 6, the wind goes to two cells
     size_t possible_directions[2u] = { 0u };
     i32 cell_altitudes[2u] = { 0 };
-    // cell chosen as the least resistance
+    // cell index later chosen as the least resistance
     size_t definitive_direction = 0u;
 
     for (size_t i = 0u ; i < DIRECTIONS_NB ; i++) {
@@ -676,20 +683,26 @@ static void winds_apply(void *target_cell, void *neighbors[DIRECTIONS_NB]) {
     mean_angle = atan2f(mean_weight * x_axis_sum, mean_weight * y_axis_sum);
     cell->winds_vector.angle = mean_angle;
 
-    // leftmost
+    // leftmost cell
     possible_directions[0u] = (size_t) ceilf((cell->winds_vector.angle / (2*PI)) * (f32) DIRECTIONS_NB) % DIRECTIONS_NB;
     cell_altitudes[0u] = ((hexa_cell_t *) neighbors[possible_directions[0u]])->altitude;
-    cell_altitudes[0u] *= (cell_altitudes[0u] > 0);
-    // rightmost
+    cell_altitudes[0u] *= (cell_altitudes[0u] > 0); /* altitude below 0 has water over it */
+    // rightmost cell
     possible_directions[1u] = (size_t) floorf((cell->winds_vector.angle / (2*PI)) * (f32) DIRECTIONS_NB) % DIRECTIONS_NB;
     cell_altitudes[1u] = ((hexa_cell_t *) neighbors[possible_directions[1u]])->altitude;
-    cell_altitudes[1u] *= (cell_altitudes[1u] > 0);
+    cell_altitudes[1u] *= (cell_altitudes[1u] > 0); /* altitude below 0 has water over it */
 
     definitive_direction = (cell_altitudes[0u] < cell_altitudes[1u])
             ? possible_directions[0u]
             : possible_directions[1u];
     
-    // cell->winds_vector.angle = ((definitive_direction / (f32) DIRECTIONS_NB) * (2*PI));
+    // difference between the two "winded upon" cells
+    normalized_altitude_diff = (f32) abs(cell_altitudes[0u] - cell_altitudes[1u]) / (f32) ALTITUDE_MAX;
+    cell->winds_vector.angle += ((definitive_direction / (f32) DIRECTIONS_NB) * (2*PI)) * normalized_altitude_diff;
+
+    // difference between the current cell's altitude and the main winded upon cell
+    normalized_altitude_diff = (f32) abs(cell->altitude * (cell->altitude > 0) - cell_altitudes[definitive_direction]) / (f32) ALTITUDE_MAX;
+    cell->winds_vector.magnitude = (1.0f - normalized_altitude_diff);
 }
 
 // -------------------------------------------------------------------------------------------------
