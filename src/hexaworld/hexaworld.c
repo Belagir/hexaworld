@@ -32,6 +32,7 @@
 
 #define SQRT_OF_3 (1.73205f)      ///< approximation of the square root of 3
 #define THREE_HALVES (1.5f)       ///< not an *approximation* of 3 / 2
+#define PI_T_2 ((2.0f) * (PI))    ///< 2 times pi
 
 #define ITERATION_NB_TELLURIC (2u)    ///< number of automaton iteration for the telluric layer
 #define ITERATION_NB_LANDMASS (6u)    ///< number of automaton iteration for the landmass layer
@@ -41,7 +42,7 @@
 
 #define TELLURIC_VECTOR_SEEDING_INV_CHANCE (0x40)  ///< the greater, the bigger the chance a telluric tile is NOT seeded.
 #define TELLURIC_VECTOR_DIRECTIONS_NB (32)     ///< number of possible directions for a telluric vector
-#define TELLURIC_VECTOR_UNIT_ANGLE (((2.0f) * (PI)) / (TELLURIC_VECTOR_DIRECTIONS_NB))      ///< telluric vector minimum angle 
+#define TELLURIC_VECTOR_UNIT_ANGLE ((PI_T_2) / (TELLURIC_VECTOR_DIRECTIONS_NB))      ///< telluric vector minimum angle 
 
 #define LANDMASS_SEEDING_CHANCE (0x03)    ///< the greater, the bigger the chance a land tile is seeded.
 
@@ -49,9 +50,7 @@
 #define ALTITUDE_MIN (-2000)  ///< minimum altitude, in meters
 
 #define WINDS_VECTOR_DIRECTIONS_NB (32)
-#define WINDS_VECTOR_UNIT_ANGLE (((2.0f) * (PI)) / (WINDS_VECTOR_DIRECTIONS_NB))      ///< winds vector minimum angle 
-
-#define HUMIDITY_INACTIVE_LOSS (0.005f)
+#define WINDS_VECTOR_UNIT_ANGLE ((PI_T_2) / (WINDS_VECTOR_DIRECTIONS_NB))      ///< winds vector minimum angle 
 
 // -------------------------------------------------------------------------------------------------
 // ---- TYPE DEFINITIONS ---------------------------------------------------------------------------
@@ -477,10 +476,10 @@ static void telluric_vector_flag_gen(void *target_cell, void *neighbors[DIRECTIO
     hexa_cell_t *pushed_from_cell = NULL;
     size_t pushed_from_cell_index = 0u;
 
-    pushed_against_cell_index = (size_t) (((cell->telluric_vector.angle / (2*PI))) * DIRECTIONS_NB);
+    pushed_against_cell_index = (size_t) (((cell->telluric_vector.angle / (PI_T_2))) * DIRECTIONS_NB);
     pushed_against_cell = neighbors[pushed_against_cell_index];
 
-    pushed_from_cell_index = (size_t) (((fmod(cell->telluric_vector.angle+PI, (2*PI)) / (2*PI))) * DIRECTIONS_NB);
+    pushed_from_cell_index = (size_t) (((fmod(cell->telluric_vector.angle+PI, (PI_T_2)) / (PI_T_2))) * DIRECTIONS_NB);
     pushed_from_cell = neighbors[pushed_from_cell_index];
 
     if (!float_equal(cell->telluric_vector.angle, pushed_against_cell->telluric_vector.angle, 1u)) {
@@ -495,23 +494,24 @@ static void telluric_vector_flag_gen(void *target_cell, void *neighbors[DIRECTIO
 
 // -------------------------------------------------------------------------------------------------
 static void landmass_draw(hexa_cell_t *cell, hexagon_shape_t *target_shape) {
-    Color tile_color = BLUE;
+    Color tile_color = (Color) { 0x20, 0x79, 0xF7, 0xFF };
 
     if (hexa_cell_has_flag(cell, HEXAW_FLAG_UNDERWATER_CANYONS)) {
-        tile_color = DARKBLUE;
+        tile_color = (Color) { 0x21, 0x36, 0x8F, 0xFF };
     } else if (hexa_cell_has_flag(cell, HEXAW_FLAG_MOUNTAIN)) {
-        tile_color = DARKGREEN;
+        tile_color = (Color) { 0x90, 0x5F, 0x07, 0xFF };
     } else if (hexa_cell_has_flag(cell, HEXAW_FLAG_CANYONS)) {
-        tile_color = LIME;
+        tile_color = (Color) { 0x93, 0x7E, 0x58, 0xFF };
+        
     } else if (cell->altitude > 0) {
-        tile_color = GREEN;
+        tile_color = (Color) { 0xC8, 0x9B, 0x49, 0xFF };
     }
 
 
     DrawPoly(*((Vector2*) &target_shape->center), HEXAGON_SIDES_NB, target_shape->radius, 0.0f, tile_color);
 
     if (hexa_cell_has_flag(cell, HEXAW_FLAG_ISLES)) {
-        DrawCircleV(*((Vector2*) &target_shape->center), target_shape->radius/2, GREEN);   
+        DrawCircleV(*((Vector2*) &target_shape->center), target_shape->radius/2, (Color) { 0xC8, 0x9B, 0x49, 0xFF });   
     }
 }
 
@@ -572,11 +572,11 @@ static void altitude_draw(hexa_cell_t *cell, hexagon_shape_t *target_shape) {
     Color base_color = { 0u };
     f32 color_intensity = 0.0f;
 
-    base_color = DARKBLUE;
+    base_color = (Color) { 0x21, 0x36, 0x8F, 0xFF, };
     color_intensity = (f32) cell->altitude / (f32) ALTITUDE_MIN;
 
     if (cell->altitude > 0) {
-        base_color = DARKGREEN;
+        base_color = (Color) { 0x90, 0x5F, 0x07, 0xFF, };
         color_intensity = (f32) cell->altitude / (f32) ALTITUDE_MAX;
     }
     base_color.a = 64u + (u8) ((color_intensity) * (f32) (255u-64u));
@@ -701,11 +701,11 @@ static void winds_apply(void *target_cell, void *neighbors[DIRECTIONS_NB]) {
     cell->winds_vector.angle = mean_angle;
 
     // leftmost cell
-    possible_directions[0u] = (size_t) ceilf((cell->winds_vector.angle / (2*PI)) * (f32) DIRECTIONS_NB) % DIRECTIONS_NB;
+    possible_directions[0u] = (size_t) ceilf((cell->winds_vector.angle / (PI_T_2)) * (f32) DIRECTIONS_NB) % DIRECTIONS_NB;
     cell_altitudes[0u] = ((hexa_cell_t *) neighbors[possible_directions[0u]])->altitude;
     cell_altitudes[0u] *= (cell_altitudes[0u] > 0); /* altitude below 0 has water over it */
     // rightmost cell
-    possible_directions[1u] = (size_t) floorf((cell->winds_vector.angle / (2*PI)) * (f32) DIRECTIONS_NB) % DIRECTIONS_NB;
+    possible_directions[1u] = (size_t) floorf((cell->winds_vector.angle / (PI_T_2)) * (f32) DIRECTIONS_NB) % DIRECTIONS_NB;
     cell_altitudes[1u] = ((hexa_cell_t *) neighbors[possible_directions[1u]])->altitude;
     cell_altitudes[1u] *= (cell_altitudes[1u] > 0); /* altitude below 0 has water over it */
 
@@ -715,7 +715,7 @@ static void winds_apply(void *target_cell, void *neighbors[DIRECTIONS_NB]) {
     
     // difference between the two "winded upon" cells
     normalized_altitude_diff = (f32) abs(cell_altitudes[0u] - cell_altitudes[1u]) / (f32) ALTITUDE_MAX;
-    cell->winds_vector.angle += ((definitive_direction / (f32) DIRECTIONS_NB) * (2*PI)) * normalized_altitude_diff;
+    cell->winds_vector.angle += ((definitive_direction / (f32) DIRECTIONS_NB) * (PI_T_2)) * normalized_altitude_diff;
 
     // difference between the current cell's altitude and the main winded upon cell
     normalized_altitude_diff = (f32) abs(cell->altitude * (cell->altitude > 0) - cell_altitudes[definitive_direction]) / (f32) ALTITUDE_MAX;
@@ -758,7 +758,7 @@ static void humidity_apply(void *target_cell, void *neighbors[DIRECTIONS_NB]) {
     f32 inv_angle_wind = 0.0f;
     size_t wind_source_cell = 0u;
 
-    inv_angle_wind = (fmod(cell->winds_vector.angle + PI, 2*PI)) / (2*PI);
+    inv_angle_wind = (fmod(cell->winds_vector.angle + PI, PI_T_2)) / (PI_T_2);
     wind_source_cell = (size_t) (inv_angle_wind * (f32) DIRECTIONS_NB) % DIRECTIONS_NB;
     source_humidity = ((hexa_cell_t *) neighbors[wind_source_cell])->humidity;
 
@@ -766,7 +766,7 @@ static void humidity_apply(void *target_cell, void *neighbors[DIRECTIONS_NB]) {
         return;
     }
     
-    cell->humidity = source_humidity * (1.0f - HUMIDITY_INACTIVE_LOSS) * (cell->winds_vector.magnitude);
+    cell->humidity = source_humidity * (cell->winds_vector.magnitude);
     cell->precipitations = source_humidity - cell->humidity;
 }
 
