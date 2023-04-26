@@ -66,7 +66,7 @@ void hexaworld_genlayer(hexaworld_t *world, hexaworld_layer_t layer);
 /**
  * @brief Sets all the layer's data to a blank state.
  * 
- * @param world target world.
+ * @param[inout] world target world.
  */
 void hexaworld_raze(hexaworld_t *world);
 

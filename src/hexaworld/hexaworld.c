@@ -36,7 +36,7 @@
 #define ITERATION_NB_TELLURIC (2u)    ///< number of automaton iteration for the telluric layer
 #define ITERATION_NB_LANDMASS (6u)    ///< number of automaton iteration for the landmass layer
 #define ITERATION_NB_ALTITUDE (10u)   ///< number of automaton iteration for the altitude layer
-#define ITERATION_NB_WINDS (1u)       ///< number of automaton iteration for the winds layer
+#define ITERATION_NB_WINDS (10u)       ///< number of automaton iteration for the winds layer
 
 #define TELLURIC_VECTOR_SEEDING_INV_CHANCE (0x40)  ///< the greater, the bigger the chance a telluric tile is NOT seeded.
 #define TELLURIC_VECTOR_DIRECTIONS_NB (32)     ///< number of possible directions for a telluric vector
@@ -580,7 +580,7 @@ static void altitude_draw(hexa_cell_t *cell, hexagon_shape_t *target_shape) {
         base_color = DARKGREEN;
         color_intensity = (f32) cell->altitude / (f32) ALTITUDE_MAX;
     }
-    base_color.a = 32u + (u8) ((color_intensity) * (f32) (225u-32u));
+    base_color.a = 64u + (u8) ((color_intensity) * (f32) (255u-64u));
 
     DrawPoly(*((Vector2*) &target_shape->center), HEXAGON_SIDES_NB, target_shape->radius, 0.0f, base_color);
 }
@@ -670,7 +670,42 @@ static void winds_seed(hexaworld_t *world) {
 static void winds_apply(void *target_cell, void *neighbors[DIRECTIONS_NB]) {
     hexa_cell_t *cell = (hexa_cell_t *) target_cell;
 
+    hexa_cell_t *tmp_cell = NULL;
+    f32 x_axis_sum = 0.0f;
+    f32 y_axis_sum = 0.0f;
+    f32 mean_weight = 0.0f;
+    f32 mean_angle = 0.0f;
+
+    // since the angle is not always divisible by 6, the wind goes to two cells
+    size_t possible_directions[2u] = { 0u };
+    i32 cell_altitudes[2u] = { 0 };
+    // cell chosen as the least resistance
+    size_t definitive_direction = 0u;
+
+    for (size_t i = 0u ; i < DIRECTIONS_NB ; i++) {
+        tmp_cell = ((hexa_cell_t *) neighbors[i]);
+        x_axis_sum += cos(tmp_cell->winds_vector.angle);
+        y_axis_sum += sin(tmp_cell->winds_vector.angle);
+    }
+
+    mean_weight = 1.0f / (f32) DIRECTIONS_NB;
+    mean_angle = atan2f(mean_weight * x_axis_sum, mean_weight * y_axis_sum);
+    cell->winds_vector.angle = mean_angle;
+
+    // leftmost
+    possible_directions[0u] = (size_t) ceilf((cell->winds_vector.angle / (2*PI)) * (f32) DIRECTIONS_NB) % DIRECTIONS_NB;
+    cell_altitudes[0u] = ((hexa_cell_t *) neighbors[possible_directions[0u]])->altitude;
+    cell_altitudes[0u] *= (cell_altitudes[0u] > 0);
+    // rightmost
+    possible_directions[1u] = (size_t) floorf((cell->winds_vector.angle / (2*PI)) * (f32) DIRECTIONS_NB) % DIRECTIONS_NB;
+    cell_altitudes[1u] = ((hexa_cell_t *) neighbors[possible_directions[1u]])->altitude;
+    cell_altitudes[1u] *= (cell_altitudes[1u] > 0);
+
+    definitive_direction = (cell_altitudes[0u] < cell_altitudes[1u])
+            ? possible_directions[0u]
+            : possible_directions[1u];
     
+    // cell->winds_vector.angle = ((definitive_direction / (f32) DIRECTIONS_NB) * (2*PI));
 }
 
 // -------------------------------------------------------------------------------------------------

@@ -97,7 +97,7 @@ void otomaton_apply(cell_automaton_t *automaton, u32 iteration_nb, void **array,
         active_buffer_index = !active_buffer_index;
     }
 
-        copy_array(&target_array, &pendulum_buffers[!active_buffer_index]);
+    copy_array(&target_array, &pendulum_buffers[!active_buffer_index]);
 }
 
 // -------------------------------------------------------------------------------------------------
