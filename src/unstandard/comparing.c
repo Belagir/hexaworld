@@ -17,3 +17,8 @@ u32 float_equal(f32 val1, f32 val2, u32 max_ulps_diff) {
 
     return (abs(repr_val1 - repr_val2) <= max_ulps_diff);
 }
+
+// -------------------------------------------------------------------------------------------------
+u64 min(u64 v1, u64 v2) {
+    return v1 * (v1 <= v2) + v2 * (v2 < v1);
+}

@@ -37,7 +37,7 @@
 #define ITERATION_NB_LANDMASS (6u)    ///< number of automaton iteration for the landmass layer
 #define ITERATION_NB_ALTITUDE (10u)   ///< number of automaton iteration for the altitude layer
 #define ITERATION_NB_WINDS (1u)       ///< number of automaton iteration for the winds layer
-#define ITERATION_NB_HUMIDITY (10u)    ///< number of automaton iteration for the humidity layer
+#define ITERATION_NB_HUMIDITY (20u)    ///< number of automaton iteration for the humidity layer
 
 #define TELLURIC_VECTOR_SEEDING_INV_CHANCE (0x40)  ///< the greater, the bigger the chance a telluric tile is NOT seeded.
 #define TELLURIC_VECTOR_DIRECTIONS_NB (32)     ///< number of possible directions for a telluric vector
@@ -757,20 +757,10 @@ static void humidity_apply(void *target_cell, void *neighbors[DIRECTIONS_NB]) {
     f32 source_humidity = 0.0f;
     f32 inv_angle_wind = 0.0f;
     size_t wind_source_cell = 0u;
-    u32 shape_dependant_weight = 0u;
 
     inv_angle_wind = (fmod(cell->winds_vector.angle + PI, 2*PI)) / (2*PI);
     wind_source_cell = (size_t) (inv_angle_wind * (f32) DIRECTIONS_NB) % DIRECTIONS_NB;
-
-    // source_humidity = ((hexa_cell_t *) neighbors[wind_source_cell])->humidity;
-
-    for (size_t i = 0u ; i < DIRECTIONS_NB ; i++) {
-        shape_dependant_weight += abs((i32) wind_source_cell - (i32) i);
-        source_humidity += 
-            ((hexa_cell_t *) neighbors[i])->humidity * (abs((i32) wind_source_cell - (i32) i));
-    }
-
-    source_humidity /= shape_dependant_weight;
+    source_humidity = ((hexa_cell_t *) neighbors[wind_source_cell])->humidity;
 
     if (float_equal(source_humidity, 0.0f, 1u) || (cell->altitude <= 0)) {
         return;
