@@ -144,7 +144,6 @@ void hexaworld_raylib_app_run(hexaworld_raylib_app_t *hexapp, u32 target_fps) {
         if (layer_changed) {
             draw_hexmap_to_texture(hexapp->hexaworld, &world_buffer, window_rectangle, layer_counter);
             layer_changed = 0u;
-            printf("layer counter : %d\n", layer_counter);
         }
 
         BeginDrawing();

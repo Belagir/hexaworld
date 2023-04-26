@@ -37,6 +37,7 @@
 #define ITERATION_NB_LANDMASS (6u)    ///< number of automaton iteration for the landmass layer
 #define ITERATION_NB_ALTITUDE (10u)   ///< number of automaton iteration for the altitude layer
 #define ITERATION_NB_WINDS (1u)       ///< number of automaton iteration for the winds layer
+#define ITERATION_NB_HUMIDITY (10u)    ///< number of automaton iteration for the humidity layer
 
 #define TELLURIC_VECTOR_SEEDING_INV_CHANCE (0x40)  ///< the greater, the bigger the chance a telluric tile is NOT seeded.
 #define TELLURIC_VECTOR_DIRECTIONS_NB (32)     ///< number of possible directions for a telluric vector
@@ -49,6 +50,8 @@
 
 #define WINDS_VECTOR_DIRECTIONS_NB (32)
 #define WINDS_VECTOR_UNIT_ANGLE (((2.0f) * (PI)) / (WINDS_VECTOR_DIRECTIONS_NB))      ///< winds vector minimum angle 
+
+#define HUMIDITY_INACTIVE_LOSS (0.005f)
 
 // -------------------------------------------------------------------------------------------------
 // ---- TYPE DEFINITIONS ---------------------------------------------------------------------------
@@ -90,6 +93,10 @@ typedef struct hexa_cell_t {
     i32 altitude;
     /// mean wind direction and force
     vector_2d_polar_t winds_vector;
+    /// mean humidty on the tile
+    f32 humidity;
+    /// mean precipitations on the tile
+    f32 precipitations;
 } hexa_cell_t;
 
 /**
@@ -187,6 +194,15 @@ static void winds_seed(hexaworld_t *world);
 static void winds_apply(void *target_cell, void *neighbors[DIRECTIONS_NB]);
 
 // -------------------------------------------------------------------------------------------------
+// -- HUMIDITY -------------------------------------------------------------------------------------
+
+static void humidity_draw(hexa_cell_t *cell, hexagon_shape_t *target_shape);
+
+static void humidity_seed(hexaworld_t *world);
+
+static void humidity_apply(void *target_cell, void *neighbors[DIRECTIONS_NB]);
+
+// -------------------------------------------------------------------------------------------------
 // -------------------------------------------------------------------------------------------------
 
 /**
@@ -242,6 +258,8 @@ static const layer_calls_t hexaworld_layers_functions[HEXAW_LAYERS_NUMBER] = {
     { &altitude_draw,        &altitude_seed,        &altitude_apply,        NULL,                      ITERATION_NB_ALTITUDE, LAYER_GEN_ITERATE_RELATIVE },
     /// wind layers calls
     { &winds_draw,           &winds_seed,           &winds_apply,           NULL,                      ITERATION_NB_WINDS,    LAYER_GEN_ITERATE_ABSOLUTE },
+    /// humidity layer
+    { &humidity_draw,        &humidity_seed,        &humidity_apply,        NULL,                      ITERATION_NB_HUMIDITY, LAYER_GEN_ITERATE_ABSOLUTE },
 };
 
 // -------------------------------------------------------------------------------------------------
@@ -653,7 +671,6 @@ static void winds_seed(hexaworld_t *world) {
             };
         }
     }
-
 }
 
 // -------------------------------------------------------------------------------------------------
@@ -703,6 +720,53 @@ static void winds_apply(void *target_cell, void *neighbors[DIRECTIONS_NB]) {
     // difference between the current cell's altitude and the main winded upon cell
     normalized_altitude_diff = (f32) abs(cell->altitude * (cell->altitude > 0) - cell_altitudes[definitive_direction]) / (f32) ALTITUDE_MAX;
     cell->winds_vector.magnitude = (1.0f - normalized_altitude_diff);
+}
+
+// -------------------------------------------------------------------------------------------------
+// -- HUMIDITY -------------------------------------------------------------------------------------
+
+// -------------------------------------------------------------------------------------------------
+static void humidity_draw(hexa_cell_t *cell, hexagon_shape_t *target_shape) {
+    Color base_color = (Color) { 0x6e, 0xBA, 0xFF, 0xFF };
+    
+    base_color.a = (u8) (cell->humidity * 255u);
+    DrawPoly(*((Vector2*) &target_shape->center), HEXAGON_SIDES_NB, target_shape->radius, 0.0f, base_color);
+    DrawCircleV(
+            *((Vector2 *) &(target_shape->center)), 
+            (2*target_shape->radius/3) * cell->precipitations, 
+            (Color) { 0xD8, 0xD8, 0xD8, 0xFF }
+    );
+
+}
+
+// -------------------------------------------------------------------------------------------------
+static void humidity_seed(hexaworld_t *world) {
+    for (size_t x = 0u ; x < world->width ; x++) {
+        for (size_t y = 0u ; y < world->height ; y++) {
+            world->tiles[x][y].humidity = (f32) (world->tiles[x][y].altitude <= 0);
+        }
+    }
+}
+
+// -------------------------------------------------------------------------------------------------
+static void humidity_apply(void *target_cell, void *neighbors[DIRECTIONS_NB]) {
+    hexa_cell_t *cell = (hexa_cell_t *) target_cell;
+
+    f32 source_humidity = 0.0f;
+    f32 inv_angle_wind = 0.0f;
+    size_t wind_source_cell = 0u;
+
+    inv_angle_wind = (fmod(cell->winds_vector.angle + PI, 2*PI)) / (2*PI);
+    wind_source_cell = (size_t) (inv_angle_wind * (f32) DIRECTIONS_NB) % DIRECTIONS_NB;
+
+    source_humidity = ((hexa_cell_t *) neighbors[wind_source_cell])->humidity;
+
+    if (float_equal(source_humidity, 0.0f, 1u) || (cell->altitude <= 0)) {
+        return;
+    }
+
+    cell->humidity = source_humidity * (1.0f - HUMIDITY_INACTIVE_LOSS) * cell->winds_vector.magnitude;
+    cell->precipitations = source_humidity - cell->humidity;
 }
 
 // -------------------------------------------------------------------------------------------------
