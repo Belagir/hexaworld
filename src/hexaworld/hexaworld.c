@@ -279,7 +279,7 @@ hexaworld_t *hexaworld_create_empty(size_t width, size_t height) {
     }
     
     // cell automaton
-    world->automaton = otomaton_create(NULL);
+    world->automaton = otomaton_create((void **) world->tiles, width, height, sizeof(**(world->tiles)));
     if (!world->automaton) {
         return NULL;
     }
@@ -338,27 +338,11 @@ void hexaworld_genlayer(hexaworld_t *world, hexaworld_layer_t layer) {
     }
 
     // applying the overall generation function N times
-    otomaton_set_apply_function(world->automaton, hexaworld_layers_functions[layer].automaton_func);
-    otomaton_apply(
-            world->automaton, 
-            iteration_number, 
-            (void **) world->tiles, 
-            world->width, 
-            world->height, 
-            sizeof(**world->tiles)
-    );
+    otomaton_apply(world->automaton, iteration_number, hexaworld_layers_functions[layer].automaton_func);
 
     // if the flag gneration function exists, apply it one time
     if (hexaworld_layers_functions[layer].flag_gen_func) {
-        otomaton_set_apply_function(world->automaton, hexaworld_layers_functions[layer].flag_gen_func);
-        otomaton_apply(
-                world->automaton, 
-                1u, 
-                (void **) world->tiles, 
-                world->width, 
-                world->height, 
-                sizeof(**world->tiles)
-        );
+        otomaton_apply(world->automaton, 1u, hexaworld_layers_functions[layer].flag_gen_func);
     }
 }
 

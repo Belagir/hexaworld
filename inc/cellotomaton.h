@@ -51,7 +51,7 @@ typedef void (*apply_to_cell_func_t)(void *target, void *neighbors[DIRECTIONS_NB
  * @param[in] height number of rows in the array (in number of elements)
  * @param[in] stride size of the array's base type, in bytes
  */
-void otomaton_apply(cell_automaton_t *automaton, u32 iteration_nb, void **array, size_t width, size_t height, size_t stride);
+void otomaton_apply(cell_automaton_t *automaton, u32 iteration_nb, apply_to_cell_func_t function);
 
 /**
  * @brief Creates an automaton on the heap and returns a pointer to it.
@@ -59,7 +59,7 @@ void otomaton_apply(cell_automaton_t *automaton, u32 iteration_nb, void **array,
  * @param[in] func function stored in the automaton, and applied to an array.
  * @return cell_automaton_t* a pointer to the instance on the heap, is NULL if something went wrong
  */
-cell_automaton_t *otomaton_create(apply_to_cell_func_t func);
+cell_automaton_t *otomaton_create(void **array, size_t width, size_t height, size_t stride);
 
 /**
  * @brief Destroys an automaton and releases the resources taken by the instance. 
@@ -68,13 +68,5 @@ cell_automaton_t *otomaton_create(apply_to_cell_func_t func);
  * @param[inout] automaton automaton to release
  */
 void otomaton_destroy(cell_automaton_t **automaton);
-
-/**
- * @brief Changes the applied function of the automaton.
- * 
- * @param[inout] automaton target automaton
- * @param[in] func new function (can be NULL)
- */
-void otomaton_set_apply_function(cell_automaton_t *automaton, apply_to_cell_func_t func);
 
 #endif
