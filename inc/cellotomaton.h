@@ -41,22 +41,22 @@ typedef struct cell_automaton_t cell_automaton_t;
 typedef void (*apply_to_cell_func_t)(void *target, void *neighbors[DIRECTIONS_NB]);
 
 /**
- * @brief Applies the automaton on an anonymous bidimensional array. The array is modified by the operation.
+ * @brief Applies the automaton on its anonymous bidimensional array. The array is modified by the operation.
  * If the automaton's function is NULL, nothing is done to the array.
  * 
  * @param[inout] automaton automaton to apply to the array, can be NULL (in this case, nothing will be done)
  * @param[in] iteration_nb number of times the function is applied to each cell
- * @param[inout] array a bidimensional array of some type representing an hesagonally-grided space
- * @param[in] width number of columns in the array (in numbers of sub-arrays)
- * @param[in] height number of rows in the array (in number of elements)
- * @param[in] stride size of the array's base type, in bytes
+ * @param[in] function function to apply to each cell
  */
 void otomaton_apply(cell_automaton_t *automaton, u32 iteration_nb, apply_to_cell_func_t function);
 
 /**
  * @brief Creates an automaton on the heap and returns a pointer to it.
  * 
- * @param[in] func function stored in the automaton, and applied to an array.
+ * @param[in] array the array on which every operation will be applied
+ * @param[in] width width, in number of sub-arrays, of the main array
+ * @param[in] height height, in number of elements of a sub-array
+ * @param[in] stride size in bytes of an element of a sub-array
  * @return cell_automaton_t* a pointer to the instance on the heap, is NULL if something went wrong
  */
 cell_automaton_t *otomaton_create(void **array, size_t width, size_t height, size_t stride);

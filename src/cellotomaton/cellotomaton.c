@@ -12,6 +12,12 @@
 #include <cellotomaton.h>
 
 // -------------------------------------------------------------------------------------------------
+// ---- CONSTANTS ----------------------------------------------------------------------------------
+// -------------------------------------------------------------------------------------------------
+
+#define PENDULUM_ARRAY_PAIR_NB (2u)   ///< I actually fail to think of a use case where this number isn't 2.
+
+// -------------------------------------------------------------------------------------------------
 // ---- TYPE DEFINITIONS ---------------------------------------------------------------------------
 // -------------------------------------------------------------------------------------------------
 
@@ -31,14 +37,21 @@ typedef struct target_array_t {
 
 /**
  * @brief Pointers to a cell's neighbors.
- * 
  */
 typedef struct cell_neighbors_t {
+    /// collection of pointers, one per direction
     void *neighbors[DIRECTIONS_NB];
 } cell_neighbors_t;
 
+/**
+ * @brief A pendulum buffer is a buffer that can also hold data about its neighboring cells.
+ * The neighboring cells are usually located in another pendulum buffer so the buffer's changes
+ * are not reflected and would influence its current processing.
+ */
 typedef struct pendulum_buffer_t {
+    /// buffer's data as a 2d array
     target_array_t data;
+    /// map linking each cell's coordinates to its neighbors
     cell_neighbors_t **neighbors;
 } pendulum_buffer_t;
 
@@ -46,11 +59,10 @@ typedef struct pendulum_buffer_t {
  * @brief Definition of a cell automaton data.
  */
 typedef struct cell_automaton_t {
-    /// applied function : the function will receive one cell's neighbors and change the state of this cell.
-    // apply_to_cell_func_t func;
-    /// companion target array
+    /// companion foreign target array, its lifetime is unmanaged by the cell automaton's routines
     target_array_t target_array;
-    pendulum_buffer_t pendulum_buffers[2u];
+    /// two owned pendulum buffers to apply the automaton without any copy
+    pendulum_buffer_t pendulum_buffers[PENDULUM_ARRAY_PAIR_NB];
 } cell_automaton_t;
 
 // -------------------------------------------------------------------------------------------------
@@ -60,10 +72,10 @@ typedef struct cell_automaton_t {
 /**
  * @brief Populates an array of anonymous pointers with the neighboring tiles of another defined by its coordinates.
  * 
- * @param[out] neighbors_tiles populated array
- * @param[in] x horizontal position of the center tile
- * @param[in] y vertical position of the center tile
- * @param[in] array all the tiles
+ * @param[out] cell_neighs method-populated array
+ * @param[in] x horizontal position of the center tile, in sub-array number
+ * @param[in] y vertical position of the center tile, in number of bytes
+ * @param[in] array all the tiles as an anonymous array
  */
 static void get_neighbors(cell_neighbors_t *cell_neighs, size_t x, size_t y, target_array_t *array);
 
@@ -75,12 +87,38 @@ static void get_neighbors(cell_neighbors_t *cell_neighs, size_t x, size_t y, tar
  */
 static void copy_array(target_array_t *dest, target_array_t *source);
 
+/**
+ * @brief Initializes an allocated pendulum buffer. This will allocate its internal data to the desired size.
+ * 
+ * @param[out] buffer target to-initialize buffer
+ * @param[in] width width, in number of sub-arrays
+ * @param[in] height height, in number of elements of size `stride`
+ * @param[in] stride size of an element
+ */
 static void pendulum_buffer_initialize(pendulum_buffer_t *buffer, size_t width, size_t height, size_t stride);
 
+/**
+ * @brief Refreshes a buffer with some data
+ * 
+ * @param[inout] buffer initialized buffer
+ * @param[in] source array containing the information. Must be of the same size, height and stride as the buffer.
+ */
 static void pendulum_buffer_refresh_from_array(pendulum_buffer_t *buffer, target_array_t source);
 
+/**
+ * @brief Link a pendulum buffer to another through its neighbors.
+ * The buffer will have its cell's neighbors set to the alter ego's cells.
+ * 
+ * @param[inout] buffer initialized buffer
+ * @param[in] alter_ego initialized buffer to target
+ */
 static void pendulum_buffer_link_to_alter_ego(pendulum_buffer_t *buffer, pendulum_buffer_t alter_ego);
 
+/**
+ * @brief Frees the memory allocated inside a buffer.
+ * 
+ * @param[inout] buffer initialized buffer
+ */
 static void pendulum_buffer_free(pendulum_buffer_t *buffer);
 
 // -------------------------------------------------------------------------------------------------
@@ -97,12 +135,15 @@ void otomaton_apply(cell_automaton_t *automaton, u32 iteration_nb, apply_to_cell
         return;
     }
 
+    // shortening accesses
     target_array = &(automaton->target_array);
 
-    for (size_t i = 0 ; i < 2u ; i++) {
+    // refreshing buffers to reflect the array's eventual exterior changes
+    for (size_t i = 0 ; i < PENDULUM_ARRAY_PAIR_NB ; i++) {
         pendulum_buffer_refresh_from_array(automaton->pendulum_buffers + i, *target_array);
     }
 
+    // applying the automaton function
     for (size_t i = 0u ; i < iteration_nb ; i++) {
         for (size_t x = 0u ; x < target_array->width ; x += 1u) {
             for (size_t y = 0u ; y < target_array->height ; y += 1u) {
@@ -112,11 +153,12 @@ void otomaton_apply(cell_automaton_t *automaton, u32 iteration_nb, apply_to_cell
             }
         }
 
-        active_buffer_index = !active_buffer_index;
+        // alternating the buffers
+        active_buffer_index = (active_buffer_index + 1u) % PENDULUM_ARRAY_PAIR_NB;
     }
     
-
-    copy_array(target_array, &(automaton->pendulum_buffers[!active_buffer_index].data));
+    // everything went right (shock, gasp ?) so we commit the last buffer into the target array 
+    copy_array(target_array, &(automaton->pendulum_buffers[(active_buffer_index + 1u) % PENDULUM_ARRAY_PAIR_NB].data));
 }
 
 // -------------------------------------------------------------------------------------------------
@@ -130,11 +172,11 @@ cell_automaton_t *otomaton_create(void **array, size_t width, size_t height, siz
 
     automaton->target_array = (target_array_t) { .tiles = array, .width = width, .height = height, .stride = stride };
 
-    for (size_t i = 0u ; i < 2u ; i++) {
+    for (size_t i = 0u ; i < PENDULUM_ARRAY_PAIR_NB ; i++) {
         pendulum_buffer_initialize(automaton->pendulum_buffers + i, width, height, stride);
     }
-    for (size_t i = 0u ; i < 2u ; i++) {
-        pendulum_buffer_link_to_alter_ego(automaton->pendulum_buffers + i, automaton->pendulum_buffers[!i]);
+    for (size_t i = 0u ; i < PENDULUM_ARRAY_PAIR_NB ; i++) {
+        pendulum_buffer_link_to_alter_ego(automaton->pendulum_buffers + i, automaton->pendulum_buffers[(i + 1u) % PENDULUM_ARRAY_PAIR_NB]);
     }
 
     return automaton;
@@ -192,6 +234,9 @@ static void copy_array(target_array_t *dest, target_array_t *source) {
 }
 
 // -------------------------------------------------------------------------------------------------
+// ---- PENDULUM BUFFER FUNCTIONS  -----------------------------------------------------------------
+
+// -------------------------------------------------------------------------------------------------
 static void pendulum_buffer_initialize(pendulum_buffer_t *buffer, size_t width, size_t height, size_t stride) {
     // allocating buffer space
     buffer->data.tiles = malloc(width * sizeof(*(buffer->data.tiles)));
@@ -207,6 +252,8 @@ static void pendulum_buffer_initialize(pendulum_buffer_t *buffer, size_t width, 
     for (size_t i = 0u ; i < width ; i++) {
         buffer->neighbors[i] = malloc(height * sizeof(*(buffer->neighbors[i])));
     }
+
+    // the function does not return anything, so if a malloc returns null... what ?
 }
 
 // -------------------------------------------------------------------------------------------------
@@ -218,12 +265,12 @@ static void pendulum_buffer_link_to_alter_ego(pendulum_buffer_t *buffer, pendulu
     }
 }
 
-
 // -------------------------------------------------------------------------------------------------
 static void pendulum_buffer_refresh_from_array(pendulum_buffer_t *buffer, target_array_t source) {
     copy_array(&(buffer->data), &source);
 }
 
+// -------------------------------------------------------------------------------------------------
 static void pendulum_buffer_free(pendulum_buffer_t *buffer) {
     for (size_t i = 0u ; i < buffer->data.width ; i++) {
         free(buffer->neighbors[i]);
