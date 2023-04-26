@@ -133,13 +133,18 @@ void hexaworld_raylib_app_run(hexaworld_raylib_app_t *hexapp, u32 target_fps) {
             layer_counter = (layer_counter + 1u) % HEXAW_LAYERS_NUMBER;
             layer_changed = 1u;
         } else if (IsKeyPressed(KEY_LEFT)) {
-            layer_counter = (layer_counter - 1u) % HEXAW_LAYERS_NUMBER;
+            if (layer_counter == 0) {
+                layer_counter = HEXAW_LAYERS_NUMBER - 1u;
+            } else {
+                layer_counter = layer_counter - 1u;
+            }
             layer_changed = 1u;
         }
 
         if (layer_changed) {
             draw_hexmap_to_texture(hexapp->hexaworld, &world_buffer, window_rectangle, layer_counter);
             layer_changed = 0u;
+            printf("layer counter : %d\n", layer_counter);
         }
 
         BeginDrawing();
