@@ -736,7 +736,9 @@ static void humidity_draw(hexa_cell_t *cell, hexagon_shape_t *target_shape) {
             (2*target_shape->radius/3) * cell->precipitations, 
             (Color) { 0xD8, 0xD8, 0xD8, 0xFF }
     );
-
+    if (cell->altitude > 0) {
+        DrawPolyLines(*((Vector2*) &target_shape->center), HEXAGON_SIDES_NB, 5*target_shape->radius/6, 0.0f, GRAY);
+    }
 }
 
 // -------------------------------------------------------------------------------------------------
@@ -755,17 +757,26 @@ static void humidity_apply(void *target_cell, void *neighbors[DIRECTIONS_NB]) {
     f32 source_humidity = 0.0f;
     f32 inv_angle_wind = 0.0f;
     size_t wind_source_cell = 0u;
+    u32 shape_dependant_weight = 0u;
 
     inv_angle_wind = (fmod(cell->winds_vector.angle + PI, 2*PI)) / (2*PI);
     wind_source_cell = (size_t) (inv_angle_wind * (f32) DIRECTIONS_NB) % DIRECTIONS_NB;
 
-    source_humidity = ((hexa_cell_t *) neighbors[wind_source_cell])->humidity;
+    // source_humidity = ((hexa_cell_t *) neighbors[wind_source_cell])->humidity;
+
+    for (size_t i = 0u ; i < DIRECTIONS_NB ; i++) {
+        shape_dependant_weight += abs((i32) wind_source_cell - (i32) i);
+        source_humidity += 
+            ((hexa_cell_t *) neighbors[i])->humidity * (abs((i32) wind_source_cell - (i32) i));
+    }
+
+    source_humidity /= shape_dependant_weight;
 
     if (float_equal(source_humidity, 0.0f, 1u) || (cell->altitude <= 0)) {
         return;
     }
-
-    cell->humidity = source_humidity * (1.0f - HUMIDITY_INACTIVE_LOSS) * cell->winds_vector.magnitude;
+    
+    cell->humidity = source_humidity * (1.0f - HUMIDITY_INACTIVE_LOSS) * (cell->winds_vector.magnitude);
     cell->precipitations = source_humidity - cell->humidity;
 }
 
