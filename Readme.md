@@ -2,7 +2,12 @@
 
 A small raylib-powered c program that will generate an hexagonally-tiled world through successive application of cellular automatons.
 
+***
+
 ![hexaworld icon, a frog vibing on a tile](img/icon/hexaworld.png)
+
+> *oh no, what it gonna do ?*
+***
 
 ## Compiling
 
@@ -60,3 +65,19 @@ The program also accepts some options :
 - `-s seed` with `seed` as any integer. The program will use this to seed the RNG.
 - `-x width` with `width` as a non-zero unsigned integer. This will set the horizontal number of tiles.
 - `-y height` with `height` as a non-zero unsigned integer. This will set the vertical number of tiles.
+
+# WIP
+
+Here is my rough roadmap :
+
+- `[x]` base system for layers
+- `[x]` tectonic plates layer
+- `[x]` landmass layer
+- `[x]` altitude layer
+- `[x]` wind direction layer
+- `[x]` humidity layer
+- `[ ]` freshwater & rivers layer
+- `[ ]` vegetation layer
+- `[ ]` tweaks to layers generation to make it as good as I can
+- `[ ]` sprite "stickers" proceduraly added on certain tiles for looks
+- `[ ]` basic UI to give info on the tiles
