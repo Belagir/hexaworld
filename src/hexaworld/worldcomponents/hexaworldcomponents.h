@@ -26,7 +26,8 @@
 #define WINDS_VECTOR_DIRECTIONS_NB (32)
 #define WINDS_VECTOR_UNIT_ANGLE ((PI_T_2) / (WINDS_VECTOR_DIRECTIONS_NB))      ///< winds vector minimum angle 
 
-#define FRESHWATER_PRECIPITATIONS_MULTIPLIER (1.5f)   ///< freshwater source generation where there is precipitations
+#define FRESHWATER_PRECIPITATIONS_THRESHOLD (0.5f)
+#define FRESHWATER_SOURCE_START_COEF (1.0f)
 #define FRESHWATER_MOUNTAIN_NO_SOURCE_CHANCE (0x10)    ///< chance that a source is generated on a mountain
 
 // -------------------------------------------------------------------------------------------------
@@ -73,8 +74,8 @@ typedef struct hexa_cell_t {
     f32 humidity;
     /// mean precipitations on the tile
     f32 precipitations;
-    /// freshwater excess height on the tile
-    u32 freshwater_height;
+    /// freshwater excess height and direction on the tile
+    vector_2d_polar_t freshwater;
 } hexa_cell_t;
 
 /**
