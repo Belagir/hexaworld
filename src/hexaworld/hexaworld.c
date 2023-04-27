@@ -11,7 +11,6 @@
 #include "hexaworld.h"
 
 #include <stdlib.h>
-#include <math.h>
 #include <raylib.h>
 
 #include <cellotomaton.h>

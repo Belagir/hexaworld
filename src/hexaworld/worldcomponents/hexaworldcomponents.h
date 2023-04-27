@@ -7,6 +7,10 @@
 
 #include "layers.h"
 
+// -------------------------------------------------------------------------------------------------
+// ---- CONSTANTS ----------------------------------------------------------------------------------
+// -------------------------------------------------------------------------------------------------
+
 #define HEXAGON_SIDES_NB (6u)     ///< number of sides of an hexagon. tough.
 #define PI_T_2 ((2.0f) * (PI))    ///< 2 times pi
 
@@ -21,6 +25,13 @@
 
 #define WINDS_VECTOR_DIRECTIONS_NB (32)
 #define WINDS_VECTOR_UNIT_ANGLE ((PI_T_2) / (WINDS_VECTOR_DIRECTIONS_NB))      ///< winds vector minimum angle 
+
+#define FRESHWATER_PRECIPITATIONS_MULTIPLIER (1.5f)   ///< freshwater source generation where there is precipitations
+#define FRESHWATER_MOUNTAIN_NO_SOURCE_CHANCE (0x10)    ///< chance that a source is generated on a mountain
+
+// -------------------------------------------------------------------------------------------------
+// ---- TYPEDEFS -----------------------------------------------------------------------------------
+// -------------------------------------------------------------------------------------------------
 
 /**
  * @brief Describes wether a cell automaton should iterates an absolute number of times or a number of times relative to the array size.
@@ -62,6 +73,8 @@ typedef struct hexa_cell_t {
     f32 humidity;
     /// mean precipitations on the tile
     f32 precipitations;
+    /// freshwater excess height on the tile
+    u32 freshwater_height;
 } hexa_cell_t;
 
 /**
@@ -118,6 +131,10 @@ typedef struct hexaworld_t {
     layer_calls_t hexaworld_layers_functions[HEXAW_LAYERS_NUMBER];
 } hexaworld_t;
 
+// -------------------------------------------------------------------------------------------------
+// ---- INTERFACE FUNCTIONS ------------------------------------------------------------------------
+// -------------------------------------------------------------------------------------------------
+
 /**
  * @brief Sets an bit flag in a cell.
  * 
@@ -146,6 +163,10 @@ u32 hexa_cell_has_flag(hexa_cell_t *cell, u32 flag);
  * @return hexagon_shape_t pixel shape of the hexagon representing the cell's coordinates
  */
 hexagon_shape_t hexagon_position_in_rectangle(f32 boundaries[4u], u32 x, u32 y, u32 width, u32 height);
+
+// -------------------------------------------------------------------------------------------------
+// ---- LAYERS CALLS DATA --------------------------------------------------------------------------
+// -------------------------------------------------------------------------------------------------
 
 extern const layer_calls_t telluric_layer_calls;
 extern const layer_calls_t landmass_layer_calls;
