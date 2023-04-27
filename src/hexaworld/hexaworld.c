@@ -30,8 +30,6 @@
 //
 // -------------------------------------------------------------------------------------------------
 
-#define PI_T_2 ((2.0f) * (PI))    ///< 2 times pi
-
 #define ITERATION_NB_TELLURIC (2u)    ///< number of automaton iteration for the telluric layer
 #define ITERATION_NB_LANDMASS (6u)    ///< number of automaton iteration for the landmass layer
 #define ITERATION_NB_ALTITUDE (10u)   ///< number of automaton iteration for the altitude layer

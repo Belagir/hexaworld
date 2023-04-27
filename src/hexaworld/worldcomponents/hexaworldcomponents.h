@@ -6,6 +6,19 @@
 #include <cellotomaton.h>
 
 #define HEXAGON_SIDES_NB (6u)     ///< number of sides of an hexagon. tough.
+#define PI_T_2 ((2.0f) * (PI))    ///< 2 times pi
+
+#define TELLURIC_VECTOR_SEEDING_INV_CHANCE (0x40)  ///< the greater, the bigger the chance a telluric tile is NOT seeded.
+#define TELLURIC_VECTOR_DIRECTIONS_NB (32)     ///< number of possible directions for a telluric vector
+#define TELLURIC_VECTOR_UNIT_ANGLE ((PI_T_2) / (TELLURIC_VECTOR_DIRECTIONS_NB))      ///< telluric vector minimum angle 
+
+#define LANDMASS_SEEDING_CHANCE (0x03)    ///< the greater, the bigger the chance a land tile is seeded.
+
+#define ALTITUDE_MAX (3000)  ///< maximum altitude, in meters
+#define ALTITUDE_MIN (-2000)  ///< minimum altitude, in meters
+
+#define WINDS_VECTOR_DIRECTIONS_NB (32)
+#define WINDS_VECTOR_UNIT_ANGLE ((PI_T_2) / (WINDS_VECTOR_DIRECTIONS_NB))      ///< winds vector minimum angle 
 
 /**
  * @brief Describes wether a cell automaton should iterates an absolute number of times or a number of times relative to the array size.
@@ -126,5 +139,11 @@ u32 hexa_cell_has_flag(hexa_cell_t *cell, u32 flag);
  * @return hexagon_shape_t pixel shape of the hexagon representing the cell's coordinates
  */
 hexagon_shape_t hexagon_position_in_rectangle(f32 boundaries[4u], u32 x, u32 y, u32 width, u32 height);
+
+extern const layer_calls_t telluric_layer_calls;
+extern const layer_calls_t landmass_layer_calls;
+extern const layer_calls_t altitude_layer_calls;
+extern const layer_calls_t winds_layer_calls;
+extern const layer_calls_t humidity_layer_calls;
 
 #endif
