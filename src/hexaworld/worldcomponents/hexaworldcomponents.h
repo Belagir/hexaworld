@@ -152,5 +152,6 @@ extern const layer_calls_t landmass_layer_calls;
 extern const layer_calls_t altitude_layer_calls;
 extern const layer_calls_t winds_layer_calls;
 extern const layer_calls_t humidity_layer_calls;
+extern const layer_calls_t freshwater_layer_calls;
 
 #endif
