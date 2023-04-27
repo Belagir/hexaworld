@@ -5,6 +5,8 @@
 #include <unstandard.h>
 #include <cellotomaton.h>
 
+#include "layers.h"
+
 #define HEXAGON_SIDES_NB (6u)     ///< number of sides of an hexagon. tough.
 #define PI_T_2 ((2.0f) * (PI))    ///< 2 times pi
 
@@ -70,28 +72,17 @@ typedef struct hexagon_shape_t {
     f32 radius;
 } hexagon_shape_t;
 
-// -------------------------------------------------------------------------------------------------
-typedef struct hexaworld_t { 
-    /// 2d heap-allocated array of the tiles
-    hexa_cell_t **tiles;
-    /// number of tiles on the x-axis
-    size_t width;
-    /// number of tiles on the y-axis
-    size_t height;
-
-    /// pointer to an heap-allocated cellular automaton for layer generation
-    cell_automaton_t *automaton;
-} hexaworld_t;
-
 /**
  * @brief Function pointer as the prototype of some code handling the drawing of a single cell.
  */
 typedef void (*layer_draw_function_t)(hexa_cell_t *cell, hexagon_shape_t *target_shape);
 
+// forward declaration
+struct hexaworld_t;
 /**
  * @brief Function pointer as the prototype of some code handling the seeding of some layer.
  */
-typedef void (*layer_seed_function_t)(hexaworld_t *world);
+typedef void (*layer_seed_function_t)(struct hexaworld_t *world);
 
 /**
  * @brief Aggregation of all the functions working on a single layer to create it and display it.
@@ -110,6 +101,22 @@ typedef struct layer_calls_t {
     /// way the automaton should iterate over the array
     layer_gen_iteration_type_t iteration_flavour;
 } layer_calls_t;
+
+// -------------------------------------------------------------------------------------------------
+typedef struct hexaworld_t { 
+    /// 2d heap-allocated array of the tiles
+    hexa_cell_t **tiles;
+    /// number of tiles on the x-axis
+    size_t width;
+    /// number of tiles on the y-axis
+    size_t height;
+
+    /// pointer to an heap-allocated cellular automaton for layer generation
+    cell_automaton_t *automaton;
+
+    /// layers generation functions
+    layer_calls_t hexaworld_layers_functions[HEXAW_LAYERS_NUMBER];
+} hexaworld_t;
 
 /**
  * @brief Sets an bit flag in a cell.
