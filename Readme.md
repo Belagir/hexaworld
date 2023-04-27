@@ -4,16 +4,20 @@ A small raylib-powered c program that will generate an hexagonally-tiled world t
 
 ![hexaworld icon, a frog vibing on a tile](img/icon/hexaworld.png)
 
-## Compilation
+## Compiling
+
+This for linux.
 
 ### Prerequisites
 
 Having `raylib` installed on the system as a static library.
+> *Link* : [Raylib on GNU/Linux](https://github.com/raysan5/raylib/wiki/Working-on-GNU-Linux)
+
 Having `gcc` and `make` installed on the system.
 
 ### Command
 
-position yourself at the project's root and type :
+Position yourself at the project's root and type :
 
 ```bash
 $ make
@@ -51,7 +55,7 @@ $ ./bin/otomaton
 
 You can navigate the layers with the left and right arrows. You also can re-generate the map with left shift + enter.
 
-The program accepts some options :
+The program also accepts some options :
 
 - `-s seed` with `seed` as any integer. The program will use this to seed the RNG.
 - `-x width` with `width` as a non-zero unsigned integer. This will set the horizontal number of tiles.
