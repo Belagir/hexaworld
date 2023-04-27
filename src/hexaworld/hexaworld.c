@@ -16,6 +16,8 @@
 
 #include <cellotomaton.h>
 
+#include "worldcomponents/hexaworldcomponents.h"
+
 // -------------------------------------------------------------------------------------------------
 // ---- FILE CONSTANTS -----------------------------------------------------------------------------
 // -------------------------------------------------------------------------------------------------
@@ -28,10 +30,6 @@
 //
 // -------------------------------------------------------------------------------------------------
 
-#define HEXAGON_SIDES_NB (6u)     ///< number of sides of an hexagon. tough.
-
-#define SQRT_OF_3 (1.73205f)      ///< approximation of the square root of 3
-#define THREE_HALVES (1.5f)       ///< not an *approximation* of 3 / 2
 #define PI_T_2 ((2.0f) * (PI))    ///< 2 times pi
 
 #define ITERATION_NB_TELLURIC (2u)    ///< number of automaton iteration for the telluric layer
@@ -56,98 +54,6 @@
 // ---- TYPE DEFINITIONS ---------------------------------------------------------------------------
 // -------------------------------------------------------------------------------------------------
 
-/**
- * @brief Describes wether a cell automaton should iterates an absolute number of times or a number of times relative to the array size.
- */
-typedef enum layer_gen_iteration_type_t {
-    LAYER_GEN_ITERATE_ABSOLUTE,
-    LAYER_GEN_ITERATE_RELATIVE,
-} layer_gen_iteration_type_t;
-
-/**
- * @brief Possible flags held in a cell. (They claim they're innocent)
- */
-typedef enum hexaworld_cell_flag_t {
-    HEXAW_FLAG_TELLURIC_RIDGE,      ///< Two plates are clashing here, and forming mountains
-    HEXAW_FLAG_TELLURIC_RIFT,       ///< Two plates are growing from the ocean's floor, forming a deep crevasse
-
-    HEXAW_FLAG_MOUNTAIN,            ///< Some mountains are forming here, above the water
-    HEXAW_FLAG_ISLES,               ///< Some isles have been created by a tectonic force
-    HEXAW_FLAG_CANYONS,             ///< Some old tectonic event or river dug a long path here
-    HEXAW_FLAG_UNDERWATER_CANYONS,  ///< Tectonic forces are at work here and create some heavy drop on the ocean floor
-
-    HEXAW_FLAGS_NB,     ///< Total number of flags
-} hexaworld_cell_flag_t;
-
-/**
- * @brief A single hexagonal cell.
- */
-typedef struct hexa_cell_t {
-    /// long unsigned integer containing the flags as bit offsets
-    u64 flags;
-    
-    /// local angle of the tectonic plate 
-    vector_2d_polar_t telluric_vector;
-    /// mean altitude of the tile
-    i32 altitude;
-    /// mean wind direction and force
-    vector_2d_polar_t winds_vector;
-    /// mean humidty on the tile
-    f32 humidity;
-    /// mean precipitations on the tile
-    f32 precipitations;
-} hexa_cell_t;
-
-/**
- * @brief just the shape of an hexagon.
- */
-typedef struct hexagon_shape_t {
-    vector_2d_cartesian_t center;
-    f32 radius;
-} hexagon_shape_t;
-
-// -------------------------------------------------------------------------------------------------
-typedef struct hexaworld_t { 
-    /// 2d heap-allocated array of the tiles
-    hexa_cell_t **tiles;
-    /// number of tiles on the x-axis
-    size_t width;
-    /// number of tiles on the y-axis
-    size_t height;
-
-    /// pointer to an heap-allocated cellular automaton for layer generation
-    cell_automaton_t *automaton;
-} hexaworld_t;
-
-/**
- * @brief Function pointer as the prototype of some code handling the drawing of a single cell.
- */
-typedef void (*layer_draw_function_t)(hexa_cell_t *cell, hexagon_shape_t *target_shape);
-
-/**
- * @brief Function pointer as the prototype of some code handling the seeding of some layer.
- */
-typedef void (*layer_seed_function_t)(hexaworld_t *world);
-
-
-/**
- * @brief Aggregation of all the functions working on a single layer to create it and display it.
- */
-typedef struct layer_calls_t {
-    /// function drawing a layer's single cell
-    layer_draw_function_t draw_func;
-    /// function seeding the whole world before the automaton
-    layer_seed_function_t seed_func;
-    /// function applied by the automaton to generate a single cell
-    apply_to_cell_func_t automaton_func;
-    /// function applied by the automaton to create the flags of a single cell
-    apply_to_cell_func_t flag_gen_func;
-    /// number of times the automaton applies the `automaton_func` toeach cell of the world
-    u32 automaton_iter;
-    /// way the automaton should iterate over the array
-    layer_gen_iteration_type_t iteration_flavour;
-} layer_calls_t;
-
 // -------------------------------------------------------------------------------------------------
 // ---- STATIC FUNCTIONS DECLARATIONS --------------------------------------------------------------
 // -------------------------------------------------------------------------------------------------
@@ -155,13 +61,13 @@ typedef struct layer_calls_t {
 // -------------------------------------------------------------------------------------------------
 // -- TELLURIC -------------------------------------------------------------------------------------
 
-static void telluric_vector_draw(hexa_cell_t *cell, hexagon_shape_t *target_shape);
+static void telluric_draw(hexa_cell_t *cell, hexagon_shape_t *target_shape);
 
-static void telluric_vector_seed(hexaworld_t *world);
+static void telluric_seed(hexaworld_t *world);
 
-static void telluric_vector_apply(void *target_cell, void *neighbors[DIRECTIONS_NB]);
+static void telluric_apply(void *target_cell, void *neighbors[DIRECTIONS_NB]);
 
-static void telluric_vector_flag_gen(void *target_cell, void *neighbors[DIRECTIONS_NB]);
+static void telluric_flag_gen(void *target_cell, void *neighbors[DIRECTIONS_NB]);
 
 // -------------------------------------------------------------------------------------------------
 // -- LANDMASS -------------------------------------------------------------------------------------
@@ -205,35 +111,6 @@ static void humidity_apply(void *target_cell, void *neighbors[DIRECTIONS_NB]);
 // -------------------------------------------------------------------------------------------------
 
 /**
- * @brief Sets an bit flag in a cell.
- * 
- * @param[inout] cell target cell
- * @param[in] flag flag to set to 1
- */
-static void hexa_cell_set_flag(hexa_cell_t *cell, u32 flag);
-
-/**
- * @brief Checks for the presence of a bit flag in  a cell.
- * 
- * @param[inout] cell target cell
- * @param[in] flag flag to check
- * @return 1 if the flag is set to 1, 0 otherwise
- */
-static u32 hexa_cell_has_flag(hexa_cell_t *cell, u32 flag);
-
-/**
- * @brief Computes the position and radius of a hexagonal cell in a pixel rectangle.
- * 
- * @param[in] boundaries rectangle defined by the topleft coordinates and its sides' length (in pixels)
- * @param[in] x tile x-position in the world array
- * @param[in] y tile y-position in the world array
- * @param[in] width width, in tiles, of the world array
- * @param[in] height height, in tiles, of the world array
- * @return hexagon_shape_t pixel shape of the hexagon representing the cell's coordinates
- */
-static hexagon_shape_t hexagon_position_in_rectangle(f32 boundaries[4u], u32 x, u32 y, u32 width, u32 height);
-
-/**
  * @brief Draw an empty hexagonal grid on the current raylib drawing context.
  * 
  * @param[in] world non-NULL pointer to some world data
@@ -250,7 +127,7 @@ static void hexaworld_draw_grid(hexaworld_t *world, f32 rectangle_target[4u]);
  */
 static const layer_calls_t hexaworld_layers_functions[HEXAW_LAYERS_NUMBER] = {
     /// telluric layer calls
-    { &telluric_vector_draw, &telluric_vector_seed, &telluric_vector_apply, &telluric_vector_flag_gen, ITERATION_NB_TELLURIC, LAYER_GEN_ITERATE_RELATIVE },
+    { &telluric_draw,        &telluric_seed,        &telluric_apply,        &telluric_flag_gen,        ITERATION_NB_TELLURIC, LAYER_GEN_ITERATE_RELATIVE },
     /// landmass layer calls
     { &landmass_draw,        &landmass_seed,        &landmass_apply,        &landmass_flag_gen,        ITERATION_NB_LANDMASS, LAYER_GEN_ITERATE_ABSOLUTE },
     /// altitude layer calls
@@ -377,7 +254,7 @@ void hexaworld_raze(hexaworld_t *world) {
 // -- TELLURIC -------------------------------------------------------------------------------------
 
 // -------------------------------------------------------------------------------------------------
-static void telluric_vector_draw(hexa_cell_t *cell, hexagon_shape_t *target_shape) {
+static void telluric_draw(hexa_cell_t *cell, hexagon_shape_t *target_shape) {
     vector_2d_cartesian_t translated_vec = { 0u };
     Color tile_color = WHITE;
 
@@ -400,7 +277,7 @@ static void telluric_vector_draw(hexa_cell_t *cell, hexagon_shape_t *target_shap
 }
 
 // -------------------------------------------------------------------------------------------------
-static void telluric_vector_seed(hexaworld_t *world) {
+static void telluric_seed(hexaworld_t *world) {
     for (size_t x = 0u ; x < world->width ; x++) {
         for (size_t y = 0u ; y < world->height ; y++) {
             if ((rand() % TELLURIC_VECTOR_SEEDING_INV_CHANCE) == 0) {
@@ -419,7 +296,7 @@ static void telluric_vector_seed(hexaworld_t *world) {
 }
 
 // -------------------------------------------------------------------------------------------------
-static void telluric_vector_apply(void *target_cell, void *neighbors[DIRECTIONS_NB]) {
+static void telluric_apply(void *target_cell, void *neighbors[DIRECTIONS_NB]) {
     hexa_cell_t *cell = (hexa_cell_t *) target_cell;
 
     u32 angle_counter[TELLURIC_VECTOR_DIRECTIONS_NB] = { 0u };
@@ -467,7 +344,7 @@ static void telluric_vector_apply(void *target_cell, void *neighbors[DIRECTIONS_
 }
 
 // -------------------------------------------------------------------------------------------------
-static void telluric_vector_flag_gen(void *target_cell, void *neighbors[DIRECTIONS_NB]) {
+static void telluric_flag_gen(void *target_cell, void *neighbors[DIRECTIONS_NB]) {
     hexa_cell_t *cell = (hexa_cell_t *) target_cell;
 
     hexa_cell_t *pushed_against_cell = NULL;
@@ -758,11 +635,15 @@ static void humidity_apply(void *target_cell, void *neighbors[DIRECTIONS_NB]) {
     f32 inv_angle_wind = 0.0f;
     size_t wind_source_cell = 0u;
 
+    if (cell->altitude <= 0) {
+        return;
+    }
+
     inv_angle_wind = (fmod(cell->winds_vector.angle + PI, PI_T_2)) / (PI_T_2);
     wind_source_cell = (size_t) (inv_angle_wind * (f32) DIRECTIONS_NB) % DIRECTIONS_NB;
     source_humidity = ((hexa_cell_t *) neighbors[wind_source_cell])->humidity;
 
-    if (float_equal(source_humidity, 0.0f, 1u) || (cell->altitude <= 0)) {
+    if (float_equal(source_humidity, 0.0f, 1u)) {
         return;
     }
     
@@ -773,30 +654,6 @@ static void humidity_apply(void *target_cell, void *neighbors[DIRECTIONS_NB]) {
 // -------------------------------------------------------------------------------------------------
 // -------------------------------------------------------------------------------------------------
 // -------------------------------------------------------------------------------------------------
-
-// -------------------------------------------------------------------------------------------------
-static void hexa_cell_set_flag(hexa_cell_t *cell, u32 flag) {
-    cell->flags = (cell->flags | (0x01 << flag));
-}
-
-// -------------------------------------------------------------------------------------------------
-static u32 hexa_cell_has_flag(hexa_cell_t *cell, u32 flag) {
-    return (cell->flags & (0x01 << flag));
-}
-
-// -------------------------------------------------------------------------------------------------
-static hexagon_shape_t hexagon_position_in_rectangle(f32 boundaries[4u], u32 x, u32 y, u32 width, u32 height) {
-    hexagon_shape_t shape = { 0u };
-
-    shape.radius = (boundaries[3u] / ((f32) height*THREE_HALVES));
-
-    shape.center = (vector_2d_cartesian_t) { 
-            boundaries[0u] + ((((f32) x+0.5f) + (0.5f * (f32) (y & 0x01))) * SQRT_OF_3 * (shape.radius)), 
-            boundaries[1u] + ((((f32) y+0.5f)) * THREE_HALVES * (shape.radius)) 
-    };
-
-    return shape;
-}
 
 // -------------------------------------------------------------------------------------------------
 static void hexaworld_draw_grid(hexaworld_t *world, f32 rectangle_target[4u]) {
