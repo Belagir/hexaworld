@@ -76,7 +76,7 @@ Here is my rough roadmap :
 - `[x]` altitude layer
 - `[x]` wind direction layer
 - `[x]` humidity layer
-- `[ ]` freshwater & rivers layer
+- `[x]` freshwater & rivers layer
 - `[ ]` vegetation layer
 - `[ ]` tweaks to layers generation to make it as good as I can
 - `[ ]` sprite "stickers" proceduraly added on certain tiles for looks
