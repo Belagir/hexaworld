@@ -77,6 +77,7 @@ Here is my rough roadmap :
 - `[x]` wind direction layer
 - `[x]` humidity layer
 - `[x]` freshwater & rivers layer
+- `[x]` (bonus !) temperature layer
 - `[ ]` vegetation layer
 - `[ ]` overall drawing cellular automaton function
 - `[ ]` tweaks to layers generation to make it as good as I can

@@ -84,17 +84,23 @@ hexaworld_t *hexaworld_create_empty(size_t width, size_t height) {
 // -------------------------------------------------------------------------------------------------
 void hexaworld_destroy(hexaworld_t **world) {
 
-    for (size_t i = 0u ; i < (*world)->width; i++) {
-        free((*world)->tiles[i]);
+    if (*world) {
+        if ((*world)->tiles) {
+            for (size_t i = 0u ; i < (*world)->width; i++) {
+                if ((*world)->tiles[i]) {
+                    free((*world)->tiles[i]);
+                }
+            }
+            free((*world)->tiles);
+        }
+
+        otomaton_destroy(&((*world)->automaton));
+
+        (*world)->width = 0u;
+        (*world)->height = 0u;
+
+        free((*world));
     }
-    free((*world)->tiles);
-
-    otomaton_destroy(&((*world)->automaton));
-
-    (*world)->width = 0u;
-    (*world)->height = 0u;
-
-    free((*world));
 
     *world = NULL;
 }

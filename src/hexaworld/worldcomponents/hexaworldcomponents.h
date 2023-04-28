@@ -74,27 +74,28 @@ typedef enum hexaworld_cell_flag_t {
  * @brief A single hexagonal cell.
  */
 typedef struct hexa_cell_t {
-    /// long unsigned integer containing the flags as bit offsets
-    u64 flags;
-    
-    /// local angle of the tectonic plate 
-    vector_2d_polar_t telluric_vector;
     /// mean altitude of the tile
     i32 altitude;
     /// expected temperature of the tile
     i32 temperature;
-    /// mean wind direction and force
-    vector_2d_polar_t winds_vector;
     /// mean humidty on the tile
     f32 humidity;
     /// mean precipitations on the tile
     f32 precipitations;
-    /// freshwater excess height and direction on the tile
+    /// freshwater excess height
     u32 freshwater_height;
-    cell_direction_t freshwater_direction;
-
     // vegetation coefficient
     f32 vegetation_cover;
+
+    /// freshwater direction on the tile
+    cell_direction_t freshwater_direction;
+    /// long unsigned integer containing the flags as bit offsets
+    u64 flags;
+
+    /// local angle of the tectonic plate 
+    vector_2d_polar_t telluric_vector;
+    /// mean wind direction and force
+    vector_2d_polar_t winds_vector;
 } hexa_cell_t;
 
 /**

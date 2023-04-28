@@ -184,11 +184,13 @@ cell_automaton_t *otomaton_create(void **array, size_t width, size_t height, siz
 
 // -------------------------------------------------------------------------------------------------
 void otomaton_destroy(cell_automaton_t **automaton) {
-    for (size_t i = 0u ; i < 2u ; i++) {
-        pendulum_buffer_free((*automaton)->pendulum_buffers + i);
-    }
+    if (*automaton) {
+        for (size_t i = 0u ; i < 2u ; i++) {
+            pendulum_buffer_free((*automaton)->pendulum_buffers + i);
+        }
 
-    free(*automaton);
+        free(*automaton);
+    }
     *automaton = NULL;
 }
 

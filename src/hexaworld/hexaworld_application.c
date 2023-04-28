@@ -91,7 +91,9 @@ void hexaworld_raylib_app_destroy(hexaworld_raylib_app_t **hexapp) {
     (*hexapp)->window_height = 0u;
     (*hexapp)->window_width = 0u;
 
-    free((*hexapp));
+    if (*hexapp) {
+        free((*hexapp));
+    }
     (*hexapp) = NULL;
 }
 
@@ -100,8 +102,10 @@ void hexaworld_raylib_app_init(hexaworld_raylib_app_t *hexapp, i32 random_seed) 
     InitWindow(hexapp->window_width, hexapp->window_height, HEXAPP_WINDOW_TITLE);
     srand(random_seed);
 
-    // generate ALL the LAYERS !
-    generate_world(hexapp->hexaworld);
+    if (hexapp->hexaworld) {
+        // generate ALL the LAYERS !
+        generate_world(hexapp->hexaworld);
+    }
 }
 
 // -------------------------------------------------------------------------------------------------
@@ -111,7 +115,7 @@ void hexaworld_raylib_app_run(hexaworld_raylib_app_t *hexapp, u32 target_fps) {
     u32 layer_counter = 0u;
     u32 layer_changed = 1u;
 
-    if (!IsWindowReady()) {
+    if (!IsWindowReady() || (!hexapp) || (!hexapp->hexaworld)) {
         return;
     }
 

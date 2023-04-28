@@ -32,7 +32,11 @@ static void vegetation_draw(hexa_cell_t *cell, hexagon_shape_t *target_shape) {
 // -------------------------------------------------------------------------------------------------
 static void vegetation_seed(hexaworld_t *world) {
     
-    // maximum cover (densest jungle) : altitude < 1500m ; humidity > 0.3 ; precipitations > 0 ; freshwater (meanders)
+    // influences :
+    // - ALTITUDE
+    // - TEMPERATURE
+    // - HUMIDITY
+    // - FRESHWATER
     for (size_t x = 0u ; x < world->width ; x++) {
         for (size_t y = 0u ; y < world->height ; y++) {
             
