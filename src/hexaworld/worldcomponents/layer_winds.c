@@ -46,11 +46,12 @@ static void winds_draw(hexa_cell_t *cell, hexagon_shape_t *target_shape) {
 static void winds_seed(hexaworld_t *world) {
     // reap the storm ?
     f32 starting_angle = ((f32) (rand() % WINDS_VECTOR_DIRECTIONS_NB)) * (WINDS_VECTOR_UNIT_ANGLE);
+    const i32 temperature_range = TEMPERATURE_MAX - TEMPERATURE_MIN;
     
     for (size_t x = 0u ; x < world->width ; x++) {
         for (size_t y = 0u ; y < world->height ; y++) {
             world->tiles[x][y].winds_vector = (vector_2d_polar_t) {
-                    .angle = starting_angle,
+                    .angle = starting_angle + (PI * ((f32) (world->tiles[x][y].temperature - TEMPERATURE_MIN) / (f32) temperature_range)),
                     .magnitude = 1.0f
             };
         }
