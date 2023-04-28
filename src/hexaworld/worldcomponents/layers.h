@@ -12,6 +12,7 @@ typedef enum hexaworld_layer_t {
     HEXAW_LAYER_WINDS,      ///< Layer representing the mean wind direction and force over the land.
     HEXAW_LAYER_HUMIDITY,   ///< Layer representing the humidity level of a tile.
     HEXAW_LAYER_FRESHWATER, ///< Layer representing the rivers and lakes of a tile.
+    HEXAW_LAYER_VEGETATION, ///< Layer representing the vegetal life of a tile.
 
     HEXAW_LAYERS_NUMBER,    ///< Total number of layers.
 } hexaworld_layer_t;

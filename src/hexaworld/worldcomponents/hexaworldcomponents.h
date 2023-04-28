@@ -86,6 +86,9 @@ typedef struct hexa_cell_t {
     /// freshwater excess height and direction on the tile
     u32 freshwater_height;
     cell_direction_t freshwater_direction;
+
+    // vegetation coefficient
+    f32 vegetation_cover;
 } hexa_cell_t;
 
 /**
@@ -185,5 +188,6 @@ extern const layer_calls_t altitude_layer_calls;
 extern const layer_calls_t winds_layer_calls;
 extern const layer_calls_t humidity_layer_calls;
 extern const layer_calls_t freshwater_layer_calls;
+extern const layer_calls_t vegetation_layer_calls;
 
 #endif

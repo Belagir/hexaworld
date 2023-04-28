@@ -72,6 +72,7 @@ hexaworld_t *hexaworld_create_empty(size_t width, size_t height) {
     world->hexaworld_layers_functions[HEXAW_LAYER_WINDS]      = winds_layer_calls;
     world->hexaworld_layers_functions[HEXAW_LAYER_HUMIDITY]   = humidity_layer_calls;
     world->hexaworld_layers_functions[HEXAW_LAYER_FRESHWATER] = freshwater_layer_calls;
+    world->hexaworld_layers_functions[HEXAW_LAYER_VEGETATION] = vegetation_layer_calls;
 
     world->width = width;
     world->height = height;
