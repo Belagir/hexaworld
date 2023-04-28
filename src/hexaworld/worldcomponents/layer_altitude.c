@@ -1,6 +1,9 @@
 
-#include <raylib.h>
 #include "hexaworldcomponents.h"
+
+#include <stdlib.h>
+
+#include <raylib.h>
 
 #define ITERATION_NB_ALTITUDE (10u)   ///< number of automaton iteration for the altitude layer
 
@@ -43,9 +46,9 @@ static void altitude_seed(hexaworld_t *world) {
             } else if (hexa_cell_has_flag(tmp_cell, HEXAW_FLAG_UNDERWATER_CANYONS)) {
                 tmp_cell->altitude = ALTITUDE_MIN;
             } else if (tmp_cell->altitude > 0) {
-                tmp_cell->altitude = ALTITUDE_MAX / 4;
+                tmp_cell->altitude = (ALTITUDE_MAX / 4) - (rand() % ALTITUDE_EROSION_RAND_VARIATION);
             } else {
-                tmp_cell->altitude = ALTITUDE_MIN / 4;
+                tmp_cell->altitude = (ALTITUDE_MIN / 4) + (rand() % ALTITUDE_EROSION_RAND_VARIATION);
             }
         }
     }
@@ -56,25 +59,23 @@ static void altitude_seed(hexaworld_t *world) {
 static void altitude_apply(void *target_cell, void *neighbors[DIRECTIONS_NB]) {
     hexa_cell_t *cell = (hexa_cell_t *) target_cell;
 
-    i32 maximum_altitude = (i32) 0x80000000;
-    i32 minimum_altitude = (i32) 0x7FFFFFFF;
-
     hexa_cell_t *tmp_cell = NULL;
+    i32 mean_altitude = 0;
 
     for (size_t i = 0u ; i < DIRECTIONS_NB ; i++) {
-        tmp_cell = ((hexa_cell_t *) neighbors[i]);
+        tmp_cell = (hexa_cell_t *) neighbors[i];
 
-        if (tmp_cell->altitude < minimum_altitude) {
-            minimum_altitude = tmp_cell->altitude;
-        }
-        if (tmp_cell->altitude > maximum_altitude) {
-            maximum_altitude = tmp_cell->altitude;
-        }
+        mean_altitude += tmp_cell->altitude;
+    }
+    mean_altitude += cell->altitude * ALTITUDE_EROSION_INERTIA_WEIGHT;
+
+    mean_altitude /= (DIRECTIONS_NB + ALTITUDE_EROSION_INERTIA_WEIGHT);
+
+    if (SGN_I32(cell->altitude-1) != SGN_I32(mean_altitude)) {
+        return;
     }
 
-    if ((cell->altitude > minimum_altitude) && (cell->altitude < maximum_altitude)) {
-        cell->altitude = (maximum_altitude + minimum_altitude) / 2;
-    }
+    cell->altitude = mean_altitude;
 }
 
 const layer_calls_t altitude_layer_calls = {

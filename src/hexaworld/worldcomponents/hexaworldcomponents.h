@@ -20,8 +20,10 @@
 
 #define LANDMASS_SEEDING_CHANCE (0x03)    ///< the greater, the bigger the chance a land tile is seeded.
 
-#define ALTITUDE_MAX (3000)  ///< maximum altitude, in meters
-#define ALTITUDE_MIN (-2000)  ///< minimum altitude, in meters
+#define ALTITUDE_MAX (4000)  ///< maximum altitude, in meters
+#define ALTITUDE_MIN (-3000)  ///< minimum altitude, in meters
+#define ALTITUDE_EROSION_INERTIA_WEIGHT (100) ///< inertia of the eroded cell
+#define ALTITUDE_EROSION_RAND_VARIATION (30)
 
 #define WINDS_VECTOR_DIRECTIONS_NB (32)
 #define WINDS_VECTOR_UNIT_ANGLE ((PI_T_2) / (WINDS_VECTOR_DIRECTIONS_NB))      ///< winds vector minimum angle 

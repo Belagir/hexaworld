@@ -15,6 +15,8 @@
 #define NULL 0x0 ///< sneaky redifinition of NULL so I won't have to import stdlib just for it
 #endif
 
+#define SGN_I32(_v) ((_v) & (0x80000000))
+
 typedef char  i8;   ///< convenience type redefinition
 typedef short i16;  ///< convenience type redefinition
 typedef int   i32;  ///< convenience type redefinition

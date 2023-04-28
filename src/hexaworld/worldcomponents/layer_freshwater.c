@@ -89,7 +89,7 @@ static void freshwater_apply(void *target_cell, void *neighbors[DIRECTIONS_NB]){
 
     size_t reversed_direction = 0u;
 
-    // this is a ocean tile !
+    // this is an ocean tile !
     if (cell->altitude <= 0) {
         return;
     }
