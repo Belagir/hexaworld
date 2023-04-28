@@ -31,7 +31,7 @@ static void temperature_draw(hexa_cell_t *cell, hexagon_shape_t *target_shape) {
         abs_temp = cell->temperature;
     } else {
         tile_color = cold_color;
-        abs_max_temp = (u32) (-TEMPERATURE_MIN);
+        abs_max_temp = (u32) (-(TEMPERATURE_MIN + TEMPERATURE_ALTITUDE_MULTIPLIER*ALTITUDE_MAX));
         abs_temp = (u32) (-cell->temperature);
     }
 

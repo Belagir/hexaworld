@@ -28,7 +28,6 @@
 #define TEMPERATURE_MAX (30)
 #define TEMPERATURE_MIN (-20)
 #define TEMPERATURE_ALTITUDE_MULTIPLIER (-0.00625f)
-#define TEMPERATURE_ALTITUDE_CONSTANT   (TEMPERATURE_MIN)
 
 #define WINDS_VECTOR_DIRECTIONS_NB (32)     ///< number of possible direction for a wind vector 
 #define WINDS_VECTOR_UNIT_ANGLE ((PI_T_2) / (WINDS_VECTOR_DIRECTIONS_NB))      ///< winds vector minimum angle 
