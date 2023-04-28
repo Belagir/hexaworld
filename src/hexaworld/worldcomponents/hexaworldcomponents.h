@@ -25,12 +25,14 @@
 #define ALTITUDE_EROSION_INERTIA_WEIGHT (100) ///< inertia of the eroded cell
 #define ALTITUDE_EROSION_RAND_VARIATION (30)
 
-#define WINDS_VECTOR_DIRECTIONS_NB (32)
+#define WINDS_VECTOR_DIRECTIONS_NB (32)     ///< number of possible direction for a wind vector 
 #define WINDS_VECTOR_UNIT_ANGLE ((PI_T_2) / (WINDS_VECTOR_DIRECTIONS_NB))      ///< winds vector minimum angle 
 
-#define FRESHWATER_PRECIPITATIONS_THRESHOLD (0.5f)
-#define FRESHWATER_SOURCE_START_DEPTH (1u)
+#define FRESHWATER_PRECIPITATIONS_THRESHOLD (0.5f)      ///< threshold from which a precipitation on a tiles creates a source of water.
+#define FRESHWATER_SOURCE_START_DEPTH (1u)      ///< start value for freshwater
 #define FRESHWATER_MOUNTAIN_NO_SOURCE_CHANCE (0x10)    ///< chance that a source is generated on a mountain
+#define FRESHWATER_WATERFALL_HEIGHT_THRESHOLD (2000)    ///< height in meters between two tiles needed for a waterfall to form
+#define FRESHWATER_LAKE_DEPTH_THRESHOLD (5u)        ///< depth from which a body of water is considered a lake
 
 // -------------------------------------------------------------------------------------------------
 // ---- TYPEDEFS -----------------------------------------------------------------------------------
@@ -55,6 +57,11 @@ typedef enum hexaworld_cell_flag_t {
     HEXAW_FLAG_ISLES,               ///< Some isles have been created by a tectonic force
     HEXAW_FLAG_CANYONS,             ///< Some old tectonic event or river dug a long path here
     HEXAW_FLAG_UNDERWATER_CANYONS,  ///< Tectonic forces are at work here and create some heavy drop on the ocean floor
+
+    HEXAW_FLAG_MEANDERS,
+    HEXAW_FLAG_WATERFALLS,
+    HEXAW_FLAG_RIVER_MOUTH,
+    HEXAW_FLAG_LAKE,
 
     HEXAW_FLAGS_NB,     ///< Total number of flags
 } hexaworld_cell_flag_t;

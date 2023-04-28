@@ -16,6 +16,12 @@ static void freshwater_apply(void *target_cell, void *neighbors[DIRECTIONS_NB]);
 
 // -------------------------------------------------------------------------------------------------
 
+/**
+ * @brief Returns the total hieght of a tile, adding the altitude to the water height.
+ * 
+ * @param cell 
+ * @return i32 
+ */
 static i32 cell_total_height(hexa_cell_t *cell);
 
 // -------------------------------------------------------------------------------------------------
@@ -26,7 +32,7 @@ static void freshwater_draw(hexa_cell_t *cell, hexagon_shape_t *target_shape) {
 
     vector_2d_cartesian_t translated_vec = { 0u };
 
-    char buffer_water_height[24u] = { 0u };
+    Color color_line = (Color) { .r = 0x00, .g = 0xD9, .b = 0xF9, .a = 0xFF };
 
     // landmass 
     if (cell->altitude > 0) {
@@ -39,22 +45,43 @@ static void freshwater_draw(hexa_cell_t *cell, hexagon_shape_t *target_shape) {
         );
     }
 
-    if (cell->freshwater_height > 0u) {
-        translated_vec = vector2d_polar_to_cartesian((vector_2d_polar_t) { 
-                .angle = ((f32) cell->freshwater_direction / (f32) DIRECTIONS_NB) * PI_T_2,
-                .magnitude = 1.0f
-        } );
-        DrawLineEx(
-                *((Vector2 *) &target_shape->center),
-                (Vector2) { 
-                        .x = target_shape->center.v + translated_vec.v * target_shape->radius, 
-                        .y = target_shape->center.w + translated_vec.w * target_shape->radius },
-                5.0f,
-                (Color) { .r = 0x00, .g = 0xD9, .b = 0xF9, .a = 0xFF }
-        );
-
-        DrawText(TextFormat("%dm", cell->freshwater_height), target_shape->center.v, target_shape->center.w, (i32) target_shape->radius/2, BLACK);
+    if (cell->freshwater_height == 0u) {
+        return;
     }
+
+    translated_vec = vector2d_polar_to_cartesian((vector_2d_polar_t) { 
+            .angle = ((f32) cell->freshwater_direction / (f32) DIRECTIONS_NB) * PI_T_2,
+            .magnitude = 1.0f
+    } );
+    
+
+    if (hexa_cell_has_flag(cell, HEXAW_FLAG_LAKE)) {
+        DrawPoly(
+            *((Vector2 *) &target_shape->center),
+            HEXAGON_SIDES_NB,
+            target_shape->radius / 2,
+            0.0f,
+            (Color) { .r = 0x00, .g = 0xD9, .b = 0xF9, .a = 0xFF }
+    );
+    }
+    if (hexa_cell_has_flag(cell, HEXAW_FLAG_MEANDERS)) {
+        color_line = (Color) { .r = 0x00, .g = 0xE9, .b = 0xD0, .a = 0xFF };
+    }
+    if (hexa_cell_has_flag(cell, HEXAW_FLAG_RIVER_MOUTH)) {
+        color_line = (Color) { .r = 0xFF, .g = 0xFF, .b = 0xFF, .a = 0xFF };
+    }
+    if (hexa_cell_has_flag(cell, HEXAW_FLAG_WATERFALLS)) {
+        color_line = (Color) { .r = 0xD0, .g = 0xD0, .b = 0xD0, .a = 0xFF };
+    }
+
+    DrawLineEx(
+            *((Vector2 *) &target_shape->center),
+            (Vector2) { 
+                    .x = target_shape->center.v + translated_vec.v * target_shape->radius, 
+                    .y = target_shape->center.w + translated_vec.w * target_shape->radius },
+            5.0f,
+            color_line
+    );
 }
 
 // -------------------------------------------------------------------------------------------------
@@ -78,7 +105,7 @@ static void freshwater_seed(hexaworld_t *world){
 }
 
 // -------------------------------------------------------------------------------------------------
-static void freshwater_apply(void *target_cell, void *neighbors[DIRECTIONS_NB]){
+static void freshwater_apply(void *target_cell, void *neighbors[DIRECTIONS_NB]) {
     hexa_cell_t *cell = (hexa_cell_t *) target_cell;
 
     hexa_cell_t *tmp_cell = NULL;
@@ -134,16 +161,56 @@ static void freshwater_apply(void *target_cell, void *neighbors[DIRECTIONS_NB]){
 }
 
 // -------------------------------------------------------------------------------------------------
+static void freshwater_flag_gen(void *target_cell, void *neighbors[DIRECTIONS_NB]) {
+    hexa_cell_t *cell = (hexa_cell_t *) target_cell;
+
+    hexa_cell_t *tmp_cell = NULL;
+    hexa_cell_t *flow_direction_tile = NULL;
+    size_t nb_freshwatered_tiles = 0u;
+
+    if ((cell->freshwater_height == 0u) && (cell->altitude > 0)) {
+        return;
+    }
+
+    for (size_t i = 0u ; i < DIRECTIONS_NB ; i++) {
+        tmp_cell = (hexa_cell_t *) neighbors[i];
+        nb_freshwatered_tiles += (tmp_cell->freshwater_height > 0u);
+    }
+    flow_direction_tile = (hexa_cell_t *) neighbors[cell->freshwater_direction];
+
+    // happens when a freshwatered tile has a majority of freshwatered tiles around it.
+    if (nb_freshwatered_tiles > (DIRECTIONS_NB / 2)) {
+        hexa_cell_set_flag(cell, HEXAW_FLAG_MEANDERS);
+    }
+
+    // happens when a freshwatered tile is directed toward a significant drop (>100m)
+    if (((flow_direction_tile->altitude * (flow_direction_tile->altitude > 0)) + FRESHWATER_WATERFALL_HEIGHT_THRESHOLD) < cell->altitude) {
+        hexa_cell_set_flag(cell, HEXAW_FLAG_WATERFALLS);
+    }
+
+    // happens when a freshwatered tile is directed toward an ocean tile
+    if (flow_direction_tile->altitude <= 0) {
+        hexa_cell_set_flag(cell, HEXAW_FLAG_RIVER_MOUTH);
+    }
+
+    // happens when a freshwater tile has a significant depth (> 5m)
+    if (cell->freshwater_height >= FRESHWATER_LAKE_DEPTH_THRESHOLD) {
+        hexa_cell_set_flag(cell, HEXAW_FLAG_LAKE);
+    }
+}
+
+// -------------------------------------------------------------------------------------------------
 static i32 cell_total_height(hexa_cell_t *cell) {
     return (cell->altitude + (i32) cell->freshwater_height);
 }
+
 
 
 const layer_calls_t freshwater_layer_calls = {
         .draw_func          = &freshwater_draw,
         .seed_func          = &freshwater_seed,
         .automaton_func     = &freshwater_apply,
-        .flag_gen_func      = NULL, 
+        .flag_gen_func      = &freshwater_flag_gen, 
         .automaton_iter     = ITERATION_NB_FRESHWATER,
         .iteration_flavour  = LAYER_GEN_ITERATE_ABSOLUTE
 };
