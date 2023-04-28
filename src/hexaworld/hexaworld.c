@@ -66,13 +66,14 @@ hexaworld_t *hexaworld_create_empty(size_t width, size_t height) {
         return NULL;
     }
 
-    world->hexaworld_layers_functions[HEXAW_LAYER_TELLURIC]   = telluric_layer_calls;
-    world->hexaworld_layers_functions[HEXAW_LAYER_LANDMASS]   = landmass_layer_calls;
-    world->hexaworld_layers_functions[HEXAW_LAYER_ALTITUDE]   = altitude_layer_calls;
-    world->hexaworld_layers_functions[HEXAW_LAYER_WINDS]      = winds_layer_calls;
-    world->hexaworld_layers_functions[HEXAW_LAYER_HUMIDITY]   = humidity_layer_calls;
-    world->hexaworld_layers_functions[HEXAW_LAYER_FRESHWATER] = freshwater_layer_calls;
-    world->hexaworld_layers_functions[HEXAW_LAYER_VEGETATION] = vegetation_layer_calls;
+    world->hexaworld_layers_functions[HEXAW_LAYER_TELLURIC]    = telluric_layer_calls;
+    world->hexaworld_layers_functions[HEXAW_LAYER_LANDMASS]    = landmass_layer_calls;
+    world->hexaworld_layers_functions[HEXAW_LAYER_ALTITUDE]    = altitude_layer_calls;
+    world->hexaworld_layers_functions[HEXAW_LAYER_TEMPERATURE] = temperature_layer_calls;
+    world->hexaworld_layers_functions[HEXAW_LAYER_WINDS]       = winds_layer_calls;
+    world->hexaworld_layers_functions[HEXAW_LAYER_HUMIDITY]    = humidity_layer_calls;
+    world->hexaworld_layers_functions[HEXAW_LAYER_FRESHWATER]  = freshwater_layer_calls;
+    world->hexaworld_layers_functions[HEXAW_LAYER_VEGETATION]  = vegetation_layer_calls;
 
     world->width = width;
     world->height = height;

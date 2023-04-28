@@ -25,6 +25,11 @@
 #define ALTITUDE_EROSION_INERTIA_WEIGHT (100) ///< inertia of the eroded cell
 #define ALTITUDE_EROSION_RAND_VARIATION (30)
 
+#define TEMPERATURE_MAX (30)
+#define TEMPERATURE_MIN (-20)
+#define TEMPERATURE_ALTITUDE_MULTIPLIER (-0.00625f)
+#define TEMPERATURE_ALTITUDE_CONSTANT   (TEMPERATURE_MIN)
+
 #define WINDS_VECTOR_DIRECTIONS_NB (32)     ///< number of possible direction for a wind vector 
 #define WINDS_VECTOR_UNIT_ANGLE ((PI_T_2) / (WINDS_VECTOR_DIRECTIONS_NB))      ///< winds vector minimum angle 
 
@@ -77,6 +82,8 @@ typedef struct hexa_cell_t {
     vector_2d_polar_t telluric_vector;
     /// mean altitude of the tile
     i32 altitude;
+    /// expected temperature of the tile
+    i32 temperature;
     /// mean wind direction and force
     vector_2d_polar_t winds_vector;
     /// mean humidty on the tile
@@ -189,5 +196,6 @@ extern const layer_calls_t winds_layer_calls;
 extern const layer_calls_t humidity_layer_calls;
 extern const layer_calls_t freshwater_layer_calls;
 extern const layer_calls_t vegetation_layer_calls;
+extern const layer_calls_t temperature_layer_calls;
 
 #endif
