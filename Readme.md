@@ -79,7 +79,7 @@ Here is my rough roadmap :
 - `[x]` freshwater & rivers layer
 - `[x]` (bonus !) temperature layer
 - `[x]` vegetation layer
-- `[ ]` overall drawing cellular automaton function
+- `[x]` overall drawing cellular automaton function
+- `[ ]` basic UI to give info on the tiles
 - `[ ]` tweaks to layers generation to make it as good as I can
 - `[ ]` sprite "stickers" proceduraly added on certain tiles for looks
-- `[ ]` basic UI to give info on the tiles

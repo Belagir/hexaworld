@@ -48,15 +48,12 @@ static void vegetation_seed(hexaworld_t *world) {
 
     for (size_t x = 0u ; x < world->width ; x++) {
         for (size_t y = 0u ; y < world->height ; y++) {
-            humidity_rating = world->tiles[x][y].humidity;
+            humidity_rating = (world->tiles[x][y].humidity * (world->tiles[x][y].freshwater_height == 0u)) + (world->tiles[x][y].freshwater_height > 0u);
             temperature_rating = 
                     NORMAL_DISTRIBUTION(VEGETATION_TEMPERATURE_MEAN, VEGETATION_TEMPERATURE_VARI, world->tiles[x][y].temperature / 2)
                     / NORMAL_DISTRIBUTION(VEGETATION_TEMPERATURE_MEAN, VEGETATION_TEMPERATURE_VARI, VEGETATION_TEMPERATURE_MEAN);
 
             world->tiles[x][y].vegetation_cover = humidity_rating * temperature_rating;
-            if (world->tiles[x][y].vegetation_cover < VEGETATION_CUTOUT_THRESHOLD) {
-                world->tiles[x][y].vegetation_cover = 0.0f;
-            }
         }
     }
 }
@@ -66,23 +63,23 @@ static void vegetation_apply(void *target_cell, void *neighbors[DIRECTIONS_NB]) 
     hexa_cell_t *cell = (hexa_cell_t *) target_cell;
 
     hexa_cell_t *tmp_cell = NULL;
-    size_t neigh_index = 0u;
-    ratio_t vegetation_max = 0.0f;
+    f32 vegetation_mean = 0.0f;
+    size_t nb_cells_with_vegetation = 0u;
 
-    if ((cell->freshwater_height == 0u) || (cell->vegetation_cover > VEGETATION_CUTOUT_THRESHOLD)) {
+    if (cell->vegetation_cover > VEGETATION_CUTOUT_THRESHOLD) {
         return;
     }
     
     for (size_t i = 0 ; i < DIRECTIONS_NB; i++) {
         tmp_cell = (hexa_cell_t *) neighbors[i];
 
-        if (tmp_cell->vegetation_cover > vegetation_max) {
-            vegetation_max = tmp_cell->vegetation_cover;
-        }
+        vegetation_mean += tmp_cell->vegetation_cover;
+        nb_cells_with_vegetation += (tmp_cell->vegetation_cover > VEGETATION_CUTOUT_THRESHOLD);
     }
+    vegetation_mean /= nb_cells_with_vegetation;
 
-    cell->vegetation_cover = vegetation_max
-            * (NORMAL_DISTRIBUTION(VEGETATION_TEMPERATURE_MEAN, VEGETATION_TEMPERATURE_VARI, cell->temperature)
+    cell->vegetation_cover = vegetation_mean 
+                    * (NORMAL_DISTRIBUTION(VEGETATION_TEMPERATURE_MEAN, VEGETATION_TEMPERATURE_VARI, cell->temperature)
                     / NORMAL_DISTRIBUTION(VEGETATION_TEMPERATURE_MEAN, VEGETATION_TEMPERATURE_VARI, VEGETATION_TEMPERATURE_MEAN));
 }
 

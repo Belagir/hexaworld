@@ -152,18 +152,34 @@ static void draw_canyons(hexa_cell_t *cell, hexagon_shape_t *target_shape) {
 
 // -------------------------------------------------------------------------------------------------
 static void draw_freshwater(hexa_cell_t *cell, hexagon_shape_t *target_shape) {
-    Color color_line = AS_RAYLIB_COLOR(COLOR_AZURE);
+    Color color_line = AS_RAYLIB_COLOR(COLOR_CERULEAN);
     vector_2d_cartesian_t water_end = { 0u };
     vector_2d_cartesian_t water_start = { 0u };
 
     if (cell->freshwater_height == 0u) {
         return;
     }
+
+    if (cell->temperature <= 0) {
+        color_line = AS_RAYLIB_COLOR(COLOR_AZURE);
+    }
     
     water_end = vector2d_polar_to_cartesian((vector_2d_polar_t) { 
             .angle = ((f32) cell->freshwater_direction / (f32) DIRECTIONS_NB) * PI_T_2,
             .magnitude = 1.0f
     });
+
+    if (hexa_cell_has_flag(cell, HEXAW_FLAG_LAKE)) {
+        DrawPoly(
+                (Vector2) {
+                        .x = target_shape->center.v, 
+                        .y = target_shape->center.w },
+                HEXAGON_SIDES_NB,
+                2*(target_shape->radius)/3,
+                0.0f,
+                color_line
+        );
+    }
 
     for (size_t i = 0u ; i < DIRECTIONS_NB ; i++) {
         if (cell->freshwater_sources_directions & (0x1 << i)) {
@@ -183,12 +199,11 @@ static void draw_freshwater(hexa_cell_t *cell, hexagon_shape_t *target_shape) {
                             .x = target_shape->center.v, 
                             .y = target_shape->center.w },
                     
-                    5.0f, 
+                    target_shape->radius / 5.0f, 
                     color_line
             );
         }
-    }    
-
+    }
 }
 
 const layer_calls_t whole_world_layer_calls = {
