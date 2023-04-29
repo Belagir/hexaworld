@@ -15,6 +15,9 @@
 #define NULL 0x0 ///< sneaky redifinition of NULL so I won't have to import stdlib just for it
 #endif
 
+#define SQRT_OF_3 (1.73205f)      ///< approximation of the square root of 3
+#define THREE_HALVES (1.5f)       ///< not an *approximation* of 3 / 2
+
 /// returns the sign bitfield of a 32-bit signed integer
 #define SGN_I32(_v) ((_v) & (0x80000000))
 

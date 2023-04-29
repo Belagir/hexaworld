@@ -34,7 +34,7 @@ i32 main(u32 argc, char const *argv[]) {
     }
 
     // creating application
-    application = hexaworld_raylib_app_create(1000u, 800u, width, height);
+    application = hexaworld_raylib_app_create(1000, 1000u, width, height);
     if (!application) {
         return -1;
     }

@@ -20,6 +20,8 @@
 // -------------------------------------------------------------------------------------------------
 
 #define HEXAPP_WINDOW_TITLE "hexaworld" ///< Title of the raylib window.
+#define WORLD_TEXTURE_BUFFER_WIDTH  2048u
+#define WORLD_TEXTURE_BUFFER_HEIGHT 2048u
 
 // -------------------------------------------------------------------------------------------------
 // ---- TYPE DEFINITIONS ---------------------------------------------------------------------------
@@ -47,10 +49,10 @@ typedef struct hexaworld_raylib_app_t {
  * 
  * @param[in] world world to draw.
  * @param[out] target target render texture
- * @param[in] window_rectangle target rectangle as the aggregation of the topleft coordinate and the two lengths of the rectangle
+ * @param[in] target_rectangle target rectangle as the aggregation of the topleft coordinate and the two lengths of the rectangle
  * @param[in] layer layer to draw to the texture
  */
-static void draw_hexmap_to_texture(hexaworld_t *world, RenderTexture2D *target, f32 window_rectangle[4u], hexaworld_layer_t layer);
+static void draw_hexmap_to_texture(hexaworld_t *world, RenderTexture2D *target, f32 target_rectangle[4u], hexaworld_layer_t layer);
 
 /**
  * @brief (Re-)generates all the layers of a world.
@@ -110,7 +112,7 @@ void hexaworld_raylib_app_init(hexaworld_raylib_app_t *hexapp, i32 random_seed) 
 
 // -------------------------------------------------------------------------------------------------
 void hexaworld_raylib_app_run(hexaworld_raylib_app_t *hexapp, u32 target_fps) {
-    f32 window_rectangle[4u] = { 0u };
+    f32 world_rectangle[4u] = { 0u };
     RenderTexture2D world_buffer = { 0u };
     u32 layer_counter = 0u;
     u32 layer_changed = 1u;
@@ -121,12 +123,10 @@ void hexaworld_raylib_app_run(hexaworld_raylib_app_t *hexapp, u32 target_fps) {
 
     SetTargetFPS(target_fps);
 
-    window_rectangle[0u] = 0.0f;
-    window_rectangle[1u] = 0.0f;
-    window_rectangle[2u] = (f32) GetScreenWidth();
-    window_rectangle[3u] = (f32) GetScreenHeight();
+    world_rectangle[2u] = (f32) WORLD_TEXTURE_BUFFER_WIDTH;
+    world_rectangle[3u] = (f32) WORLD_TEXTURE_BUFFER_HEIGHT;
 
-    world_buffer = LoadRenderTexture(window_rectangle[2u], window_rectangle[3u]);
+    world_buffer = LoadRenderTexture(world_rectangle[2u], world_rectangle[3u]);
 
     layer_counter = HEXAW_LAYER_WHOLE_WORLD;
     while (!WindowShouldClose()) {
@@ -147,14 +147,14 @@ void hexaworld_raylib_app_run(hexaworld_raylib_app_t *hexapp, u32 target_fps) {
         }
 
         if (layer_changed) {
-            draw_hexmap_to_texture(hexapp->hexaworld, &world_buffer, window_rectangle, layer_counter);
+            draw_hexmap_to_texture(hexapp->hexaworld, &world_buffer, world_rectangle, layer_counter);
             layer_changed = 0u;
         }
 
         BeginDrawing();
         DrawTexturePro(
                 world_buffer.texture, 
-                (Rectangle) { 0.0f, 0.0f, world_buffer.texture.width, -world_buffer.texture.height }, 
+                (Rectangle) { world_rectangle[0u], world_rectangle[1u], world_rectangle[2u], world_rectangle[3u] }, 
                 (Rectangle) { 0.0f, 0.0f, GetScreenWidth(), GetScreenHeight() },
                 (Vector2)   { 0.0f, 0.0f },
                 0.0f,
@@ -171,13 +171,16 @@ void hexaworld_raylib_app_run(hexaworld_raylib_app_t *hexapp, u32 target_fps) {
 // -------------------------------------------------------------------------------------------------
 
 // -------------------------------------------------------------------------------------------------
-static void draw_hexmap_to_texture(hexaworld_t *world, RenderTexture2D *target, f32 window_rectangle[4u], hexaworld_layer_t layer) {
+static void draw_hexmap_to_texture(hexaworld_t *world, RenderTexture2D *target, f32 target_rectangle[4u], hexaworld_layer_t layer) {
     BeginTextureMode(*target);
     ClearBackground(WHITE);
-    hexaworld_draw(world, layer, window_rectangle);
+    
+    hexaworld_draw(world, layer, target_rectangle);
+
     EndTextureMode();
+
     GenTextureMipmaps(&(target->texture));
-    SetTextureFilter(target->texture, TEXTURE_FILTER_TRILINEAR);
+    SetTextureFilter(target->texture, TEXTURE_FILTER_BILINEAR);
 }
 
 // -------------------------------------------------------------------------------------------------

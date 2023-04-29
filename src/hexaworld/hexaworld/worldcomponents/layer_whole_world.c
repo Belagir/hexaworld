@@ -105,6 +105,9 @@ static void draw_mountains_canyon(hexa_cell_t *cell, hexagon_shape_t *target_sha
 
     if (hexa_cell_has_flag(cell, HEXAW_FLAG_MOUNTAIN)) {
         draw_hexagon(target_shape, FROM_RAYLIB_COLOR(feature_color), 0.66f, DRAW_HEXAGON_FILL);
+        if (cell->temperature <= 0) {
+            draw_hexagon(target_shape, COLOR_ICE_BLUE, 0.3f , DRAW_HEXAGON_FILL);
+        }
     }
     feature_color.a = 0xD0;
     draw_hexagon(target_shape, FROM_RAYLIB_COLOR(feature_color), 0.66f, DRAW_HEXAGON_LINES);
