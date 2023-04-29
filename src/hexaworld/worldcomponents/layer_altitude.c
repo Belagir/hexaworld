@@ -65,13 +65,13 @@ static void altitude_apply(void *target_cell, void *neighbors[DIRECTIONS_NB]) {
     for (size_t i = 0u ; i < DIRECTIONS_NB ; i++) {
         tmp_cell = (hexa_cell_t *) neighbors[i];
 
-        mean_altitude += tmp_cell->altitude;
+        mean_altitude += (i32) tmp_cell->altitude;
     }
-    mean_altitude += cell->altitude * ALTITUDE_EROSION_INERTIA_WEIGHT;
+    mean_altitude += (i32) cell->altitude * ALTITUDE_EROSION_INERTIA_WEIGHT;
 
     mean_altitude /= (DIRECTIONS_NB + ALTITUDE_EROSION_INERTIA_WEIGHT);
 
-    if (SGN_I16(cell->altitude-1) != SGN_I32(mean_altitude)) {
+    if (SGN_I32((cell->altitude - 1)) != SGN_I32(mean_altitude)) {
         return;
     }
 

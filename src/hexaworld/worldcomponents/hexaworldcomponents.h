@@ -26,7 +26,7 @@
 #define ALTITUDE_EROSION_RAND_VARIATION (30)
 
 #define TEMPERATURE_MAX (40)
-#define TEMPERATURE_MIN (-30)
+#define TEMPERATURE_MIN (-20)
 #define TEMPERATURE_ALTITUDE_MULTIPLIER (-0.00625f)
 
 #define WINDS_VECTOR_DIRECTIONS_NB (32)     ///< number of possible direction for a wind vector 
@@ -38,8 +38,8 @@
 #define FRESHWATER_WATERFALL_HEIGHT_THRESHOLD (2000)    ///< height in meters between two tiles needed for a waterfall to form
 #define FRESHWATER_LAKE_DEPTH_THRESHOLD (5u)        ///< depth from which a body of water is considered a lake
 
-#define VEGETATION_TEMPERATURE_MIN (-5)
-#define VEGETATION_TEMPERATURE_MAX (25)
+#define VEGETATION_TEMPERATURE_MEAN (20)
+#define VEGETATION_TEMPERATURE_VARI (6)
 
 // -------------------------------------------------------------------------------------------------
 // ---- TYPEDEFS -----------------------------------------------------------------------------------

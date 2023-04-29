@@ -16,9 +16,8 @@
 #endif
 
 #define SGN_I32(_v) ((_v) & (0x80000000))
-#define SGN_I16(_v) ((_v) & (0x8000))
 
-#define SGN_I(_type, _v) ((_v) & (0x1 << ((sizeof(_type)*8u) - 1u)))
+#define NORMAL_DISTRIBUTION(_mean, _variance, _x) ((1.0f / (_variance * sqrt(2.0f * (PI)))) * exp(-0.5f * pow(((_x) - (_mean)) / (_variance), 2)))
 
 typedef char  i8;   ///< convenience type redefinition
 typedef short i16;  ///< convenience type redefinition
