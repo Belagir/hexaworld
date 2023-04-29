@@ -4,6 +4,7 @@
 #include <stdlib.h>
 
 #include <raylib.h>
+#include <colorpalette.h>
 
 #define ITERATION_NB_ALTITUDE (10u)   ///< number of automaton iteration for the altitude layer
 
@@ -21,14 +22,16 @@ static void altitude_draw(hexa_cell_t *cell, hexagon_shape_t *target_shape) {
     Color base_color = { 0u };
     f32 color_intensity = 0.0f;
 
-    base_color = (Color) { 0x21, 0x36, 0x8F, 0xFF, };
+    // base color is for an ocean tile
+    base_color = AS_RAYLIB_COLOR(COLOR_DUSK_BLUE);
     color_intensity = (f32) cell->altitude / (f32) ALTITUDE_MIN;
 
+    // switch color if the tile is above ground
     if (cell->altitude > 0) {
-        base_color = (Color) { 0x90, 0x5F, 0x07, 0xFF, };
+        base_color = AS_RAYLIB_COLOR(COLOR_LEATHER);
         color_intensity = (f32) cell->altitude / (f32) ALTITUDE_MAX;
     }
-    base_color.a = 64u + (u8) ((color_intensity) * (f32) (255u-64u));
+    base_color.a = 0x40 + (u8) ((color_intensity) * (f32) (0xFF-0x40));
 
     DrawPoly(*((Vector2*) &target_shape->center), HEXAGON_SIDES_NB, target_shape->radius, 0.0f, base_color);
 }

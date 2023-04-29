@@ -40,6 +40,7 @@
 
 #define VEGETATION_TEMPERATURE_MEAN (20)
 #define VEGETATION_TEMPERATURE_VARI (6)
+#define VEGETATION_CUTOUT_THRESHOLD (0.01f)
 
 // -------------------------------------------------------------------------------------------------
 // ---- TYPEDEFS -----------------------------------------------------------------------------------

@@ -6,7 +6,15 @@
 
 #include <raylib.h>
 
+#include <colorpalette.h>
+
 #define ITERATION_NB_WINDS (1u)       ///< number of automaton iteration for the winds layer
+
+typedef enum two_cells_directions_t {
+    LEFT_CELL,
+    RIGHT_CELL,
+    TWO_CELLS
+} two_cells_directions_t;
 
 static void winds_draw(hexa_cell_t *cell, hexagon_shape_t *target_shape);
 
@@ -14,23 +22,24 @@ static void winds_seed(hexaworld_t *world);
 
 static void winds_apply(void *target_cell, void *neighbors[DIRECTIONS_NB]);
 
-
 // -------------------------------------------------------------------------------------------------
 // -- WINDS -------------------------------------------------------------------------------------------
 
 // -------------------------------------------------------------------------------------------------
 static void winds_draw(hexa_cell_t *cell, hexagon_shape_t *target_shape) {
     vector_2d_cartesian_t translated_vec = { 0u };
+    Color terrain_color = AS_RAYLIB_COLOR(COLOR_GRAY);
+    terrain_color.a = (u8) (((f32) (cell->altitude * (cell->altitude > 0)) / (f32) ALTITUDE_MAX) * 0xFF );
 
-    DrawPoly(*(
-            (Vector2*) &target_shape->center), 
+    DrawPoly(
+            *((Vector2*) &target_shape->center), 
             HEXAGON_SIDES_NB, 
             target_shape->radius, 
             0.0f, 
-            (Color) { 200u, 200u, 200u, (u8) (((f32) (cell->altitude * (cell->altitude > 0)) / (f32) ALTITUDE_MAX) * 255u )}
+            terrain_color
     );
 
-    DrawCircle(target_shape->center.v, target_shape->center.w, (target_shape->radius/2)*(1.0f-cell->winds_vector.magnitude), (Color) { 0x6e, 0xBA, 0xFF, 0xFF });
+    DrawCircle(target_shape->center.v, target_shape->center.w, (target_shape->radius/2)*(1.0f-cell->winds_vector.magnitude), AS_RAYLIB_COLOR(COLOR_AZURE));
 
     translated_vec = vector2d_polar_to_cartesian(cell->winds_vector);
     DrawLineV(
@@ -38,7 +47,7 @@ static void winds_draw(hexa_cell_t *cell, hexagon_shape_t *target_shape) {
             (Vector2) { 
                     .x = target_shape->center.v + translated_vec.v * target_shape->radius, 
                     .y = target_shape->center.w + translated_vec.w * target_shape->radius },
-            DARKBLUE
+            AS_RAYLIB_COLOR(COLOR_DUSK_BLUE)
     );
 }
 
@@ -70,8 +79,8 @@ static void winds_apply(void *target_cell, void *neighbors[DIRECTIONS_NB]) {
     f32 normalized_altitude_diff = 0.0f;
 
     // since the angle is not always divisible by 6, the wind goes to two cells
-    size_t possible_directions[2u] = { 0u };
-    i32 cell_altitudes[2u] = { 0 };
+    size_t possible_directions[TWO_CELLS] = { 0u };
+    i32 cell_altitudes[TWO_CELLS] = { 0 };
     // cell index later chosen as the least resistance
     size_t definitive_direction = 0u;
 
@@ -86,20 +95,20 @@ static void winds_apply(void *target_cell, void *neighbors[DIRECTIONS_NB]) {
     cell->winds_vector.angle = mean_angle;
 
     // leftmost cell
-    possible_directions[0u] = (size_t) ceilf((cell->winds_vector.angle / (PI_T_2)) * (f32) DIRECTIONS_NB) % DIRECTIONS_NB;
-    cell_altitudes[0u] = ((hexa_cell_t *) neighbors[possible_directions[0u]])->altitude;
-    cell_altitudes[0u] *= (cell_altitudes[0u] > 0); /* altitude below 0 has water over it */
+    possible_directions[LEFT_CELL] = (size_t) ceilf((cell->winds_vector.angle / (PI_T_2)) * (f32) DIRECTIONS_NB) % DIRECTIONS_NB;
+    cell_altitudes[LEFT_CELL] = ((hexa_cell_t *) neighbors[possible_directions[LEFT_CELL]])->altitude;
+    cell_altitudes[LEFT_CELL] *= (cell_altitudes[LEFT_CELL] > 0); /* altitude below 0 has water over it */
     // rightmost cell
-    possible_directions[1u] = (size_t) floorf((cell->winds_vector.angle / (PI_T_2)) * (f32) DIRECTIONS_NB) % DIRECTIONS_NB;
-    cell_altitudes[1u] = ((hexa_cell_t *) neighbors[possible_directions[1u]])->altitude;
-    cell_altitudes[1u] *= (cell_altitudes[1u] > 0); /* altitude below 0 has water over it */
+    possible_directions[RIGHT_CELL] = (size_t) floorf((cell->winds_vector.angle / (PI_T_2)) * (f32) DIRECTIONS_NB) % DIRECTIONS_NB;
+    cell_altitudes[RIGHT_CELL] = ((hexa_cell_t *) neighbors[possible_directions[RIGHT_CELL]])->altitude;
+    cell_altitudes[RIGHT_CELL] *= (cell_altitudes[RIGHT_CELL] > 0); /* altitude below 0 has water over it */
 
-    definitive_direction = (cell_altitudes[0u] < cell_altitudes[1u])
-            ? possible_directions[0u]
-            : possible_directions[1u];
+    definitive_direction = (cell_altitudes[LEFT_CELL] < cell_altitudes[RIGHT_CELL])
+            ? possible_directions[LEFT_CELL]
+            : possible_directions[RIGHT_CELL];
     
     // difference between the two "winded upon" cells
-    normalized_altitude_diff = (f32) abs(cell_altitudes[0u] - cell_altitudes[1u]) / (f32) ALTITUDE_MAX;
+    normalized_altitude_diff = (f32) abs(cell_altitudes[LEFT_CELL] - cell_altitudes[RIGHT_CELL]) / (f32) ALTITUDE_MAX;
     cell->winds_vector.angle += ((definitive_direction / (f32) DIRECTIONS_NB) * (PI_T_2)) * normalized_altitude_diff;
 
     // difference between the current cell's altitude and the main winded upon cell

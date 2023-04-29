@@ -6,6 +6,8 @@
 
 #include <raylib.h>
 
+#include <colorpalette.h>
+
 #define ITERATION_NB_FRESHWATER (50u)    ///< number of automaton iteration for the freshwater layer
 
 static void freshwater_draw(hexa_cell_t *cell, hexagon_shape_t *target_shape);
@@ -32,7 +34,7 @@ static void freshwater_draw(hexa_cell_t *cell, hexagon_shape_t *target_shape) {
 
     vector_2d_cartesian_t translated_vec = { 0u };
 
-    Color color_line = (Color) { .r = 0x00, .g = 0xD9, .b = 0xF9, .a = 0xFF };
+    Color color_line = AS_RAYLIB_COLOR(COLOR_AZURE);
 
     // landmass 
     if (cell->altitude > 0) {
@@ -41,7 +43,7 @@ static void freshwater_draw(hexa_cell_t *cell, hexagon_shape_t *target_shape) {
                 HEXAGON_SIDES_NB,
                 target_shape->radius,
                 0.0f,
-                (Color) { .r = 0xAB, .g = 0xAB, .b = 0xAB, .a = 0xFF }
+                AS_RAYLIB_COLOR(COLOR_GRAY)
         );
     }
 
@@ -61,17 +63,17 @@ static void freshwater_draw(hexa_cell_t *cell, hexagon_shape_t *target_shape) {
             HEXAGON_SIDES_NB,
             target_shape->radius / 2,
             0.0f,
-            (Color) { .r = 0x00, .g = 0xD9, .b = 0xF9, .a = 0xFF }
+            AS_RAYLIB_COLOR(COLOR_AZURE)
     );
     }
     if (hexa_cell_has_flag(cell, HEXAW_FLAG_MEANDERS)) {
-        color_line = (Color) { .r = 0x00, .g = 0xE9, .b = 0xD0, .a = 0xFF };
+        color_line = AS_RAYLIB_COLOR(COLOR_AQUA_GREEN);
     }
     if (hexa_cell_has_flag(cell, HEXAW_FLAG_RIVER_MOUTH)) {
-        color_line = (Color) { .r = 0xFF, .g = 0xFF, .b = 0xFF, .a = 0xFF };
+        color_line = AS_RAYLIB_COLOR(COLOR_DUSK_BLUE);
     }
     if (hexa_cell_has_flag(cell, HEXAW_FLAG_WATERFALLS)) {
-        color_line = (Color) { .r = 0xD0, .g = 0xD0, .b = 0xD0, .a = 0xFF };
+        color_line = AS_RAYLIB_COLOR(COLOR_WHITE);
     }
 
     DrawLineEx(
@@ -203,8 +205,6 @@ static void freshwater_flag_gen(void *target_cell, void *neighbors[DIRECTIONS_NB
 static i32 cell_total_height(hexa_cell_t *cell) {
     return ((i32) cell->altitude + (i32) cell->freshwater_height);
 }
-
-
 
 const layer_calls_t freshwater_layer_calls = {
         .draw_func          = &freshwater_draw,

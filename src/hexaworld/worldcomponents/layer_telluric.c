@@ -6,6 +6,8 @@
 
 #include <raylib.h>
 
+#include <colorpalette.h>
+
 #define ITERATION_NB_TELLURIC (2u)    ///< number of automaton iteration for the telluric layer
 
 static void telluric_draw(hexa_cell_t *cell, hexagon_shape_t *target_shape);
@@ -23,12 +25,12 @@ static void telluric_flag_gen(void *target_cell, void *neighbors[DIRECTIONS_NB])
 // -------------------------------------------------------------------------------------------------
 static void telluric_draw(hexa_cell_t *cell, hexagon_shape_t *target_shape) {
     vector_2d_cartesian_t translated_vec = { 0u };
-    Color tile_color = WHITE;
+    Color tile_color = AS_RAYLIB_COLOR(COLOR_WHITE);
 
     if (hexa_cell_has_flag(cell, HEXAW_FLAG_TELLURIC_RIDGE)) {
-        tile_color = ORANGE;
+        tile_color = AS_RAYLIB_COLOR(COLOR_BUTTERSCOTCH);
     } else if (hexa_cell_has_flag(cell, HEXAW_FLAG_TELLURIC_RIFT)) {
-        tile_color = YELLOW;
+        tile_color = AS_RAYLIB_COLOR(COLOR_AQUA_GREEN);
     }
 
     DrawPoly(*((Vector2*) (&target_shape->center)), HEXAGON_SIDES_NB, target_shape->radius, 0.0f, tile_color);
@@ -39,7 +41,7 @@ static void telluric_draw(hexa_cell_t *cell, hexagon_shape_t *target_shape) {
             (Vector2) { 
                     .x = target_shape->center.v + translated_vec.v * target_shape->radius, 
                     .y = target_shape->center.w + translated_vec.w * target_shape->radius },
-            RED
+            AS_RAYLIB_COLOR(COLOR_TOMATO)
     );
 }
 

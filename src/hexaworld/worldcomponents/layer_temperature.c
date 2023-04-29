@@ -5,6 +5,8 @@
 
 #include <raylib.h>
 
+#include <colorpalette.h>
+
 #define ITERATION_NB_TEMPERATURE (1u)    ///< number of automaton iteration for the landmass layer
 
 static void temperature_draw(hexa_cell_t *cell, hexagon_shape_t *target_shape);
@@ -18,8 +20,8 @@ static void temperature_apply(void *target_cell, void *neighbors[DIRECTIONS_NB])
 
 // -------------------------------------------------------------------------------------------------
 static void temperature_draw(hexa_cell_t *cell, hexagon_shape_t *target_shape) {
-    Color cold_color = (Color) { 0x3F, 0xD4, 0xE8, 0xFF };
-    Color hot_color  = (Color) { 0xE8, 0x3F, 0x3F, 0xFF };
+    Color cold_color = AS_RAYLIB_COLOR(COLOR_AZURE);
+    Color hot_color  = AS_RAYLIB_COLOR(COLOR_DARKISH_RED);
 
     Color tile_color = { 0u };
     u32 abs_max_temp = 0u;
@@ -31,11 +33,11 @@ static void temperature_draw(hexa_cell_t *cell, hexagon_shape_t *target_shape) {
         abs_temp = cell->temperature;
     } else {
         tile_color = cold_color;
-        abs_max_temp = (u32) (-(TEMPERATURE_MIN + TEMPERATURE_ALTITUDE_MULTIPLIER*ALTITUDE_MAX));
+        abs_max_temp = (u32) (-(TEMPERATURE_MIN + (TEMPERATURE_ALTITUDE_MULTIPLIER*ALTITUDE_MAX)));
         abs_temp = (u32) (-cell->temperature);
     }
 
-    tile_color.a = (u8) (((f32) abs_temp / (f32) abs_max_temp) * 255u);
+    tile_color.a = (u8) (((f32) abs_temp / (f32) abs_max_temp) * 0xFF);
 
     DrawPoly(
             *((Vector2*) &target_shape->center),

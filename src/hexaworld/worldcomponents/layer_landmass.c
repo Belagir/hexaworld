@@ -5,6 +5,8 @@
 
 #include <raylib.h>
 
+#include <colorpalette.h>
+
 #define ITERATION_NB_LANDMASS (6u)    ///< number of automaton iteration for the landmass layer
 
 static void landmass_draw(hexa_cell_t *cell, hexagon_shape_t *target_shape);
@@ -21,24 +23,23 @@ static void landmass_flag_gen(void *target_cell, void *neighbors[DIRECTIONS_NB])
 
 // -------------------------------------------------------------------------------------------------
 static void landmass_draw(hexa_cell_t *cell, hexagon_shape_t *target_shape) {
-    Color tile_color = (Color) { 0x20, 0x79, 0xF7, 0xFF };
+    Color tile_color = AS_RAYLIB_COLOR(COLOR_CERULEAN);
 
     if (hexa_cell_has_flag(cell, HEXAW_FLAG_UNDERWATER_CANYONS)) {
-        tile_color = (Color) { 0x21, 0x36, 0x8F, 0xFF };
+        tile_color = AS_RAYLIB_COLOR(COLOR_DUSK_BLUE);
     } else if (hexa_cell_has_flag(cell, HEXAW_FLAG_MOUNTAIN)) {
-        tile_color = (Color) { 0x90, 0x5F, 0x07, 0xFF };
+        tile_color = AS_RAYLIB_COLOR(COLOR_LEATHER);
     } else if (hexa_cell_has_flag(cell, HEXAW_FLAG_CANYONS)) {
-        tile_color = (Color) { 0x93, 0x7E, 0x58, 0xFF };
-        
+        tile_color = AS_RAYLIB_COLOR(COLOR_TAUPE);
     } else if (cell->altitude > 0) {
-        tile_color = (Color) { 0xC8, 0x9B, 0x49, 0xFF };
+        tile_color = AS_RAYLIB_COLOR(COLOR_SAND_BROWN);
     }
 
 
     DrawPoly(*((Vector2*) &target_shape->center), HEXAGON_SIDES_NB, target_shape->radius, 0.0f, tile_color);
 
     if (hexa_cell_has_flag(cell, HEXAW_FLAG_ISLES)) {
-        DrawCircleV(*((Vector2*) &target_shape->center), target_shape->radius/2, (Color) { 0xC8, 0x9B, 0x49, 0xFF });   
+        DrawCircleV(*((Vector2*) &target_shape->center), target_shape->radius/2, AS_RAYLIB_COLOR(COLOR_TAUPE));   
     }
 }
 

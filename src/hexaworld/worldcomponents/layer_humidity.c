@@ -5,6 +5,8 @@
 
 #include <raylib.h>
 
+#include <colorpalette.h>
+
 #define ITERATION_NB_HUMIDITY (20u)    ///< number of automaton iteration for the humidity layer
 
 static void humidity_draw(hexa_cell_t *cell, hexagon_shape_t *target_shape);
@@ -18,17 +20,17 @@ static void humidity_apply(void *target_cell, void *neighbors[DIRECTIONS_NB]);
 
 // -------------------------------------------------------------------------------------------------
 static void humidity_draw(hexa_cell_t *cell, hexagon_shape_t *target_shape) {
-    Color base_color = (Color) { 0x6e, 0xBA, 0xFF, 0xFF };
+    Color base_color = AS_RAYLIB_COLOR(COLOR_CERULEAN);
     
     base_color.a = (u8) (cell->humidity * 255u);
     DrawPoly(*((Vector2*) &target_shape->center), HEXAGON_SIDES_NB, target_shape->radius, 0.0f, base_color);
     DrawCircleV(
             *((Vector2 *) &(target_shape->center)), 
             (2*target_shape->radius/3) * cell->precipitations, 
-            (Color) { 0xD8, 0xD8, 0xD8, 0xFF }
+            AS_RAYLIB_COLOR(COLOR_GRAY)
     );
     if (cell->altitude > 0) {
-        DrawPolyLines(*((Vector2*) &target_shape->center), HEXAGON_SIDES_NB, 5*target_shape->radius/6, 0.0f, GRAY);
+        DrawPolyLines(*((Vector2*) &target_shape->center), HEXAGON_SIDES_NB, 5*target_shape->radius/6, 0.0f, AS_RAYLIB_COLOR(COLOR_LEATHER));
     }
 }
 

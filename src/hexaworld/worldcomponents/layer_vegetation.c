@@ -5,6 +5,8 @@
 
 #include <raylib.h>
 
+#include <colorpalette.h>
+
 #define ITERATION_NB_VEGETATION (10u)    ///< number of automaton iteration for the vegetation layer
 
 static void vegetation_draw(hexa_cell_t *cell, hexagon_shape_t *target_shape);
@@ -18,12 +20,12 @@ static void vegetation_apply(void *target_cell, void *neighbors[DIRECTIONS_NB]);
 
 // -------------------------------------------------------------------------------------------------
 static void vegetation_draw(hexa_cell_t *cell, hexagon_shape_t *target_shape) {
-    Color tile_color = (Color) { 0x03, 0xB9, 0x04, 0xFF };
+    Color tile_color = AS_RAYLIB_COLOR(COLOR_LEAFY_GREEN);
 
     tile_color.a = (u8) ((f32) tile_color.a * cell->vegetation_cover);
 
     if (cell->altitude <= 0) {
-        tile_color = (Color) { 0x21, 0x36, 0x8F, 0xFF, };
+        tile_color = AS_RAYLIB_COLOR(COLOR_CERULEAN);
     }
 
     DrawPoly(
@@ -34,7 +36,7 @@ static void vegetation_draw(hexa_cell_t *cell, hexagon_shape_t *target_shape) {
             tile_color
     );
 
-    tile_color.a = (cell->vegetation_cover > 0.01) * 0xFF;
+    tile_color.a = (cell->vegetation_cover > VEGETATION_CUTOUT_THRESHOLD) * 0xFF;
     DrawPolyLines(
             *((Vector2 *) &target_shape->center),
             HEXAGON_SIDES_NB,
@@ -58,7 +60,7 @@ static void vegetation_seed(hexaworld_t *world) {
                     / NORMAL_DISTRIBUTION(VEGETATION_TEMPERATURE_MEAN, VEGETATION_TEMPERATURE_VARI, VEGETATION_TEMPERATURE_MEAN);
 
             world->tiles[x][y].vegetation_cover = humidity_rating * temperature_rating;
-            if (world->tiles[x][y].vegetation_cover < 0.01f) {
+            if (world->tiles[x][y].vegetation_cover < VEGETATION_CUTOUT_THRESHOLD) {
                 world->tiles[x][y].vegetation_cover = 0.0f;
             }
         }
@@ -73,7 +75,7 @@ static void vegetation_apply(void *target_cell, void *neighbors[DIRECTIONS_NB]) 
     size_t neigh_index = 0u;
     ratio_t vegetation_max = 0.0f;
 
-    if ((cell->freshwater_height == 0u) || (cell->vegetation_cover > 0.1f)) {
+    if ((cell->freshwater_height == 0u) || (cell->vegetation_cover > VEGETATION_CUTOUT_THRESHOLD)) {
         return;
     }
     
