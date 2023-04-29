@@ -25,8 +25,8 @@
 #define ALTITUDE_EROSION_INERTIA_WEIGHT (100) ///< inertia of the eroded cell
 #define ALTITUDE_EROSION_RAND_VARIATION (30)
 
-#define TEMPERATURE_MAX (30)
-#define TEMPERATURE_MIN (-20)
+#define TEMPERATURE_MAX (40)
+#define TEMPERATURE_MIN (-30)
 #define TEMPERATURE_ALTITUDE_MULTIPLIER (-0.00625f)
 
 #define WINDS_VECTOR_DIRECTIONS_NB (32)     ///< number of possible direction for a wind vector 
@@ -37,6 +37,9 @@
 #define FRESHWATER_MOUNTAIN_NO_SOURCE_CHANCE (0x10)    ///< chance that a source is generated on a mountain
 #define FRESHWATER_WATERFALL_HEIGHT_THRESHOLD (2000)    ///< height in meters between two tiles needed for a waterfall to form
 #define FRESHWATER_LAKE_DEPTH_THRESHOLD (5u)        ///< depth from which a body of water is considered a lake
+
+#define VEGETATION_TEMPERATURE_MIN (-5)
+#define VEGETATION_TEMPERATURE_MAX (25)
 
 // -------------------------------------------------------------------------------------------------
 // ---- TYPEDEFS -----------------------------------------------------------------------------------
@@ -70,32 +73,49 @@ typedef enum hexaworld_cell_flag_t {
     HEXAW_FLAGS_NB,     ///< Total number of flags
 } hexaworld_cell_flag_t;
 
+/// @brief a set of flags
+typedef u16 flag_set_t;
+
+/// @brief temperature in celsius (human POV)
+typedef i16 temp_c_t;
+
+/// @brief sane altitude range for terrain
+typedef i16 alt_m_t;
+
+/// @brief freshwater height type
+typedef u16 frwtr_m_t;
+
+/// @brief ratio type (usually between 0.0f and 1.0f)
+typedef f32 ratio_t;
+
 /**
  * @brief A single hexagonal cell.
  */
 typedef struct hexa_cell_t {
-    /// mean altitude of the tile
-    i32 altitude;
-    /// expected temperature of the tile
-    i32 temperature;
-    /// mean humidty on the tile
-    f32 humidity;
-    /// mean precipitations on the tile
-    f32 precipitations;
-    /// freshwater excess height
-    u32 freshwater_height;
-    // vegetation coefficient
-    f32 vegetation_cover;
-
-    /// freshwater direction on the tile
-    cell_direction_t freshwater_direction;
-    /// long unsigned integer containing the flags as bit offsets
-    u64 flags;
-
     /// local angle of the tectonic plate 
     vector_2d_polar_t telluric_vector;
     /// mean wind direction and force
     vector_2d_polar_t winds_vector;
+
+    /// freshwater direction on the tile
+    cell_direction_t freshwater_direction;
+
+    /// mean humidty on the tile
+    ratio_t humidity;
+    /// mean precipitations on the tile
+    ratio_t precipitations;
+    // vegetation coefficient
+    ratio_t vegetation_cover;
+
+    /// freshwater excess height
+    frwtr_m_t freshwater_height;
+    /// mean altitude of the tile
+    alt_m_t altitude;
+    /// unsigned integer containing the flags as bit offsets
+    flag_set_t flags;
+
+    /// expected temperature of the tile
+    temp_c_t temperature;
 } hexa_cell_t;
 
 /**

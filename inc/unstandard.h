@@ -16,6 +16,9 @@
 #endif
 
 #define SGN_I32(_v) ((_v) & (0x80000000))
+#define SGN_I16(_v) ((_v) & (0x8000))
+
+#define SGN_I(_type, _v) ((_v) & (0x1 << ((sizeof(_type)*8u) - 1u)))
 
 typedef char  i8;   ///< convenience type redefinition
 typedef short i16;  ///< convenience type redefinition

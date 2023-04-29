@@ -139,7 +139,7 @@ static void freshwater_apply(void *target_cell, void *neighbors[DIRECTIONS_NB]) 
             flowed_to_cell = (hexa_cell_t *) neighbors[lowest_alt_direction];
 
             if (cell_total_height(flowed_to_cell) >= cell_total_height(cell)) {
-                cell->freshwater_height = cell_total_height(flowed_to_cell) - cell->altitude + 1u;
+                cell->freshwater_height = cell_total_height(flowed_to_cell) - (frwtr_m_t) cell->altitude + 1u;
             }
         }
     } else {
@@ -201,7 +201,7 @@ static void freshwater_flag_gen(void *target_cell, void *neighbors[DIRECTIONS_NB
 
 // -------------------------------------------------------------------------------------------------
 static i32 cell_total_height(hexa_cell_t *cell) {
-    return (cell->altitude + (i32) cell->freshwater_height);
+    return ((i32) cell->altitude + (i32) cell->freshwater_height);
 }
 
 

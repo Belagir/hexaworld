@@ -42,13 +42,13 @@ static void altitude_seed(hexaworld_t *world) {
             tmp_cell = world->tiles[x] + y;
 
             if (hexa_cell_has_flag(tmp_cell, HEXAW_FLAG_MOUNTAIN)) {
-                tmp_cell->altitude = ALTITUDE_MAX;
+                tmp_cell->altitude = (alt_m_t) ALTITUDE_MAX;
             } else if (hexa_cell_has_flag(tmp_cell, HEXAW_FLAG_UNDERWATER_CANYONS)) {
-                tmp_cell->altitude = ALTITUDE_MIN;
+                tmp_cell->altitude = (alt_m_t) ALTITUDE_MIN;
             } else if (tmp_cell->altitude > 0) {
-                tmp_cell->altitude = (ALTITUDE_MAX / 4) - (rand() % ALTITUDE_EROSION_RAND_VARIATION);
+                tmp_cell->altitude = (alt_m_t) ((ALTITUDE_MAX / 4) - (rand() % ALTITUDE_EROSION_RAND_VARIATION));
             } else {
-                tmp_cell->altitude = (ALTITUDE_MIN / 4) + (rand() % ALTITUDE_EROSION_RAND_VARIATION);
+                tmp_cell->altitude = (alt_m_t) ((ALTITUDE_MIN / 4) + (rand() % ALTITUDE_EROSION_RAND_VARIATION));
             }
         }
     }
@@ -71,11 +71,11 @@ static void altitude_apply(void *target_cell, void *neighbors[DIRECTIONS_NB]) {
 
     mean_altitude /= (DIRECTIONS_NB + ALTITUDE_EROSION_INERTIA_WEIGHT);
 
-    if (SGN_I32(cell->altitude-1) != SGN_I32(mean_altitude)) {
+    if (SGN_I16(cell->altitude-1) != SGN_I32(mean_altitude)) {
         return;
     }
 
-    cell->altitude = mean_altitude;
+    cell->altitude = (alt_m_t) mean_altitude;
 }
 
 const layer_calls_t altitude_layer_calls = {
