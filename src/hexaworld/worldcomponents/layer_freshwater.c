@@ -10,13 +10,9 @@
 
 #define ITERATION_NB_FRESHWATER (50u)    ///< number of automaton iteration for the freshwater layer
 
-static void freshwater_draw(hexa_cell_t *cell, hexagon_shape_t *target_shape);
-
-static void freshwater_seed(hexaworld_t *world);
-
-static void freshwater_apply(void *target_cell, void *neighbors[DIRECTIONS_NB]);
 
 // -------------------------------------------------------------------------------------------------
+// -- FRESHWATER -----------------------------------------------------------------------------------
 
 /**
  * @brief Returns the total hieght of a tile, adding the altitude to the water height.

@@ -15,6 +15,8 @@ typedef enum hexaworld_layer_t {
     HEXAW_LAYER_FRESHWATER,     ///< Layer representing the rivers and lakes of a tile.
     HEXAW_LAYER_VEGETATION,     ///< Layer representing the vegetal life of a tile.
 
+    HEXAW_LAYER_WHOLE_WORLD,    ///< Aggrgation of all the layers below
+
     HEXAW_LAYERS_NUMBER,    ///< Total number of layers.
 } hexaworld_layer_t;
 

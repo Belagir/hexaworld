@@ -8,12 +8,6 @@
 
 #define ITERATION_NB_ALTITUDE (10u)   ///< number of automaton iteration for the altitude layer
 
-static void altitude_draw(hexa_cell_t *cell, hexagon_shape_t *target_shape);
-
-static void altitude_seed(hexaworld_t *world);
-
-static void altitude_apply(void *target_cell, void *neighbors[DIRECTIONS_NB]);
-
 // -------------------------------------------------------------------------------------------------
 // -- ALTITUDE -------------------------------------------------------------------------------------
 

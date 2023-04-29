@@ -9,14 +9,8 @@
 
 #define ITERATION_NB_VEGETATION (10u)    ///< number of automaton iteration for the vegetation layer
 
-static void vegetation_draw(hexa_cell_t *cell, hexagon_shape_t *target_shape);
-
-static void vegetation_seed(hexaworld_t *world);
-
-static void vegetation_apply(void *target_cell, void *neighbors[DIRECTIONS_NB]);
-
 // -------------------------------------------------------------------------------------------------
-// -------------------------------------------------------------------------------------------------
+// -- VEGETATION -----------------------------------------------------------------------------------
 
 // -------------------------------------------------------------------------------------------------
 static void vegetation_draw(hexa_cell_t *cell, hexagon_shape_t *target_shape) {

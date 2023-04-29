@@ -9,15 +9,6 @@
 
 #define ITERATION_NB_LANDMASS (6u)    ///< number of automaton iteration for the landmass layer
 
-static void landmass_draw(hexa_cell_t *cell, hexagon_shape_t *target_shape);
-
-static void landmass_seed(hexaworld_t *world);
-
-static void landmass_apply(void *target_cell, void *neighbors[DIRECTIONS_NB]);
-
-static void landmass_flag_gen(void *target_cell, void *neighbors[DIRECTIONS_NB]);
-
-
 // -------------------------------------------------------------------------------------------------
 // -- LANDMASS -------------------------------------------------------------------------------------
 

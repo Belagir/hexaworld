@@ -218,5 +218,6 @@ extern const layer_calls_t humidity_layer_calls;
 extern const layer_calls_t freshwater_layer_calls;
 extern const layer_calls_t vegetation_layer_calls;
 extern const layer_calls_t temperature_layer_calls;
+extern const layer_calls_t whole_world_layer_calls;
 
 #endif

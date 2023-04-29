@@ -74,6 +74,7 @@ hexaworld_t *hexaworld_create_empty(size_t width, size_t height) {
     world->hexaworld_layers_functions[HEXAW_LAYER_HUMIDITY]    = humidity_layer_calls;
     world->hexaworld_layers_functions[HEXAW_LAYER_FRESHWATER]  = freshwater_layer_calls;
     world->hexaworld_layers_functions[HEXAW_LAYER_VEGETATION]  = vegetation_layer_calls;
+    world->hexaworld_layers_functions[HEXAW_LAYER_WHOLE_WORLD] = whole_world_layer_calls;
 
     world->width = width;
     world->height = height;
@@ -127,7 +128,9 @@ void hexaworld_draw(hexaworld_t *world, hexaworld_layer_t layer, f32 rectangle_t
 void hexaworld_genlayer(hexaworld_t *world, hexaworld_layer_t layer) {
     size_t iteration_number = 0u;
 
-    world->hexaworld_layers_functions[layer].seed_func(world);
+    if (world->hexaworld_layers_functions[layer].seed_func) {
+        world->hexaworld_layers_functions[layer].seed_func(world);
+    }
 
     iteration_number = world->hexaworld_layers_functions[layer].automaton_iter;
     if (world->hexaworld_layers_functions[layer].iteration_flavour == LAYER_GEN_ITERATE_RELATIVE) {

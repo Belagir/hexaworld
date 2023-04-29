@@ -10,17 +10,17 @@
 
 #define ITERATION_NB_WINDS (1u)       ///< number of automaton iteration for the winds layer
 
+/**
+ * @brief Cells directions needed for the automaton function
+ */
 typedef enum two_cells_directions_t {
+    /// left cell
     LEFT_CELL,
+    /// right cell
     RIGHT_CELL,
+    /// number of directions
     TWO_CELLS
 } two_cells_directions_t;
-
-static void winds_draw(hexa_cell_t *cell, hexagon_shape_t *target_shape);
-
-static void winds_seed(hexaworld_t *world);
-
-static void winds_apply(void *target_cell, void *neighbors[DIRECTIONS_NB]);
 
 // -------------------------------------------------------------------------------------------------
 // -- WINDS -------------------------------------------------------------------------------------------

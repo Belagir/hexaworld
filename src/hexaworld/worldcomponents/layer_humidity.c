@@ -9,12 +9,6 @@
 
 #define ITERATION_NB_HUMIDITY (20u)    ///< number of automaton iteration for the humidity layer
 
-static void humidity_draw(hexa_cell_t *cell, hexagon_shape_t *target_shape);
-
-static void humidity_seed(hexaworld_t *world);
-
-static void humidity_apply(void *target_cell, void *neighbors[DIRECTIONS_NB]);
-
 // -------------------------------------------------------------------------------------------------
 // -- HUMIDITY -------------------------------------------------------------------------------------
 

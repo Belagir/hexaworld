@@ -9,14 +9,8 @@
 
 #define ITERATION_NB_TEMPERATURE (1u)    ///< number of automaton iteration for the landmass layer
 
-static void temperature_draw(hexa_cell_t *cell, hexagon_shape_t *target_shape);
-
-static void temperature_seed(hexaworld_t *world);
-
-static void temperature_apply(void *target_cell, void *neighbors[DIRECTIONS_NB]);
-
 // -------------------------------------------------------------------------------------------------
-// -------------------------------------------------------------------------------------------------
+// -- TEMPERATURE ----------------------------------------------------------------------------------
 
 // -------------------------------------------------------------------------------------------------
 static void temperature_draw(hexa_cell_t *cell, hexagon_shape_t *target_shape) {

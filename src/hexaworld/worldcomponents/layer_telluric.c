@@ -10,15 +10,6 @@
 
 #define ITERATION_NB_TELLURIC (2u)    ///< number of automaton iteration for the telluric layer
 
-static void telluric_draw(hexa_cell_t *cell, hexagon_shape_t *target_shape);
-
-static void telluric_seed(hexaworld_t *world);
-
-static void telluric_apply(void *target_cell, void *neighbors[DIRECTIONS_NB]);
-
-static void telluric_flag_gen(void *target_cell, void *neighbors[DIRECTIONS_NB]);
-
-
 // -------------------------------------------------------------------------------------------------
 // -- TELLURIC -------------------------------------------------------------------------------------
 
