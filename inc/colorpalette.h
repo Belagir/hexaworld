@@ -1,9 +1,15 @@
-
+/**
+ * @file colorpalette.h
+ * @author gabriel 
+ * @brief Declares some colors and colr conversion macros for raylib
+ * @version 0.1
+ * @date 2023-04-29
+ * 
+ * @copyright Copyright (c) 2023
+ * 
+ */
 #ifndef __COLORPALETTE_H__
 #define __COLORPALETTE_H__
-
-#include <raylib.h>
-#include <unstandard.h>
 
 #define AS_RAYLIB_COLOR(_c) ((Color) { .r = (((_c) & 0xFF000000) >> 24u), .g = (((_c) & 0x00FF0000) >> 16u), .b = (((_c) & 0x0000FF00) >> 8u), .a = (((_c) & 0x000000FF)) })
 

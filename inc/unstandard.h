@@ -15,8 +15,10 @@
 #define NULL 0x0 ///< sneaky redifinition of NULL so I won't have to import stdlib just for it
 #endif
 
+/// returns the sign bitfield of a 32-bit signed integer
 #define SGN_I32(_v) ((_v) & (0x80000000))
 
+/// Calculates a normal distribution of a certain mean and variance (not squared variance !). Needs math.h.
 #define NORMAL_DISTRIBUTION(_mean, _variance, _x) ((1.0f / (_variance * sqrt(2.0f * (PI)))) * exp(-0.5f * pow(((_x) - (_mean)) / (_variance), 2)))
 
 typedef char  i8;   ///< convenience type redefinition

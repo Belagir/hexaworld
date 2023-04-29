@@ -101,9 +101,13 @@ static void draw_mountains_canyon(hexa_cell_t *cell, hexagon_shape_t *target_sha
     }
 
     feature_color = AS_RAYLIB_COLOR(COLOR_LEATHER);
-    feature_color.a = 0x7F;
+    feature_color.a = 0x20 + (u8) ((f32) 0x80 * ((f32) cell->altitude / (f32) ALTITUDE_MAX));
 
-    draw_hexagon(target_shape, FROM_RAYLIB_COLOR(feature_color), 0.66f , hexa_cell_has_flag(cell, HEXAW_FLAG_MOUNTAIN) ? DRAW_HEXAGON_FILL : DRAW_HEXAGON_LINES);
+    if (hexa_cell_has_flag(cell, HEXAW_FLAG_MOUNTAIN)) {
+        draw_hexagon(target_shape, FROM_RAYLIB_COLOR(feature_color), 0.66f, DRAW_HEXAGON_FILL);
+    }
+    feature_color.a = 0xD0;
+    draw_hexagon(target_shape, FROM_RAYLIB_COLOR(feature_color), 0.66f, DRAW_HEXAGON_LINES);
 }
 
 // -------------------------------------------------------------------------------------------------
