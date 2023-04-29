@@ -31,13 +31,7 @@ static void winds_draw(hexa_cell_t *cell, hexagon_shape_t *target_shape) {
     Color terrain_color = AS_RAYLIB_COLOR(COLOR_GRAY);
     terrain_color.a = (u8) (((f32) (cell->altitude * (cell->altitude > 0)) / (f32) ALTITUDE_MAX) * 0xFF );
 
-    DrawPoly(
-            *((Vector2*) &target_shape->center), 
-            HEXAGON_SIDES_NB, 
-            target_shape->radius, 
-            0.0f, 
-            terrain_color
-    );
+    draw_hexagon(target_shape, FROM_RAYLIB_COLOR(terrain_color), 1.0f , DRAW_HEXAGON_FILL);
 
     DrawCircle(target_shape->center.v, target_shape->center.w, (target_shape->radius/2)*(1.0f-cell->winds_vector.magnitude), AS_RAYLIB_COLOR(COLOR_AZURE));
 

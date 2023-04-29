@@ -14,6 +14,7 @@
 #include <raylib.h>
 
 #include <cellotomaton.h>
+#include <colorpalette.h>
 
 #include "worldcomponents/hexaworldcomponents.h"
 
@@ -170,7 +171,7 @@ static void hexaworld_draw_grid(hexaworld_t *world, f32 rectangle_target[4u]) {
                     x, y,
                     world->width, world->height
             );
-            DrawPolyLines(*((Vector2*) &shape.center), HEXAGON_SIDES_NB, shape.radius, 0.0f, BLACK);
+            draw_hexagon(&shape, COLOR_BLACK, 1.0f, DRAW_HEXAGON_LINES);
         }
     }
 }

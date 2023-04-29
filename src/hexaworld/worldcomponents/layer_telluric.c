@@ -24,7 +24,7 @@ static void telluric_draw(hexa_cell_t *cell, hexagon_shape_t *target_shape) {
         tile_color = AS_RAYLIB_COLOR(COLOR_AQUA_GREEN);
     }
 
-    DrawPoly(*((Vector2*) (&target_shape->center)), HEXAGON_SIDES_NB, target_shape->radius, 0.0f, tile_color);
+    draw_hexagon(target_shape, FROM_RAYLIB_COLOR(tile_color), 1.0f , DRAW_HEXAGON_FILL);
 
     translated_vec = vector2d_polar_to_cartesian(cell->telluric_vector);
     DrawLineV(

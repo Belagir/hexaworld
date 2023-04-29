@@ -5,13 +5,13 @@
 #include <unstandard.h>
 #include <cellotomaton.h>
 
+#include "hexagon/hexagonparadigm.h"
 #include "layers.h"
 
 // -------------------------------------------------------------------------------------------------
 // ---- CONSTANTS ----------------------------------------------------------------------------------
 // -------------------------------------------------------------------------------------------------
 
-#define HEXAGON_SIDES_NB (6u)     ///< number of sides of an hexagon. tough.
 #define PI_T_2 ((2.0f) * (PI))    ///< 2 times pi
 
 #define TELLURIC_VECTOR_SEEDING_INV_CHANCE (0x40)  ///< the greater, the bigger the chance a telluric tile is NOT seeded.
@@ -23,12 +23,12 @@
 #define ALTITUDE_MAX (4000)  ///< maximum altitude, in meters
 #define ALTITUDE_MIN (-3000)  ///< minimum altitude, in meters
 #define ALTITUDE_EROSION_INERTIA_WEIGHT (100) ///< inertia of the eroded cell
-#define ALTITUDE_EROSION_RAND_VARIATION (30)
+#define ALTITUDE_EROSION_RAND_VARIATION (30)    ///< random variation of altitude
 
-#define TEMPERATURE_MAX (40)
-#define TEMPERATURE_MIN (-30)
-#define TEMPERATURE_RANGE (TEMPERATURE_MAX - TEMPERATURE_MIN)
-#define TEMPERATURE_ALTITUDE_MULTIPLIER (-0.00625f)
+#define TEMPERATURE_MAX (40)    ///< maximum temperature (on the equator at sea level)
+#define TEMPERATURE_MIN (-30)   ///< minimum temperature (on the poles at sea level)
+#define TEMPERATURE_RANGE (TEMPERATURE_MAX - TEMPERATURE_MIN)   ///< total temperature range
+#define TEMPERATURE_ALTITUDE_MULTIPLIER (-0.00625f)     ///< °C lost with every meter of altitude
 
 #define WINDS_VECTOR_DIRECTIONS_NB (32)     ///< number of possible direction for a wind vector 
 #define WINDS_VECTOR_UNIT_ANGLE ((PI_T_2) / (WINDS_VECTOR_DIRECTIONS_NB))      ///< winds vector minimum angle 
@@ -39,12 +39,12 @@
 #define FRESHWATER_WATERFALL_HEIGHT_THRESHOLD (2000)    ///< height in meters between two tiles needed for a waterfall to form
 #define FRESHWATER_LAKE_DEPTH_THRESHOLD (5u)        ///< depth from which a body of water is considered a lake
 
-#define VEGETATION_TEMPERATURE_MEAN (18)
-#define VEGETATION_TEMPERATURE_VARI (10)
-#define VEGETATION_CUTOUT_THRESHOLD (0.01f)
+#define VEGETATION_TEMPERATURE_MEAN (18)    ///< ideal temperature for things to grow
+#define VEGETATION_TEMPERATURE_VARI (10)    ///< squared variation in temperature tolerated by plants
+#define VEGETATION_CUTOUT_THRESHOLD (0.01f) ///< thrshold from which the vegetation cover is ignored by some methods
 
-#define WHOLE_WORLD_OCEAN_ABYSS_CUTOUT (0.50f)
-#define WHOLE_WORLD_OCEAN_REEF_CUTOUT  (0.25f)
+#define WHOLE_WORLD_OCEAN_ABYSS_CUTOUT (0.50f)  ///< height ratio for abyss ocean -> normal ocean drawing 
+#define WHOLE_WORLD_OCEAN_REEF_CUTOUT  (0.25f)  ///< height ratio for normal ocean -> reef ocean drawing
 
 // -------------------------------------------------------------------------------------------------
 // ---- TYPEDEFS -----------------------------------------------------------------------------------
@@ -126,14 +126,6 @@ typedef struct hexa_cell_t {
 } hexa_cell_t;
 
 /**
- * @brief just the shape of an hexagon.
- */
-typedef struct hexagon_shape_t {
-    vector_2d_cartesian_t center;
-    f32 radius;
-} hexagon_shape_t;
-
-/**
  * @brief Function pointer as the prototype of some code handling the drawing of a single cell.
  */
 typedef void (*layer_draw_function_t)(hexa_cell_t *cell, hexagon_shape_t *target_shape);
@@ -200,30 +192,27 @@ void hexa_cell_set_flag(hexa_cell_t *cell, u32 flag);
  */
 u32 hexa_cell_has_flag(hexa_cell_t *cell, u32 flag);
 
-/**
- * @brief Computes the position and radius of a hexagonal cell in a pixel rectangle.
- * 
- * @param[in] boundaries rectangle defined by the topleft coordinates and its sides' length (in pixels)
- * @param[in] x tile x-position in the world array
- * @param[in] y tile y-position in the world array
- * @param[in] width width, in tiles, of the world array
- * @param[in] height height, in tiles, of the world array
- * @return hexagon_shape_t pixel shape of the hexagon representing the cell's coordinates
- */
-hexagon_shape_t hexagon_position_in_rectangle(f32 boundaries[4u], u32 x, u32 y, u32 width, u32 height);
-
 // -------------------------------------------------------------------------------------------------
 // ---- LAYERS CALLS DATA --------------------------------------------------------------------------
 // -------------------------------------------------------------------------------------------------
 
 extern const layer_calls_t telluric_layer_calls;
+
 extern const layer_calls_t landmass_layer_calls;
+
 extern const layer_calls_t altitude_layer_calls;
+
 extern const layer_calls_t winds_layer_calls;
+
 extern const layer_calls_t humidity_layer_calls;
+
 extern const layer_calls_t freshwater_layer_calls;
+
 extern const layer_calls_t vegetation_layer_calls;
+
 extern const layer_calls_t temperature_layer_calls;
+
 extern const layer_calls_t whole_world_layer_calls;
+
 
 #endif

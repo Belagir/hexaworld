@@ -27,7 +27,7 @@ static void altitude_draw(hexa_cell_t *cell, hexagon_shape_t *target_shape) {
     }
     base_color.a = 0x40 + (u8) ((color_intensity) * (f32) (0xFF-0x40));
 
-    DrawPoly(*((Vector2*) &target_shape->center), HEXAGON_SIDES_NB, target_shape->radius, 0.0f, base_color);
+    draw_hexagon(target_shape, FROM_RAYLIB_COLOR(base_color), 1.0f, DRAW_HEXAGON_FILL);
 }
 
 // -------------------------------------------------------------------------------------------------

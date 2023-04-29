@@ -21,23 +21,13 @@ static void vegetation_draw(hexa_cell_t *cell, hexagon_shape_t *target_shape) {
     if (cell->altitude <= 0) {
         tile_color = AS_RAYLIB_COLOR(COLOR_CERULEAN);
     }
+    draw_hexagon(target_shape, FROM_RAYLIB_COLOR(tile_color), 1.0f , DRAW_HEXAGON_FILL);
 
-    DrawPoly(
-            *((Vector2 *) &target_shape->center),
-            HEXAGON_SIDES_NB,
-            target_shape->radius,
-            0.0f,
-            tile_color
-    );
 
     tile_color.a = (cell->vegetation_cover > VEGETATION_CUTOUT_THRESHOLD) * 0xFF;
-    DrawPolyLines(
-            *((Vector2 *) &target_shape->center),
-            HEXAGON_SIDES_NB,
-            5*target_shape->radius/6,
-            0.0f,
-            tile_color
-    );
+    
+    draw_hexagon(target_shape, FROM_RAYLIB_COLOR(tile_color), 0.83f , DRAW_HEXAGON_LINES);
+
 }
 
 // -------------------------------------------------------------------------------------------------

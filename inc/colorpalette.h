@@ -7,8 +7,11 @@
 
 #define AS_RAYLIB_COLOR(_c) ((Color) { .r = (((_c) & 0xFF000000) >> 24u), .g = (((_c) & 0x00FF0000) >> 16u), .b = (((_c) & 0x0000FF00) >> 8u), .a = (((_c) & 0x000000FF)) })
 
+#define FROM_RAYLIB_COLOR(_C) (((_C).r << 24u) | ((_C).g << 16u) | ((_C).b << 8u) | (_C).a)
+
 
 #define COLOR_WHITE         (0xFFFFFFFF)
+#define COLOR_BLACK         (0x000000FF)
 #define COLOR_ICE_BLUE      (0xDAF7FFFF)
 
 #define COLOR_TOMATO        (0xE43625FF)

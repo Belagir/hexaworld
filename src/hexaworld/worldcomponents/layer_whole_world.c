@@ -14,8 +14,7 @@ static Color color_earth_tile(hexa_cell_t *cell);
 static void draw_vegetation(hexa_cell_t *cell, hexagon_shape_t *target_shape);
 static void draw_snow(hexa_cell_t *cell, hexagon_shape_t *target_shape);
 
-static void draw_mountains(hexa_cell_t *cell, hexagon_shape_t *target_shape);
-static void draw_canyons(hexa_cell_t *cell, hexagon_shape_t *target_shape);
+static void draw_mountains_canyon(hexa_cell_t *cell, hexagon_shape_t *target_shape);
 
 static void draw_freshwater(hexa_cell_t *cell, hexagon_shape_t *target_shape);
 
@@ -32,21 +31,14 @@ static void whole_world_draw(hexa_cell_t *cell, hexagon_shape_t *target_shape) {
         tile_color = color_ocean_tile(cell);
     }
 
-    DrawPoly(
-            *((Vector2*) &(target_shape->center)),
-            HEXAGON_SIDES_NB,
-            target_shape->radius,
-            0.0,
-            tile_color
-    );
+    draw_hexagon(target_shape, FROM_RAYLIB_COLOR(tile_color), 1.0f , DRAW_HEXAGON_FILL);
 
     if  (cell->altitude > 0) {
         draw_vegetation(cell, target_shape);
     }
     draw_snow(cell, target_shape);
 
-    draw_mountains(cell, target_shape);
-    draw_canyons(cell, target_shape);
+    draw_mountains_canyon(cell, target_shape);
     draw_freshwater(cell, target_shape);
 }
 
@@ -83,13 +75,8 @@ static void draw_vegetation(hexa_cell_t *cell, hexagon_shape_t *target_shape) {
     Color tile_color = AS_RAYLIB_COLOR(COLOR_LEAFY_GREEN);
 
     tile_color.a = cell->vegetation_cover * 0xFF;
-    DrawPoly(
-            *((Vector2*) &(target_shape->center)),
-            HEXAGON_SIDES_NB,
-            target_shape->radius,
-            0.0,
-            tile_color
-    );
+    
+    draw_hexagon(target_shape, FROM_RAYLIB_COLOR(tile_color), 1.0f , DRAW_HEXAGON_FILL);
 }
 
 // -------------------------------------------------------------------------------------------------
@@ -101,53 +88,22 @@ static void draw_snow(hexa_cell_t *cell, hexagon_shape_t *target_shape) {
     }
 
     tile_color.a = ((f32) (cell->temperature - TEMPERATURE_MIN) / (f32) TEMPERATURE_RANGE) * 0xFF;
-    DrawPoly(
-            *((Vector2*) &(target_shape->center)),
-            HEXAGON_SIDES_NB,
-            target_shape->radius,
-            0.0,
-            tile_color
-    );
+    
+    draw_hexagon(target_shape, FROM_RAYLIB_COLOR(tile_color), 1.0f , DRAW_HEXAGON_FILL);
 }
 
 // -------------------------------------------------------------------------------------------------
-static void draw_mountains(hexa_cell_t *cell, hexagon_shape_t *target_shape) {
+static void draw_mountains_canyon(hexa_cell_t *cell, hexagon_shape_t *target_shape) {
     Color feature_color = { 0u };
 
-    if (!hexa_cell_has_flag(cell, HEXAW_FLAG_MOUNTAIN)) {
+    if ((!hexa_cell_has_flag(cell, HEXAW_FLAG_MOUNTAIN)) && (!hexa_cell_has_flag(cell, HEXAW_FLAG_CANYONS))) {
         return;
     }
 
     feature_color = AS_RAYLIB_COLOR(COLOR_LEATHER);
     feature_color.a = 0x7F;
 
-    DrawPoly(
-            *((Vector2*) &(target_shape->center)),
-            HEXAGON_SIDES_NB,
-            2*target_shape->radius/3,
-            0.0,
-            feature_color
-    );
-}
-
-// -------------------------------------------------------------------------------------------------
-static void draw_canyons(hexa_cell_t *cell, hexagon_shape_t *target_shape) {
-    Color feature_color = { 0u };
-
-    if (!hexa_cell_has_flag(cell, HEXAW_FLAG_CANYONS)) {
-        return;
-    }
-
-    feature_color = AS_RAYLIB_COLOR(COLOR_LEATHER);
-    feature_color.a = 0x7F;
-
-    DrawPolyLines(
-            *((Vector2*) &(target_shape->center)),
-            HEXAGON_SIDES_NB,
-            2*target_shape->radius/3,
-            0.0,
-            feature_color
-    );
+    draw_hexagon(target_shape, FROM_RAYLIB_COLOR(feature_color), 0.66f , hexa_cell_has_flag(cell, HEXAW_FLAG_MOUNTAIN) ? DRAW_HEXAGON_FILL : DRAW_HEXAGON_LINES);
 }
 
 // -------------------------------------------------------------------------------------------------
@@ -170,15 +126,8 @@ static void draw_freshwater(hexa_cell_t *cell, hexagon_shape_t *target_shape) {
     });
 
     if (hexa_cell_has_flag(cell, HEXAW_FLAG_LAKE)) {
-        DrawPoly(
-                (Vector2) {
-                        .x = target_shape->center.v, 
-                        .y = target_shape->center.w },
-                HEXAGON_SIDES_NB,
-                2*(target_shape->radius)/3,
-                0.0f,
-                color_line
-        );
+        draw_hexagon(target_shape, FROM_RAYLIB_COLOR(color_line), 0.66f , DRAW_HEXAGON_FILL);
+
     }
 
     for (size_t i = 0u ; i < DIRECTIONS_NB ; i++) {

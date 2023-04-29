@@ -34,13 +34,7 @@ static void freshwater_draw(hexa_cell_t *cell, hexagon_shape_t *target_shape) {
 
     // landmass 
     if (cell->altitude > 0) {
-        DrawPoly(
-                *((Vector2 *) &target_shape->center),
-                HEXAGON_SIDES_NB,
-                target_shape->radius,
-                0.0f,
-                AS_RAYLIB_COLOR(COLOR_GRAY)
-        );
+        draw_hexagon(target_shape, COLOR_GRAY, 1.0f, DRAW_HEXAGON_FILL);
     }
 
     if (cell->freshwater_height == 0u) {
@@ -54,13 +48,7 @@ static void freshwater_draw(hexa_cell_t *cell, hexagon_shape_t *target_shape) {
     
 
     if (hexa_cell_has_flag(cell, HEXAW_FLAG_LAKE)) {
-        DrawPoly(
-            *((Vector2 *) &target_shape->center),
-            HEXAGON_SIDES_NB,
-            target_shape->radius / 2,
-            0.0f,
-            AS_RAYLIB_COLOR(COLOR_AZURE)
-    );
+        draw_hexagon(target_shape, COLOR_AZURE, 0.5f, DRAW_HEXAGON_FILL);
     }
     if (hexa_cell_has_flag(cell, HEXAW_FLAG_MEANDERS)) {
         color_line = AS_RAYLIB_COLOR(COLOR_AQUA_GREEN);

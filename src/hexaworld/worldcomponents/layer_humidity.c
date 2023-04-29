@@ -17,14 +17,14 @@ static void humidity_draw(hexa_cell_t *cell, hexagon_shape_t *target_shape) {
     Color base_color = AS_RAYLIB_COLOR(COLOR_CERULEAN);
     
     base_color.a = (u8) (cell->humidity * 255u);
-    DrawPoly(*((Vector2*) &target_shape->center), HEXAGON_SIDES_NB, target_shape->radius, 0.0f, base_color);
+    draw_hexagon(target_shape, FROM_RAYLIB_COLOR(base_color), 1.0f, DRAW_HEXAGON_FILL);
     DrawCircleV(
             *((Vector2 *) &(target_shape->center)), 
             (2*target_shape->radius/3) * cell->precipitations, 
             AS_RAYLIB_COLOR(COLOR_GRAY)
     );
     if (cell->altitude > 0) {
-        DrawPolyLines(*((Vector2*) &target_shape->center), HEXAGON_SIDES_NB, 5*target_shape->radius/6, 0.0f, AS_RAYLIB_COLOR(COLOR_LEATHER));
+        draw_hexagon(target_shape, COLOR_LEATHER, 0.83f, DRAW_HEXAGON_LINES);
     }
 }
 
