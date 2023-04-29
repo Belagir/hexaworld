@@ -128,6 +128,7 @@ void hexaworld_raylib_app_run(hexaworld_raylib_app_t *hexapp, u32 target_fps) {
 
     world_buffer = LoadRenderTexture(window_rectangle[2u], window_rectangle[3u]);
 
+    layer_counter = HEXAW_LAYER_WHOLE_WORLD;
     while (!WindowShouldClose()) {
 
         if (IsKeyPressed(KEY_ENTER) && IsKeyDown(KEY_LEFT_SHIFT)) {

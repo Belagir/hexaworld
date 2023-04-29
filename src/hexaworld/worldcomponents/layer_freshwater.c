@@ -119,7 +119,25 @@ static void freshwater_apply(void *target_cell, void *neighbors[DIRECTIONS_NB]) 
         return;
     }
 
+    cell->freshwater_sources_directions = 0x00;
+    for (size_t i = 0u ; i < DIRECTIONS_NB ; i++) {
+        tmp_cell = (hexa_cell_t *) neighbors[i];
+
+        if (tmp_cell->freshwater_height == 0u) {
+            continue;
+        }
+
+        reversed_direction = (i + (DIRECTIONS_NB/2)) % DIRECTIONS_NB;
+
+        if ((tmp_cell->freshwater_direction == reversed_direction) && (cell_total_height(tmp_cell) > cell_total_height(cell))) {
+            cell->freshwater_sources_directions = cell->freshwater_sources_directions | (0x1 << i);
+        }
+    }
+
     if (cell->freshwater_height > 0u) {
+        // there is already some freshwater here. We have to :
+        // check that the tile can actually flow to its designated tile
+        // if not, we have to find the new nighboring lowest tile and maybe increase the water height
         flowed_to_cell = (hexa_cell_t *) neighbors[cell->freshwater_direction];
         
         if (cell_total_height(flowed_to_cell) >= cell_total_height(cell)) {
@@ -141,20 +159,12 @@ static void freshwater_apply(void *target_cell, void *neighbors[DIRECTIONS_NB]) 
             }
         }
     } else {
-        for (size_t i = 0u ; i < DIRECTIONS_NB ; i++) {
-            tmp_cell = (hexa_cell_t *) neighbors[i];
+        // there is no freshwater here (not yet !) so we check if there is some water pouring from a neighboring tile
+        // we check with the sources computed a bit earlier
 
-            if (tmp_cell->freshwater_height == 0u) {
-                continue;
-            }
-
-            reversed_direction = (i + (DIRECTIONS_NB/2)) % DIRECTIONS_NB;
-
-            if ((tmp_cell->freshwater_direction == reversed_direction) && (cell_total_height(tmp_cell) > cell_total_height(cell))) {
-                cell->freshwater_height = FRESHWATER_SOURCE_START_DEPTH;
-            }
+        if (cell->freshwater_sources_directions != 0x00) {
+            cell->freshwater_height = FRESHWATER_SOURCE_START_DEPTH;
         }
-
     }
 }
 

@@ -26,7 +26,8 @@
 #define ALTITUDE_EROSION_RAND_VARIATION (30)
 
 #define TEMPERATURE_MAX (40)
-#define TEMPERATURE_MIN (-20)
+#define TEMPERATURE_MIN (-30)
+#define TEMPERATURE_RANGE (TEMPERATURE_MAX - TEMPERATURE_MIN)
 #define TEMPERATURE_ALTITUDE_MULTIPLIER (-0.00625f)
 
 #define WINDS_VECTOR_DIRECTIONS_NB (32)     ///< number of possible direction for a wind vector 
@@ -38,9 +39,12 @@
 #define FRESHWATER_WATERFALL_HEIGHT_THRESHOLD (2000)    ///< height in meters between two tiles needed for a waterfall to form
 #define FRESHWATER_LAKE_DEPTH_THRESHOLD (5u)        ///< depth from which a body of water is considered a lake
 
-#define VEGETATION_TEMPERATURE_MEAN (20)
-#define VEGETATION_TEMPERATURE_VARI (6)
+#define VEGETATION_TEMPERATURE_MEAN (18)
+#define VEGETATION_TEMPERATURE_VARI (10)
 #define VEGETATION_CUTOUT_THRESHOLD (0.01f)
+
+#define WHOLE_WORLD_OCEAN_ABYSS_CUTOUT (0.50f)
+#define WHOLE_WORLD_OCEAN_REEF_CUTOUT  (0.25f)
 
 // -------------------------------------------------------------------------------------------------
 // ---- TYPEDEFS -----------------------------------------------------------------------------------
@@ -75,10 +79,11 @@ typedef enum hexaworld_cell_flag_t {
 } hexaworld_cell_flag_t;
 
 /// @brief a set of flags
-typedef u16 flag_set_t;
+typedef u16 flag_set16_t;
+typedef u8  flag_set8_t;
 
 /// @brief temperature in celsius (human POV)
-typedef i16 temp_c_t;
+typedef i8 temp_c_t;
 
 /// @brief sane altitude range for terrain
 typedef i16 alt_m_t;
@@ -113,10 +118,11 @@ typedef struct hexa_cell_t {
     /// mean altitude of the tile
     alt_m_t altitude;
     /// unsigned integer containing the flags as bit offsets
-    flag_set_t flags;
+    flag_set16_t flags;
 
     /// expected temperature of the tile
     temp_c_t temperature;
+    flag_set8_t freshwater_sources_directions;
 } hexa_cell_t;
 
 /**

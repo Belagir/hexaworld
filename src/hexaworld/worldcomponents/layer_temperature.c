@@ -50,7 +50,7 @@ static void temperature_seed(hexaworld_t *world) {
                     // inverse distance to equator 
                     (1.0f - (((f32) abs((i32) y - (i32) (world->height/2))) / (f32) (world->height/2)))
                     // temperature ratio and shifting toward the colder temps
-                    * (TEMPERATURE_MAX - TEMPERATURE_MIN) + TEMPERATURE_MIN;
+                    * TEMPERATURE_RANGE + TEMPERATURE_MIN;
         }
     }
 }
