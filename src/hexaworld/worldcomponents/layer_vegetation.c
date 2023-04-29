@@ -54,10 +54,13 @@ static void vegetation_seed(hexaworld_t *world) {
         for (size_t y = 0u ; y < world->height ; y++) {
             humidity_rating = world->tiles[x][y].humidity;
             temperature_rating = 
-                    NORMAL_DISTRIBUTION(VEGETATION_TEMPERATURE_MEAN, VEGETATION_TEMPERATURE_VARI, world->tiles[x][y].temperature)
+                    NORMAL_DISTRIBUTION(VEGETATION_TEMPERATURE_MEAN, VEGETATION_TEMPERATURE_VARI, world->tiles[x][y].temperature / 2)
                     / NORMAL_DISTRIBUTION(VEGETATION_TEMPERATURE_MEAN, VEGETATION_TEMPERATURE_VARI, VEGETATION_TEMPERATURE_MEAN);
 
             world->tiles[x][y].vegetation_cover = humidity_rating * temperature_rating;
+            if (world->tiles[x][y].vegetation_cover < 0.01f) {
+                world->tiles[x][y].vegetation_cover = 0.0f;
+            }
         }
     }
 }
@@ -68,7 +71,7 @@ static void vegetation_apply(void *target_cell, void *neighbors[DIRECTIONS_NB]) 
 
     hexa_cell_t *tmp_cell = NULL;
     size_t neigh_index = 0u;
-    f32 vegetation_mean = 0.0f;
+    ratio_t vegetation_max = 0.0f;
 
     if ((cell->freshwater_height == 0u) || (cell->vegetation_cover > 0.1f)) {
         return;
@@ -76,11 +79,13 @@ static void vegetation_apply(void *target_cell, void *neighbors[DIRECTIONS_NB]) 
     
     for (size_t i = 0 ; i < DIRECTIONS_NB; i++) {
         tmp_cell = (hexa_cell_t *) neighbors[i];
-        vegetation_mean += tmp_cell->vegetation_cover;
-    }
-    vegetation_mean /= (f32) DIRECTIONS_NB;
 
-    cell->vegetation_cover = vegetation_mean
+        if (tmp_cell->vegetation_cover > vegetation_max) {
+            vegetation_max = tmp_cell->vegetation_cover;
+        }
+    }
+
+    cell->vegetation_cover = vegetation_max
             * (NORMAL_DISTRIBUTION(VEGETATION_TEMPERATURE_MEAN, VEGETATION_TEMPERATURE_VARI, cell->temperature)
                     / NORMAL_DISTRIBUTION(VEGETATION_TEMPERATURE_MEAN, VEGETATION_TEMPERATURE_VARI, VEGETATION_TEMPERATURE_MEAN));
 }
