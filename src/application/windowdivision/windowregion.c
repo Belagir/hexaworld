@@ -68,3 +68,11 @@ void window_region_draw(window_region_t *w_region) {
     );
 }
 
+// -------------------------------------------------------------------------------------------------
+void window_region_deinit(window_region_t *w_region) {
+    if (!w_region) {
+        return;
+    }
+
+    UnloadRenderTexture(w_region->buffer_rendertexture);
+}

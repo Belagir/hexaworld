@@ -16,6 +16,7 @@
 #include <colorpalette.h>
 
 #include "hexaworld/hexaworld.h"
+#include "infopanel/infopanel.h"
 #include "windowdivision/windowregion.h"
 
 // -------------------------------------------------------------------------------------------------
@@ -41,8 +42,11 @@ typedef struct hexaworld_application_data_t {
  * @brief Defintion for the hexaworld raylib application data type.
  */
 typedef struct hexaworld_raylib_app_handle_t {
-    /// pointer to a world data
+    /// application-specific world data
     hexaworld_application_data_t hexaworld_data;
+
+    /// pointer to the info panel data
+    info_panel_t *info_panel;
 
     /// pixel width of the window
     i32 window_width;
@@ -63,7 +67,9 @@ static struct {
 
 static const f32 window_position_map[WINREGIONS_NUMBER][4u] = {
         // WINREGION_HEXAWORLD
-        { 0.0f, 0.0f, 0.75f, 1.0f },
+        { 0.0f,  0.0f, 0.75f, 1.0f },
+        // WINREGION_TILEINFO
+        { 0.75f, 0.0f, 0.25f, 1.0f },
 };
 
 // -------------------------------------------------------------------------------------------------
@@ -79,22 +85,28 @@ static void generate_world(hexaworld_t *world);
 
 static void winregion_hexaworld_draw(vector_2d_cartesian_t target_dim, void *world_data);
 
+static void winregion_tileinfo_draw(vector_2d_cartesian_t target_dim, void *tile_info_data);
+
 // -------------------------------------------------------------------------------------------------
 // ---- HEADER FUNCTIONS DEFINITIONS ---------------------------------------------------------------
 // -------------------------------------------------------------------------------------------------
 
 // -------------------------------------------------------------------------------------------------
 hexaworld_raylib_app_handle_t * hexaworld_raylib_app_init(i32 random_seed, u32 window_width, u32 window_height, u32 world_width, u32 world_height) {
+    // window dimensions
     module_data.real_app.window_height = window_height;
     module_data.real_app.window_width  = window_width;
 
+    // hexaworld allocation & initialisation of the companion data
     module_data.real_app.hexaworld_data = (hexaworld_application_data_t) {
             .hexaworld = hexaworld_create_empty(world_width, world_height),
             .current_layer = HEXAW_LAYER_WHOLE_WORLD,
-            .layer_changed = 1u,
+            .layer_changed = 0u,
     };
 
+    // raylib window
     InitWindow(module_data.real_app.window_width, module_data.real_app.window_height, HEXAPP_WINDOW_TITLE);
+    // random number generator
     srand(random_seed);
 
     if (module_data.real_app.hexaworld_data.hexaworld) {
@@ -111,13 +123,27 @@ hexaworld_raylib_app_handle_t * hexaworld_raylib_app_init(i32 random_seed, u32 w
             NULL,
             &winregion_hexaworld_draw,
             (void *) &module_data.real_app.hexaworld_data);
+    window_region_init(
+            module_data.real_app.window_regions + WINREGION_TILEINFO,
+            window_position_map[WINREGION_TILEINFO],
+            module_data.real_app.window_width, 
+            module_data.real_app.window_height,
+            NULL,
+            &winregion_tileinfo_draw,
+            (void *) module_data.real_app.info_panel
+    );
 
     return &(module_data.real_app);
 }
 
 // -------------------------------------------------------------------------------------------------
 void hexaworld_raylib_app_deinit(hexaworld_raylib_app_handle_t **hexapp) {
+    for (size_t i = 0; i < WINREGIONS_NUMBER; i++) {
+        window_region_deinit((*hexapp)->window_regions + i);
+    }
+
     hexaworld_destroy(&((*hexapp)->hexaworld_data.hexaworld));
+    info_panel_destroy(&((*hexapp)->info_panel));
 
     if (IsWindowReady()) {
         CloseWindow();
@@ -137,6 +163,10 @@ void hexaworld_raylib_app_run(hexaworld_raylib_app_handle_t *hexapp, u32 target_
     }
 
     SetTargetFPS(target_fps);
+
+    for (size_t i = 0; i < WINREGIONS_NUMBER; i++) {
+        window_region_refresh(hexapp->window_regions + i);
+    }
 
     while (!WindowShouldClose()) {
 
@@ -162,7 +192,9 @@ void hexaworld_raylib_app_run(hexaworld_raylib_app_handle_t *hexapp, u32 target_
 
         BeginDrawing();
         ClearBackground(AS_RAYLIB_COLOR(COLOR_BLAND));
-        window_region_draw(hexapp->window_regions + WINREGION_HEXAWORLD);
+        for (size_t i = 0; i < WINREGIONS_NUMBER; i++) {
+            window_region_draw(hexapp->window_regions + i);
+        }
         EndDrawing();
     }
 }
@@ -184,12 +216,12 @@ static void generate_world(hexaworld_t *world) {
 static void winregion_hexaworld_draw(vector_2d_cartesian_t target_dim, void *world_data) {
     hexaworld_application_data_t *hexaworld_data = (hexaworld_application_data_t *) world_data;
 
-    f32 target_rectangle[4u] = {
-            0.0f,
-            0.0f,
-            target_dim.v,
-            target_dim.w,
-    };
+    f32 target_rectangle[4u] = { 0.0f, 0.0f, target_dim.v, target_dim.w };
     
     hexaworld_draw(hexaworld_data->hexaworld, hexaworld_data->current_layer, target_rectangle);
+}
+
+// -------------------------------------------------------------------------------------------------
+static void winregion_tileinfo_draw(vector_2d_cartesian_t target_dim, void *tile_info_data) {
+    ClearBackground(AS_RAYLIB_COLOR(COLOR_WHITE));
 }

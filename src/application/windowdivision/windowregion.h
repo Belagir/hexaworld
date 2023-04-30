@@ -74,15 +74,23 @@ void window_region_init(
 /**
  * @brief Re-draw a region's state to its internal texture.
  * 
- * @param w_region target texture
+ * @param w_region target region
  */
 void window_region_refresh(window_region_t *w_region);
 
 /**
  * @brief Draws the internal texture to the active raylib context.
  * 
- * @param w_region target texture
+ * @param w_region target region
  */
 void window_region_draw(window_region_t *w_region);
+
+/**
+ * @brief Releases resources held by the structure.
+ * 
+ * @param w_region target region
+ */
+void window_region_deinit(window_region_t *w_region);
+
 
 #endif

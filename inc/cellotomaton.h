@@ -12,20 +12,7 @@
 #define __CELLOTOMATON_H__
 
 #include <unstandard.h>
-
-/**
- * @brief Possible directions from a hexagonal cell to another. Ordered along the unit circle.
- * 
- */
-typedef enum cell_direction_t {
-    DIRECTION_E,    ///< Right cell
-    DIRECTION_SE,   ///< Bottom right cell
-    DIRECTION_SW,   ///< Bottom left cell
-    DIRECTION_W,    ///< Left cell
-    DIRECTION_NW,   ///< Top left cell
-    DIRECTION_NE,   ///< Top right cell
-    DIRECTIONS_NB,  ///< Number of possible directions
-} cell_direction_t;
+#include <hexatypes.h>
 
 /**
  * @brief Sructure holding the data describing a cell automaton.

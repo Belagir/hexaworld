@@ -10,6 +10,7 @@
  */
 #include "hexaworld.h"
 
+#include <math.h>
 #include <stdlib.h>
 #include <raylib.h>
 
@@ -145,7 +146,7 @@ void hexaworld_genlayer(hexaworld_t *world, hexaworld_layer_t layer) {
 
     iteration_number = world->hexaworld_layers_functions[layer].automaton_iter;
     if (world->hexaworld_layers_functions[layer].iteration_flavour == LAYER_GEN_ITERATE_RELATIVE) {
-        iteration_number *= (world->width / 10);
+        iteration_number *= (u32) sqrt(powf((f32) world->width, 2.0f) + powf((f32) world->height, 2.0f)) / 10;
     }
 
     // applying the overall generation function N times
