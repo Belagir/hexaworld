@@ -12,7 +12,7 @@ typedef enum registered_window_region_t {
 } registered_window_region_t;
 
 typedef void (*on_region_click_func_t)(u32 relative_x, u32 relative_y, void *data);
-typedef void (*on_region_refreshed_func_t)(RenderTexture2D target_texture, f32 px_coords_rectangle[4u], void *data);
+typedef void (*on_region_refreshed_func_t)(vector_2d_cartesian_t target_dim, void *data);
 
 typedef struct window_region_t {
     f32 px_coords_rectangle[4u];
@@ -32,5 +32,9 @@ void window_region_init(
             on_region_click_func_t on_click_f,
             on_region_refreshed_func_t on_refresh_f,
             void *related_data);
+
+void window_region_refresh(window_region_t *w_region);
+
+void window_region_draw_to(window_region_t *w_region, f32 rectangle_dest[4u]);
 
 #endif
