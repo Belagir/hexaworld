@@ -30,7 +30,7 @@
 /**
  * @brief Defintion for the hexaworld raylib application data type.
  */
-typedef struct hexaworld_raylib_app_t {
+typedef struct hexaworld_raylib_app_handle_t {
     /// pointer to a world data
     hexaworld_t *hexaworld;
 
@@ -38,7 +38,15 @@ typedef struct hexaworld_raylib_app_t {
     i32 window_width;
     /// pixel height of the window
     i32 window_height;
-} hexaworld_raylib_app_t;
+} hexaworld_raylib_app_handle_t;
+
+// -------------------------------------------------------------------------------------------------
+// ---- STATIC DATA --------------------------------------------------------------------------------
+// -------------------------------------------------------------------------------------------------
+
+static struct {
+    hexaworld_raylib_app_handle_t real_app;
+} module_data = { 0u };
 
 // -------------------------------------------------------------------------------------------------
 // ---- STATIC FUNCTIONS DECLARATIONS --------------------------------------------------------------
@@ -66,24 +74,59 @@ static void generate_world(hexaworld_t *world);
 // -------------------------------------------------------------------------------------------------
 
 // -------------------------------------------------------------------------------------------------
-hexaworld_raylib_app_t *hexaworld_raylib_app_create(u32 window_width, u32 window_height, u32 world_width, u32 world_height) {
-    hexaworld_raylib_app_t *hexapp = NULL;
+// hexaworld_raylib_app_handle_t *hexaworld_raylib_app_create(u32 window_width, u32 window_height, u32 world_width, u32 world_height) {
+//     hexaworld_raylib_app_handle_t *hexapp = NULL;
 
-    hexapp = malloc(sizeof(*hexapp));
-    if (!hexapp) {
-        return NULL;
+//     hexapp = malloc(sizeof(*hexapp));
+//     if (!hexapp) {
+//         return NULL;
+//     }
+
+//     *hexapp = (hexaworld_raylib_app_handle_t) { 0u };
+//     hexapp->hexaworld = hexaworld_create_empty(world_width, world_height);
+//     hexapp->window_height = window_height;
+//     hexapp->window_width = window_width;
+    
+//     return hexapp;
+// }
+
+// -------------------------------------------------------------------------------------------------
+// void hexaworld_raylib_app_destroy(hexaworld_raylib_app_handle_t **hexapp) {
+//     hexaworld_destroy(&(*hexapp)->hexaworld);
+
+//     if (IsWindowReady()) {
+//         CloseWindow();
+//     }
+
+//     (*hexapp)->window_height = 0u;
+//     (*hexapp)->window_width = 0u;
+
+//     if (*hexapp) {
+//         free((*hexapp));
+//     }
+//     (*hexapp) = NULL;
+// }
+
+// -------------------------------------------------------------------------------------------------
+hexaworld_raylib_app_handle_t * hexaworld_raylib_app_init(i32 random_seed, u32 window_width, u32 window_height, u32 world_width, u32 world_height) {
+    module_data.real_app.window_height = window_height;
+    module_data.real_app.window_width  = window_width;
+
+    module_data.real_app.hexaworld = hexaworld_create_empty(world_width, world_height);
+
+    InitWindow(module_data.real_app.window_width, module_data.real_app.window_height, HEXAPP_WINDOW_TITLE);
+    srand(random_seed);
+
+    if (module_data.real_app.hexaworld) {
+        // generate ALL the LAYERS !
+        generate_world(module_data.real_app.hexaworld);
     }
 
-    *hexapp = (hexaworld_raylib_app_t) { 0u };
-    hexapp->hexaworld = hexaworld_create_empty(world_width, world_height);
-    hexapp->window_height = window_height;
-    hexapp->window_width = window_width;
-    
-    return hexapp;
+    return &(module_data.real_app);
 }
 
 // -------------------------------------------------------------------------------------------------
-void hexaworld_raylib_app_destroy(hexaworld_raylib_app_t **hexapp) {
+void hexaworld_raylib_app_deinit(hexaworld_raylib_app_handle_t **hexapp) {
     hexaworld_destroy(&(*hexapp)->hexaworld);
 
     if (IsWindowReady()) {
@@ -93,25 +136,12 @@ void hexaworld_raylib_app_destroy(hexaworld_raylib_app_t **hexapp) {
     (*hexapp)->window_height = 0u;
     (*hexapp)->window_width = 0u;
 
-    if (*hexapp) {
-        free((*hexapp));
-    }
     (*hexapp) = NULL;
 }
 
-// -------------------------------------------------------------------------------------------------
-void hexaworld_raylib_app_init(hexaworld_raylib_app_t *hexapp, i32 random_seed) {
-    InitWindow(hexapp->window_width, hexapp->window_height, HEXAPP_WINDOW_TITLE);
-    srand(random_seed);
-
-    if (hexapp->hexaworld) {
-        // generate ALL the LAYERS !
-        generate_world(hexapp->hexaworld);
-    }
-}
 
 // -------------------------------------------------------------------------------------------------
-void hexaworld_raylib_app_run(hexaworld_raylib_app_t *hexapp, u32 target_fps) {
+void hexaworld_raylib_app_run(hexaworld_raylib_app_handle_t *hexapp, u32 target_fps) {
     f32 world_rectangle[4u] = { 0u };
     RenderTexture2D world_buffer = { 0u };
     u32 layer_counter = 0u;

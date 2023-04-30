@@ -8,7 +8,7 @@
 #include <unstandard.h>
 
 i32 main(u32 argc, char const *argv[]) {
-    hexaworld_raylib_app_t *application = NULL;
+    hexaworld_raylib_app_handle_t *application = NULL;
 
     u32 index_args = 1u;
     u32 seed = time(NULL);
@@ -34,17 +34,16 @@ i32 main(u32 argc, char const *argv[]) {
     }
 
     // creating application
-    application = hexaworld_raylib_app_create(1000, 1000u, width, height);
+    application = hexaworld_raylib_app_init(seed, 1000, 1000u, width, height);
     if (!application) {
         return -1;
     }
 
     // running the application
-    hexaworld_raylib_app_init(application, seed);
     hexaworld_raylib_app_run(application, 20u);
 
     // deallocating
-    hexaworld_raylib_app_destroy(&application);
+    hexaworld_raylib_app_deinit(&application);
 
     return 0;
 }
