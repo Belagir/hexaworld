@@ -58,14 +58,34 @@ void window_region_refresh(window_region_t *w_region) {
 
 // -------------------------------------------------------------------------------------------------
 void window_region_draw(window_region_t *w_region) {
+    if (!w_region) {
+        return;
+    }
+
     DrawTexturePro(
                 w_region->buffer_rendertexture.texture, 
-                (Rectangle) { 0.0f, 0.0f, w_region->buffer_rendertexture.texture.width, w_region->buffer_rendertexture.texture.height }, 
+                (Rectangle) { 0.0f, 0.0f, w_region->buffer_rendertexture.texture.width, -w_region->buffer_rendertexture.texture.height }, 
                 (Rectangle) { w_region->px_coords_rectangle[0u], w_region->px_coords_rectangle[1u], w_region->px_coords_rectangle[2u], w_region->px_coords_rectangle[3u] },
                 (Vector2)   { 0.0f, 0.0f },
                 0.0f,
                 WHITE
     );
+}
+
+// -------------------------------------------------------------------------------------------------
+void window_region_process_click(window_region_t *w_region, i32 x, i32 y) {
+    if ((!w_region) || (!w_region->on_click_f)) {
+        return;
+    }
+
+    vector_2d_cartesian_t region_dim = (vector_2d_cartesian_t) { w_region->px_coords_rectangle[2u], w_region->px_coords_rectangle[3u] };
+
+    if ((x >= w_region->px_coords_rectangle[0u]) 
+            && (x < (w_region->px_coords_rectangle[0u] + w_region->px_coords_rectangle[2u]))
+            && (y >= w_region->px_coords_rectangle[1u]) 
+            && (y < (w_region->px_coords_rectangle[1u] + w_region->px_coords_rectangle[3u]))) {
+        w_region->on_click_f(region_dim, (u32) (x - w_region->px_coords_rectangle[0u]), (u32) (y - w_region->px_coords_rectangle[1u]), w_region->related_data);
+    }
 }
 
 // -------------------------------------------------------------------------------------------------

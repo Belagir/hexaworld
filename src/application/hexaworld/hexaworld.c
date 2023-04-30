@@ -127,7 +127,7 @@ void hexaworld_draw(hexaworld_t *world, hexaworld_layer_t layer, f32 rectangle_t
     // drawing each cell
     for (size_t x = 0u ; x < world->width ; x++) {
         for (size_t y = 0u ; y < world->height ; y++) {
-            shape = hexagon_position_in_rectangle(rectangle_target, x, y, world->width, world->height);
+            shape = hexagon_pixel_position_in_rectangle(rectangle_target, x, y, world->width, world->height);
             draw_hexagon(&shape, COLOR_WHITE, 1.0f, DRAW_HEXAGON_FILL);
             layer_function(world->tiles[x] + y, &shape);
         }
@@ -168,6 +168,24 @@ void hexaworld_raze(hexaworld_t *world) {
 }
 
 // -------------------------------------------------------------------------------------------------
+hexa_cell_t *hexaworld_tile_at(hexaworld_t *world, u32 x, u32 y, f32 reference_rectangle[4u]) {
+    vector_2d_cartesian_t array_coords = { 0u };
+    i32 wanted_x = 0;
+    i32 wanted_y = 0;
+
+    array_coords = hexagon_array_coords_from_rectangle(reference_rectangle, x, y, world->width, world->height);
+
+    wanted_x = (i32) floor(array_coords.v);
+    wanted_y = (i32) floor(array_coords.w);
+    
+    if ((wanted_x < 0) || (wanted_x >= (i32) world->width) || (wanted_y < 0) || (wanted_y >= (i32) world->height)) {
+        return NULL;
+    }
+
+    return world->tiles[wanted_x] + wanted_y;
+}
+
+// -------------------------------------------------------------------------------------------------
 // ---- STATIC FUNCTIONS DEFINITIONS ---------------------------------------------------------------
 // -------------------------------------------------------------------------------------------------
 
@@ -177,7 +195,7 @@ static void hexaworld_draw_grid(hexaworld_t *world, f32 rectangle_target[4u]) {
 
     for (size_t x = 0u ; x < world->width ; x++) {
         for (size_t y = 0u ; y < world->height ; y++) {
-            shape = hexagon_position_in_rectangle(
+            shape = hexagon_pixel_position_in_rectangle(
                     rectangle_target,
                     x, y,
                     world->width, world->height

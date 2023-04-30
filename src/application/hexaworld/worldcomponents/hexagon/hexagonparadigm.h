@@ -38,7 +38,9 @@ typedef struct hexagon_shape_t {
  * @param[in] height height, in tiles, of the world array
  * @return hexagon_shape_t pixel shape of the hexagon representing the cell's coordinates
  */
-hexagon_shape_t hexagon_position_in_rectangle(f32 boundaries[4u], u32 x, u32 y, u32 width, u32 height);
+hexagon_shape_t hexagon_pixel_position_in_rectangle(f32 boundaries[4u], u32 x, u32 y, u32 width, u32 height);
+
+vector_2d_cartesian_t hexagon_array_coords_from_rectangle(f32 boundaries[4u], u32 pix_x, u32 pix_y, u32 array_width, u32 array_height);
 
 /**
  * @brief 

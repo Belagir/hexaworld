@@ -83,9 +83,11 @@ static const f32 window_position_map[WINREGIONS_NUMBER][4u] = {
  */
 static void generate_world(hexaworld_t *world);
 
-static void winregion_hexaworld_draw(vector_2d_cartesian_t target_dim, void *world_data);
+static void winregion_hexaworld_on_refresh(vector_2d_cartesian_t target_dim, void *world_data);
 
-static void winregion_tileinfo_draw(vector_2d_cartesian_t target_dim, void *tile_info_data);
+static void winregion_hexaworld_on_click(vector_2d_cartesian_t region_dim, u32 x, u32 y, void *world_data);
+
+static void winregion_tileinfo_on_refresh(vector_2d_cartesian_t target_dim, void *tile_info_data);
 
 // -------------------------------------------------------------------------------------------------
 // ---- HEADER FUNCTIONS DEFINITIONS ---------------------------------------------------------------
@@ -120,8 +122,8 @@ hexaworld_raylib_app_handle_t * hexaworld_raylib_app_init(i32 random_seed, u32 w
             window_position_map[WINREGION_HEXAWORLD], 
             module_data.real_app.window_width, 
             module_data.real_app.window_height,
-            NULL,
-            &winregion_hexaworld_draw,
+            &winregion_hexaworld_on_click,
+            &winregion_hexaworld_on_refresh,
             (void *) &module_data.real_app.hexaworld_data);
     window_region_init(
             module_data.real_app.window_regions + WINREGION_TILEINFO,
@@ -129,7 +131,7 @@ hexaworld_raylib_app_handle_t * hexaworld_raylib_app_init(i32 random_seed, u32 w
             module_data.real_app.window_width, 
             module_data.real_app.window_height,
             NULL,
-            &winregion_tileinfo_draw,
+            &winregion_tileinfo_on_refresh,
             (void *) module_data.real_app.info_panel
     );
 
@@ -185,6 +187,12 @@ void hexaworld_raylib_app_run(hexaworld_raylib_app_handle_t *hexapp, u32 target_
             hexapp->hexaworld_data.layer_changed = 1u;
         }
 
+        if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT)) {
+            for (size_t i = 0; i < WINREGIONS_NUMBER; i++) {
+                window_region_process_click(hexapp->window_regions + i, GetMouseX(), GetMouseY());
+            }
+        }
+
         if (hexapp->hexaworld_data.layer_changed) {
             window_region_refresh(hexapp->window_regions + WINREGION_HEXAWORLD);
              hexapp->hexaworld_data.layer_changed = 0u;
@@ -213,7 +221,7 @@ static void generate_world(hexaworld_t *world) {
 }
 
 // -------------------------------------------------------------------------------------------------
-static void winregion_hexaworld_draw(vector_2d_cartesian_t target_dim, void *world_data) {
+static void winregion_hexaworld_on_refresh(vector_2d_cartesian_t target_dim, void *world_data) {
     hexaworld_application_data_t *hexaworld_data = (hexaworld_application_data_t *) world_data;
 
     f32 target_rectangle[4u] = { 0.0f, 0.0f, target_dim.v, target_dim.w };
@@ -222,6 +230,22 @@ static void winregion_hexaworld_draw(vector_2d_cartesian_t target_dim, void *wor
 }
 
 // -------------------------------------------------------------------------------------------------
-static void winregion_tileinfo_draw(vector_2d_cartesian_t target_dim, void *tile_info_data) {
+static void winregion_hexaworld_on_click(vector_2d_cartesian_t region_dim, u32 x, u32 y, void *world_data) {
+    hexaworld_application_data_t *hexaworld_data = (hexaworld_application_data_t *) world_data;
+    hexa_cell_t *clicked_cell = NULL;
+
+    f32 target_rectangle[4u] = { 0.0f, 0.0f, region_dim.v, region_dim.w };
+
+    clicked_cell = hexaworld_tile_at(hexaworld_data->hexaworld, x, y, target_rectangle);
+
+    if (!clicked_cell) {
+        return;
+    }
+
+    // TODO
+}
+
+// -------------------------------------------------------------------------------------------------
+static void winregion_tileinfo_on_refresh(vector_2d_cartesian_t target_dim, void *tile_info_data) {
     ClearBackground(AS_RAYLIB_COLOR(COLOR_WHITE));
 }

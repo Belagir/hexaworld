@@ -27,7 +27,7 @@ typedef enum registered_window_region_t {
 /**
  * @brief function handling a click on the region
  */
-typedef void (*on_region_click_func_t)(u32 relative_x, u32 relative_y, void *data);
+typedef void (*on_region_click_func_t)(vector_2d_cartesian_t region_dim, u32 relative_x, u32 relative_y, void *data);
 /**
  * @brief function handling the drawing of the region to its internal buffer
  */
@@ -84,6 +84,14 @@ void window_region_refresh(window_region_t *w_region);
  * @param w_region target region
  */
 void window_region_draw(window_region_t *w_region);
+/**
+ * @brief Processes a click at a certain pair of coordinates using the data held in the region structure.
+ * 
+ * @param w_region target region
+ * @param x mouse click x-coordinate
+ * @param y mouse click y-coordinate
+ */
+void window_region_process_click(window_region_t *w_region, i32 x, i32 y);
 
 /**
  * @brief Releases resources held by the structure.

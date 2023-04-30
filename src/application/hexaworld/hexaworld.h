@@ -12,6 +12,7 @@
 #define __HEXAWORLD_H__
 
 #include <unstandard.h>
+#include <hexatypes.h>
 
 #include "worldcomponents/layers.h"
 
@@ -59,5 +60,16 @@ void hexaworld_genlayer(hexaworld_t *world, hexaworld_layer_t layer);
  * @param[inout] world target world.
  */
 void hexaworld_raze(hexaworld_t *world);
+
+/**
+ * @brief Returns a pointer to a tile at the position (x, y) inside a reference rectangle.
+ * Returns NULL if the coordinates are out of bounds.
+ * 
+ * @param world 
+ * @param x 
+ * @param y 
+ * @return hexa_cell_t* 
+ */
+hexa_cell_t *hexaworld_tile_at(hexaworld_t *world, u32 x, u32 y, f32 reference_rectangle[4u]);
 
 #endif
