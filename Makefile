@@ -21,7 +21,7 @@ EXC_DIR = bin
 CC = gcc
 ## compilation flags
 LFLAGS += -lraylib -lGL -ldl -lpthread
-CFLAGS += -Wextra -Wpadded -g
+CFLAGS += -Wextra -g
 ## linker flags
 LFLAGS += -lm
 

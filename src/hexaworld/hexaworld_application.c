@@ -14,6 +14,7 @@
 #include <raylib.h>
 
 #include "hexaworld/hexaworld.h"
+#include "windowdivision/windowregion.h"
 
 // -------------------------------------------------------------------------------------------------
 // ---- FILE CONSTANTS -----------------------------------------------------------------------------
@@ -38,6 +39,9 @@ typedef struct hexaworld_raylib_app_handle_t {
     i32 window_width;
     /// pixel height of the window
     i32 window_height;
+
+    /// window region information
+    window_region_t window_regions[WINREGIONS_NUMBER];
 } hexaworld_raylib_app_handle_t;
 
 // -------------------------------------------------------------------------------------------------
@@ -47,6 +51,11 @@ typedef struct hexaworld_raylib_app_handle_t {
 static struct {
     hexaworld_raylib_app_handle_t real_app;
 } module_data = { 0u };
+
+static const f32 window_position_map[WINREGIONS_NUMBER][4u] = {
+        // WINREGION_HEXAWORLD
+        { 0.25f, 0.25f, 0.25f, 0.25f },
+};
 
 // -------------------------------------------------------------------------------------------------
 // ---- STATIC FUNCTIONS DECLARATIONS --------------------------------------------------------------
@@ -60,7 +69,7 @@ static struct {
  * @param[in] target_rectangle target rectangle as the aggregation of the topleft coordinate and the two lengths of the rectangle
  * @param[in] layer layer to draw to the texture
  */
-static void draw_hexmap_to_texture(hexaworld_t *world, RenderTexture2D *target, f32 target_rectangle[4u], hexaworld_layer_t layer);
+static void draw_hexmap_to_texture(hexaworld_t *world, RenderTexture2D *target, hexaworld_layer_t layer);
 
 /**
  * @brief (Re-)generates all the layers of a world.
@@ -88,6 +97,16 @@ hexaworld_raylib_app_handle_t * hexaworld_raylib_app_init(i32 random_seed, u32 w
         generate_world(module_data.real_app.hexaworld);
     }
 
+    // assign window regions to some data
+    window_region_init(
+            module_data.real_app.window_regions + WINREGION_HEXAWORLD, 
+            window_position_map[WINREGION_HEXAWORLD], 
+            module_data.real_app.window_width, 
+            module_data.real_app.window_height,
+            NULL,
+            NULL,
+            (void *) module_data.real_app.hexaworld);
+
     return &(module_data.real_app);
 }
 
@@ -108,7 +127,6 @@ void hexaworld_raylib_app_deinit(hexaworld_raylib_app_handle_t **hexapp) {
 
 // -------------------------------------------------------------------------------------------------
 void hexaworld_raylib_app_run(hexaworld_raylib_app_handle_t *hexapp, u32 target_fps) {
-    f32 world_rectangle[4u] = { 0u };
     RenderTexture2D world_buffer = { 0u };
     u32 layer_counter = 0u;
     u32 layer_changed = 1u;
@@ -119,10 +137,7 @@ void hexaworld_raylib_app_run(hexaworld_raylib_app_handle_t *hexapp, u32 target_
 
     SetTargetFPS(target_fps);
 
-    world_rectangle[2u] = (f32) WORLD_TEXTURE_BUFFER_WIDTH;
-    world_rectangle[3u] = (f32) WORLD_TEXTURE_BUFFER_HEIGHT;
-
-    world_buffer = LoadRenderTexture(world_rectangle[2u], world_rectangle[3u]);
+    world_buffer = LoadRenderTexture(WORLD_TEXTURE_BUFFER_WIDTH, WORLD_TEXTURE_BUFFER_HEIGHT);
 
     layer_counter = HEXAW_LAYER_WHOLE_WORLD;
     while (!WindowShouldClose()) {
@@ -143,14 +158,14 @@ void hexaworld_raylib_app_run(hexaworld_raylib_app_handle_t *hexapp, u32 target_
         }
 
         if (layer_changed) {
-            draw_hexmap_to_texture(hexapp->hexaworld, &world_buffer, world_rectangle, layer_counter);
+            draw_hexmap_to_texture(hexapp->hexaworld, &world_buffer, layer_counter);
             layer_changed = 0u;
         }
 
         BeginDrawing();
         DrawTexturePro(
                 world_buffer.texture, 
-                (Rectangle) { world_rectangle[0u], world_rectangle[1u], world_rectangle[2u], world_rectangle[3u] }, 
+                (Rectangle) { 0.0f, 0.0f, world_buffer.texture.width, world_buffer.texture.height }, 
                 (Rectangle) { 0.0f, 0.0f, GetScreenWidth(), GetScreenHeight() },
                 (Vector2)   { 0.0f, 0.0f },
                 0.0f,
@@ -167,9 +182,16 @@ void hexaworld_raylib_app_run(hexaworld_raylib_app_handle_t *hexapp, u32 target_
 // -------------------------------------------------------------------------------------------------
 
 // -------------------------------------------------------------------------------------------------
-static void draw_hexmap_to_texture(hexaworld_t *world, RenderTexture2D *target, f32 target_rectangle[4u], hexaworld_layer_t layer) {
+static void draw_hexmap_to_texture(hexaworld_t *world, RenderTexture2D *target, hexaworld_layer_t layer) {
     BeginTextureMode(*target);
     ClearBackground(WHITE);
+
+    f32 target_rectangle[4u] = {
+            0.0f,
+            0.0f,
+            target->texture.width,
+            target->texture.height,
+    };
     
     hexaworld_draw(world, layer, target_rectangle);
 
