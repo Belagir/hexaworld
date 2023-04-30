@@ -23,19 +23,26 @@
 // -------------------------------------------------------------------------------------------------
 
 #define HEXAPP_WINDOW_TITLE "hexaworld" ///< Title of the raylib window.
-#define WORLD_TEXTURE_BUFFER_WIDTH  2048u   ///< world render texture pixel x-axis dimension
-#define WORLD_TEXTURE_BUFFER_HEIGHT 2048u   ///< world render texture pixel y-axis dimension
 
 // -------------------------------------------------------------------------------------------------
 // ---- TYPE DEFINITIONS ---------------------------------------------------------------------------
 // -------------------------------------------------------------------------------------------------
 
 /**
+ * @brief World data and some collateral data for the main loop
+ */
+typedef struct hexaworld_application_data_t {
+    hexaworld_t *hexaworld;
+    hexaworld_layer_t current_layer;
+    u32 layer_changed;
+} hexaworld_application_data_t;
+
+/**
  * @brief Defintion for the hexaworld raylib application data type.
  */
 typedef struct hexaworld_raylib_app_handle_t {
     /// pointer to a world data
-    hexaworld_t *hexaworld;
+    hexaworld_application_data_t hexaworld_data;
 
     /// pixel width of the window
     i32 window_width;
@@ -81,14 +88,18 @@ hexaworld_raylib_app_handle_t * hexaworld_raylib_app_init(i32 random_seed, u32 w
     module_data.real_app.window_height = window_height;
     module_data.real_app.window_width  = window_width;
 
-    module_data.real_app.hexaworld = hexaworld_create_empty(world_width, world_height);
+    module_data.real_app.hexaworld_data = (hexaworld_application_data_t) {
+            .hexaworld = hexaworld_create_empty(world_width, world_height),
+            .current_layer = HEXAW_LAYER_WHOLE_WORLD,
+            .layer_changed = 1u,
+    };
 
     InitWindow(module_data.real_app.window_width, module_data.real_app.window_height, HEXAPP_WINDOW_TITLE);
     srand(random_seed);
 
-    if (module_data.real_app.hexaworld) {
+    if (module_data.real_app.hexaworld_data.hexaworld) {
         // generate ALL the LAYERS !
-        generate_world(module_data.real_app.hexaworld);
+        generate_world(module_data.real_app.hexaworld_data.hexaworld);
     }
 
     // assign window regions to some data
@@ -99,14 +110,14 @@ hexaworld_raylib_app_handle_t * hexaworld_raylib_app_init(i32 random_seed, u32 w
             module_data.real_app.window_height,
             NULL,
             &winregion_hexaworld_draw,
-            (void *) module_data.real_app.hexaworld);
+            (void *) &module_data.real_app.hexaworld_data);
 
     return &(module_data.real_app);
 }
 
 // -------------------------------------------------------------------------------------------------
 void hexaworld_raylib_app_deinit(hexaworld_raylib_app_handle_t **hexapp) {
-    hexaworld_destroy(&(*hexapp)->hexaworld);
+    hexaworld_destroy(&((*hexapp)->hexaworld_data.hexaworld));
 
     if (IsWindowReady()) {
         CloseWindow();
@@ -121,37 +132,33 @@ void hexaworld_raylib_app_deinit(hexaworld_raylib_app_handle_t **hexapp) {
 
 // -------------------------------------------------------------------------------------------------
 void hexaworld_raylib_app_run(hexaworld_raylib_app_handle_t *hexapp, u32 target_fps) {
-    RenderTexture2D world_buffer = { 0u };
-    u32 layer_counter = 0u;
-    u32 layer_changed = 1u;
 
-    if (!IsWindowReady() || (!hexapp) || (!hexapp->hexaworld)) {
+    if (!IsWindowReady() || (!hexapp) || (!hexapp->hexaworld_data.hexaworld)) {
         return;
     }
 
     SetTargetFPS(target_fps);
 
-    layer_counter = HEXAW_LAYER_WHOLE_WORLD;
     while (!WindowShouldClose()) {
 
         if (IsKeyPressed(KEY_ENTER) && IsKeyDown(KEY_LEFT_SHIFT)) {
-            generate_world(hexapp->hexaworld);
-            layer_changed = 1u;
+            generate_world(hexapp->hexaworld_data.hexaworld);
+            hexapp->hexaworld_data.layer_changed = 1u;
         } else if (IsKeyPressed(KEY_RIGHT)) {
-            layer_counter = (layer_counter + 1u) % HEXAW_LAYERS_NUMBER;
-            layer_changed = 1u;
+            hexapp->hexaworld_data.current_layer = (hexapp->hexaworld_data.current_layer + 1u) % HEXAW_LAYERS_NUMBER;
+            hexapp->hexaworld_data.layer_changed = 1u;
         } else if (IsKeyPressed(KEY_LEFT)) {
-            if (layer_counter == 0) {
-                layer_counter = HEXAW_LAYERS_NUMBER - 1u;
+            if (hexapp->hexaworld_data.current_layer == 0) {
+                hexapp->hexaworld_data.current_layer = HEXAW_LAYERS_NUMBER - 1u;
             } else {
-                layer_counter = layer_counter - 1u;
+                hexapp->hexaworld_data.current_layer = hexapp->hexaworld_data.current_layer - 1u;
             }
-            layer_changed = 1u;
+            hexapp->hexaworld_data.layer_changed = 1u;
         }
 
-        if (layer_changed) {
+        if ( hexapp->hexaworld_data.layer_changed) {
             window_region_refresh(hexapp->window_regions + WINREGION_HEXAWORLD);
-            layer_changed = 0u;
+             hexapp->hexaworld_data.layer_changed = 0u;
         }
 
         BeginDrawing();
@@ -159,8 +166,6 @@ void hexaworld_raylib_app_run(hexaworld_raylib_app_handle_t *hexapp, u32 target_
         window_region_draw(hexapp->window_regions + WINREGION_HEXAWORLD);
         EndDrawing();
     }
-
-    UnloadRenderTexture(world_buffer);
 }
 
 // -------------------------------------------------------------------------------------------------
@@ -178,7 +183,7 @@ static void generate_world(hexaworld_t *world) {
 
 // -------------------------------------------------------------------------------------------------
 static void winregion_hexaworld_draw(vector_2d_cartesian_t target_dim, void *world_data) {
-    hexaworld_t *hexaworld = (hexaworld_t *) world_data;
+    hexaworld_application_data_t *hexaworld_data = (hexaworld_application_data_t *) world_data;
 
     f32 target_rectangle[4u] = {
             0.0f,
@@ -187,5 +192,5 @@ static void winregion_hexaworld_draw(vector_2d_cartesian_t target_dim, void *wor
             target_dim.w,
     };
     
-    hexaworld_draw(world_data, HEXAW_LAYER_WHOLE_WORLD, target_rectangle);
+    hexaworld_draw(hexaworld_data->hexaworld, hexaworld_data->current_layer, target_rectangle);
 }
