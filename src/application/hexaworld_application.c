@@ -129,7 +129,6 @@ void hexaworld_raylib_app_deinit(hexaworld_raylib_app_handle_t **hexapp) {
     (*hexapp) = NULL;
 }
 
-
 // -------------------------------------------------------------------------------------------------
 void hexaworld_raylib_app_run(hexaworld_raylib_app_handle_t *hexapp, u32 target_fps) {
 
