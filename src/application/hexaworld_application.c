@@ -143,19 +143,19 @@ void hexaworld_raylib_app_run(hexaworld_raylib_app_handle_t *hexapp, u32 target_
         if (IsKeyPressed(KEY_ENTER) && IsKeyDown(KEY_LEFT_SHIFT)) {
             generate_world(hexapp->hexaworld_data.hexaworld);
             hexapp->hexaworld_data.layer_changed = 1u;
+
         } else if (IsKeyPressed(KEY_RIGHT)) {
             hexapp->hexaworld_data.current_layer = (hexapp->hexaworld_data.current_layer + 1u) % HEXAW_LAYERS_NUMBER;
             hexapp->hexaworld_data.layer_changed = 1u;
+
         } else if (IsKeyPressed(KEY_LEFT)) {
-            if (hexapp->hexaworld_data.current_layer == 0) {
-                hexapp->hexaworld_data.current_layer = HEXAW_LAYERS_NUMBER - 1u;
-            } else {
-                hexapp->hexaworld_data.current_layer = hexapp->hexaworld_data.current_layer - 1u;
-            }
+            hexapp->hexaworld_data.current_layer = (hexapp->hexaworld_data.current_layer == 0)
+                    ? HEXAW_LAYERS_NUMBER - 1u
+                    : hexapp->hexaworld_data.current_layer - 1u;
             hexapp->hexaworld_data.layer_changed = 1u;
         }
 
-        if ( hexapp->hexaworld_data.layer_changed) {
+        if (hexapp->hexaworld_data.layer_changed) {
             window_region_refresh(hexapp->window_regions + WINREGION_HEXAWORLD);
              hexapp->hexaworld_data.layer_changed = 0u;
         }

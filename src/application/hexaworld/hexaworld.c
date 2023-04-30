@@ -127,6 +127,7 @@ void hexaworld_draw(hexaworld_t *world, hexaworld_layer_t layer, f32 rectangle_t
     for (size_t x = 0u ; x < world->width ; x++) {
         for (size_t y = 0u ; y < world->height ; y++) {
             shape = hexagon_position_in_rectangle(rectangle_target, x, y, world->width, world->height);
+            draw_hexagon(&shape, COLOR_WHITE, 1.0f, DRAW_HEXAGON_FILL);
             layer_function(world->tiles[x] + y, &shape);
         }
     }
