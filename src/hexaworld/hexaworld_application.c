@@ -13,6 +13,8 @@
 #include <stdlib.h>
 #include <raylib.h>
 
+#include <colorpalette.h>
+
 #include "hexaworld/hexaworld.h"
 #include "windowdivision/windowregion.h"
 
@@ -54,7 +56,7 @@ static struct {
 
 static const f32 window_position_map[WINREGIONS_NUMBER][4u] = {
         // WINREGION_HEXAWORLD
-        { 0.25f, 0.25f, 0.25f, 0.25f },
+        { 0.0f, 0.0f, 0.75f, 1.0f },
 };
 
 // -------------------------------------------------------------------------------------------------
@@ -62,21 +64,13 @@ static const f32 window_position_map[WINREGIONS_NUMBER][4u] = {
 // -------------------------------------------------------------------------------------------------
 
 /**
- * @brief Draws a layer of an hexaworld to a render texture.
- * 
- * @param[in] world world to draw.
- * @param[out] target target render texture
- * @param[in] target_rectangle target rectangle as the aggregation of the topleft coordinate and the two lengths of the rectangle
- * @param[in] layer layer to draw to the texture
- */
-static void draw_hexmap_to_texture(hexaworld_t *world, RenderTexture2D *target, hexaworld_layer_t layer);
-
-/**
  * @brief (Re-)generates all the layers of a world.
  * 
  * @param world target world.
  */
 static void generate_world(hexaworld_t *world);
+
+static void winregion_hexaworld_draw(vector_2d_cartesian_t target_dim, void *world_data);
 
 // -------------------------------------------------------------------------------------------------
 // ---- HEADER FUNCTIONS DEFINITIONS ---------------------------------------------------------------
@@ -104,7 +98,7 @@ hexaworld_raylib_app_handle_t * hexaworld_raylib_app_init(i32 random_seed, u32 w
             module_data.real_app.window_width, 
             module_data.real_app.window_height,
             NULL,
-            NULL,
+            &winregion_hexaworld_draw,
             (void *) module_data.real_app.hexaworld);
 
     return &(module_data.real_app);
@@ -137,8 +131,6 @@ void hexaworld_raylib_app_run(hexaworld_raylib_app_handle_t *hexapp, u32 target_
 
     SetTargetFPS(target_fps);
 
-    world_buffer = LoadRenderTexture(WORLD_TEXTURE_BUFFER_WIDTH, WORLD_TEXTURE_BUFFER_HEIGHT);
-
     layer_counter = HEXAW_LAYER_WHOLE_WORLD;
     while (!WindowShouldClose()) {
 
@@ -158,19 +150,13 @@ void hexaworld_raylib_app_run(hexaworld_raylib_app_handle_t *hexapp, u32 target_
         }
 
         if (layer_changed) {
-            draw_hexmap_to_texture(hexapp->hexaworld, &world_buffer, layer_counter);
+            window_region_refresh(hexapp->window_regions + WINREGION_HEXAWORLD);
             layer_changed = 0u;
         }
 
         BeginDrawing();
-        DrawTexturePro(
-                world_buffer.texture, 
-                (Rectangle) { 0.0f, 0.0f, world_buffer.texture.width, world_buffer.texture.height }, 
-                (Rectangle) { 0.0f, 0.0f, GetScreenWidth(), GetScreenHeight() },
-                (Vector2)   { 0.0f, 0.0f },
-                0.0f,
-                WHITE
-        );
+        ClearBackground(AS_RAYLIB_COLOR(COLOR_BLAND));
+        window_region_draw(hexapp->window_regions + WINREGION_HEXAWORLD);
         EndDrawing();
     }
 
@@ -182,30 +168,24 @@ void hexaworld_raylib_app_run(hexaworld_raylib_app_handle_t *hexapp, u32 target_
 // -------------------------------------------------------------------------------------------------
 
 // -------------------------------------------------------------------------------------------------
-static void draw_hexmap_to_texture(hexaworld_t *world, RenderTexture2D *target, hexaworld_layer_t layer) {
-    BeginTextureMode(*target);
-    ClearBackground(WHITE);
-
-    f32 target_rectangle[4u] = {
-            0.0f,
-            0.0f,
-            target->texture.width,
-            target->texture.height,
-    };
-    
-    hexaworld_draw(world, layer, target_rectangle);
-
-    EndTextureMode();
-
-    GenTextureMipmaps(&(target->texture));
-    SetTextureFilter(target->texture, TEXTURE_FILTER_BILINEAR);
-}
-
-// -------------------------------------------------------------------------------------------------
 static void generate_world(hexaworld_t *world) {
     hexaworld_raze(world);
     
     for (size_t i_layer = 0u ; i_layer < HEXAW_LAYERS_NUMBER ; i_layer++) {
         hexaworld_genlayer(world, i_layer);
     }
+}
+
+// -------------------------------------------------------------------------------------------------
+static void winregion_hexaworld_draw(vector_2d_cartesian_t target_dim, void *world_data) {
+    hexaworld_t *hexaworld = (hexaworld_t *) world_data;
+
+    f32 target_rectangle[4u] = {
+            0.0f,
+            0.0f,
+            target_dim.v,
+            target_dim.w,
+    };
+    
+    hexaworld_draw(world_data, HEXAW_LAYER_WHOLE_WORLD, target_rectangle);
 }

@@ -35,6 +35,6 @@ void window_region_init(
 
 void window_region_refresh(window_region_t *w_region);
 
-void window_region_draw_to(window_region_t *w_region, f32 rectangle_dest[4u]);
+void window_region_draw(window_region_t *w_region);
 
 #endif

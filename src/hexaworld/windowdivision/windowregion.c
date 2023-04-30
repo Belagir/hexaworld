@@ -3,6 +3,7 @@
 
 #include <raylib.h>
 
+#include <colorpalette.h>
 
 // -------------------------------------------------------------------------------------------------
 void window_region_init(
@@ -40,6 +41,7 @@ void window_region_refresh(window_region_t *w_region) {
     }
 
     BeginTextureMode(w_region->buffer_rendertexture);
+    ClearBackground(AS_RAYLIB_COLOR(COLOR_NO_COLOR));
 
     w_region->on_refresh_f(
             (vector_2d_cartesian_t) {
@@ -49,17 +51,20 @@ void window_region_refresh(window_region_t *w_region) {
             w_region->related_data
     );
     EndTextureMode();
+
+    GenTextureMipmaps(&(w_region->buffer_rendertexture.texture));
+    SetTextureFilter(w_region->buffer_rendertexture.texture, TEXTURE_FILTER_BILINEAR);
 }
 
 // -------------------------------------------------------------------------------------------------
-void window_region_draw_to(window_region_t *w_region, f32 rectangle_dest[4u]) {
+void window_region_draw(window_region_t *w_region) {
     DrawTexturePro(
-            w_region->buffer_rendertexture.texture, 
-            (Rectangle) { 0.0f, 0.0f, w_region->buffer_rendertexture.texture.width, w_region->buffer_rendertexture.texture.height }, 
-            (Rectangle) { rectangle_dest[0u], rectangle_dest[1u], rectangle_dest[2u], rectangle_dest[3u] },
-            (Vector2)   { 0.0f, 0.0f },
-            0.0f,
-            WHITE
+                w_region->buffer_rendertexture.texture, 
+                (Rectangle) { 0.0f, 0.0f, w_region->buffer_rendertexture.texture.width, w_region->buffer_rendertexture.texture.height }, 
+                (Rectangle) { w_region->px_coords_rectangle[0u], w_region->px_coords_rectangle[1u], w_region->px_coords_rectangle[2u], w_region->px_coords_rectangle[3u] },
+                (Vector2)   { 0.0f, 0.0f },
+                0.0f,
+                WHITE
     );
 }
 
