@@ -37,5 +37,6 @@
 
 #define COLOR_DARKISH_RED   (0xB5050AFF)    ///< dark red color
 #define COLOR_TOMATO        (0xE43625FF)    ///< vibrant red color
+#define COLOR_TANGERINE     (0xFF8E20FF)    ///< shy orange
 
 #endif

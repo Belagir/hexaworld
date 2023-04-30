@@ -19,7 +19,7 @@ static void telluric_draw(hexa_cell_t *cell, hexagon_shape_t *target_shape) {
     Color tile_color = AS_RAYLIB_COLOR(COLOR_WHITE);
 
     if (hexa_cell_has_flag(cell, HEXAW_FLAG_TELLURIC_RIDGE)) {
-        tile_color = AS_RAYLIB_COLOR(COLOR_BUTTERSCOTCH);
+        tile_color = AS_RAYLIB_COLOR(COLOR_TANGERINE);
     } else if (hexa_cell_has_flag(cell, HEXAW_FLAG_TELLURIC_RIFT)) {
         tile_color = AS_RAYLIB_COLOR(COLOR_AQUA_GREEN);
     }
