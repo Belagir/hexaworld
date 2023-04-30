@@ -1,4 +1,13 @@
-
+/**
+ * @file hexaworldcomponents.h
+ * @author gabriel 
+ * @brief Declaration of components (data structures, constants, layer descriptors, and some helper methods) needed to build a world.
+ * @version 0.1
+ * @date 2023-04-30
+ * 
+ * @copyright Copyright (c) 2023
+ * 
+ */
 #ifndef __HEXAWORLDCOMPONENTS_H__
 #define __HEXAWORLDCOMPONENTS_H__
 
@@ -70,16 +79,18 @@ typedef enum hexaworld_cell_flag_t {
     HEXAW_FLAG_CANYONS,             ///< Some old tectonic event or river dug a long path here
     HEXAW_FLAG_UNDERWATER_CANYONS,  ///< Tectonic forces are at work here and create some heavy drop on the ocean floor
 
-    HEXAW_FLAG_MEANDERS,
-    HEXAW_FLAG_WATERFALLS,
-    HEXAW_FLAG_RIVER_MOUTH,
-    HEXAW_FLAG_LAKE,
+    HEXAW_FLAG_MEANDERS,            ///< A river here twists and turns, creating a marsh, a bog, or maybe a swamp
+    HEXAW_FLAG_WATERFALLS,          ///< Great waterfalls run down the landscape here
+    HEXAW_FLAG_RIVER_MOUTH,         ///< The river on the tile goes directly to an ocean or sea 
+    HEXAW_FLAG_LAKE,                ///< a lake has formed here
 
     HEXAW_FLAGS_NB,     ///< Total number of flags
 } hexaworld_cell_flag_t;
 
-/// @brief a set of flags
+/// @brief a 16-width set of bit flags
 typedef u16 flag_set16_t;
+
+/// @brief a 8-width set of bit flags
 typedef u8  flag_set8_t;
 
 /// @brief temperature in celsius (human POV)
@@ -91,7 +102,7 @@ typedef i16 alt_m_t;
 /// @brief freshwater height type
 typedef u16 frwtr_m_t;
 
-/// @brief ratio type (usually between 0.0f and 1.0f)
+/// @brief ratio type (usually between 0.0f and 1.0f, but no guarantee)
 typedef f32 ratio_t;
 
 /**
@@ -122,6 +133,7 @@ typedef struct hexa_cell_t {
 
     /// expected temperature of the tile
     temp_c_t temperature;
+    /// bit flags representing wether a direction is considered as a freshwater source
     flag_set8_t freshwater_sources_directions;
 } hexa_cell_t;
 

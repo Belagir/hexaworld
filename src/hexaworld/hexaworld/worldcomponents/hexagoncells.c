@@ -1,4 +1,13 @@
-
+/**
+ * @file hexagoncells.c
+ * @author gabriel 
+ * @brief Definition file for some cell data interaction functions
+ * @version 0.1
+ * @date 2023-04-30
+ * 
+ * @copyright Copyright (c) 2023
+ * 
+ */
 #include "hexaworldcomponents.h"
 
 // -------------------------------------------------------------------------------------------------

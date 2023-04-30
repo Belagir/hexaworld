@@ -1,4 +1,13 @@
-
+/**
+ * @file hexagonparadigm.c
+ * @author gabriel 
+ * @brief Definition file for hexagon-related functions
+ * @version 0.1
+ * @date 2023-04-30
+ * 
+ * @copyright Copyright (c) 2023
+ * 
+ */
 #include "hexagonparadigm.h"
 
 #include <raylib.h>

@@ -1,4 +1,13 @@
-
+/**
+ * @file layers.h
+ * @author gabriel 
+ * @brief Definition file for some usually widely needed layer constants.
+ * @version 0.1
+ * @date 2023-04-30
+ * 
+ * @copyright Copyright (c) 2023
+ * 
+ */
 #ifndef __LAYERS_H__
 #define __LAYERS_H__
 

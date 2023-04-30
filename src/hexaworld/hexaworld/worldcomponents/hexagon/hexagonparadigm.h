@@ -1,4 +1,13 @@
-
+/**
+ * @file hexagonparadigm.h
+ * @author gabriel 
+ * @brief The hexagon is the start and the end. This definition file contains some functions and data types needed to work with hexagons.
+ * @version 0.1
+ * @date 2023-04-30
+ * 
+ * @copyright Copyright (c) 2023
+ * 
+ */
 #ifndef __HEXAGONPARADIGM_H__
 #define __HEXAGONPARADIGM_H__
 

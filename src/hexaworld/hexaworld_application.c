@@ -20,8 +20,8 @@
 // -------------------------------------------------------------------------------------------------
 
 #define HEXAPP_WINDOW_TITLE "hexaworld" ///< Title of the raylib window.
-#define WORLD_TEXTURE_BUFFER_WIDTH  2048u
-#define WORLD_TEXTURE_BUFFER_HEIGHT 2048u
+#define WORLD_TEXTURE_BUFFER_WIDTH  2048u   ///< world render texture pixel x-axis dimension
+#define WORLD_TEXTURE_BUFFER_HEIGHT 2048u   ///< world render texture pixel y-axis dimension
 
 // -------------------------------------------------------------------------------------------------
 // ---- TYPE DEFINITIONS ---------------------------------------------------------------------------

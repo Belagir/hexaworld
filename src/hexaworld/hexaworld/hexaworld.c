@@ -67,14 +67,23 @@ hexaworld_t *hexaworld_create_empty(size_t width, size_t height) {
         return NULL;
     }
 
+    // adding the tectonic plates layer
     world->hexaworld_layers_functions[HEXAW_LAYER_TELLURIC]    = telluric_layer_calls;
+    // adding the rough landmass layer
     world->hexaworld_layers_functions[HEXAW_LAYER_LANDMASS]    = landmass_layer_calls;
+    // adding the altitude gradient layer
     world->hexaworld_layers_functions[HEXAW_LAYER_ALTITUDE]    = altitude_layer_calls;
+    // adding the mean temperature layer
     world->hexaworld_layers_functions[HEXAW_LAYER_TEMPERATURE] = temperature_layer_calls;
+    // adding the wind mean direction layer
     world->hexaworld_layers_functions[HEXAW_LAYER_WINDS]       = winds_layer_calls;
+    // adding the cloud cover layer
     world->hexaworld_layers_functions[HEXAW_LAYER_HUMIDITY]    = humidity_layer_calls;
+    // adding the river & lakes layer
     world->hexaworld_layers_functions[HEXAW_LAYER_FRESHWATER]  = freshwater_layer_calls;
+    // adding the vegetation cover layer
     world->hexaworld_layers_functions[HEXAW_LAYER_VEGETATION]  = vegetation_layer_calls;
+    // adding the nice overworld drawing layer
     world->hexaworld_layers_functions[HEXAW_LAYER_WHOLE_WORLD] = whole_world_layer_calls;
 
     world->width = width;
