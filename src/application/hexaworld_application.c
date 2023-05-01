@@ -16,6 +16,7 @@
 #include <colorpalette.h>
 
 #include "hexaworld/hexaworld.h"
+#include "hexaworld/worldcomponents/hexagon/hexagonparadigm.h"
 #include "infopanel/infopanel.h"
 #include "windowdivision/windowregion.h"
 
@@ -47,6 +48,7 @@ typedef enum registered_window_region_t {
 typedef struct hexaworld_application_data_t {
     hexaworld_t *hexaworld;
     hexaworld_layer_t current_layer;
+    info_panel_t *linked_panel;
 } hexaworld_application_data_t;
 
 /**
@@ -55,9 +57,6 @@ typedef struct hexaworld_application_data_t {
 typedef struct hexaworld_raylib_app_handle_t {
     /// application-specific world data
     hexaworld_application_data_t hexaworld_data;
-
-    /// application-specific info panel
-    info_panel_t *infopanel;
 
     /// pixel width of the window
     i32 window_width;
@@ -117,8 +116,8 @@ hexaworld_raylib_app_handle_t * hexaworld_raylib_app_init(i32 random_seed, u32 w
     handle->hexaworld_data = (hexaworld_application_data_t) {
             .hexaworld = hexaworld_create_empty(world_width, world_height),
             .current_layer = HEXAW_LAYER_WHOLE_WORLD,
+            .linked_panel = info_panel_create(),
     };
-    handle->infopanel = info_panel_create();
 
     // raylib window
     InitWindow(handle->window_width, handle->window_height, HEXAPP_WINDOW_TITLE);
@@ -146,7 +145,7 @@ hexaworld_raylib_app_handle_t * hexaworld_raylib_app_init(i32 random_seed, u32 w
             handle->window_height,
             NULL,
             &winregion_infopanel_on_refresh,
-            (void *) &handle->hexaworld_data);
+            (void *) handle->hexaworld_data.linked_panel);
     
 
     return handle;
@@ -158,7 +157,7 @@ void hexaworld_raylib_app_deinit(hexaworld_raylib_app_handle_t **hexapp) {
         window_region_deinit((*hexapp)->window_regions + i);
     }
 
-    info_panel_destroy(&((*hexapp)->infopanel));
+    info_panel_destroy(&((*hexapp)->hexaworld_data.linked_panel));
     hexaworld_destroy(&((*hexapp)->hexaworld_data.hexaworld));
 
     if (IsWindowReady()) {
@@ -205,6 +204,7 @@ void hexaworld_raylib_app_run(hexaworld_raylib_app_handle_t *hexapp, u32 target_
             for (size_t i = 0; i < WINREGIONS_NUMBER; i++) {
                 window_region_process_click(hexapp->window_regions + i, GetMouseX(), GetMouseY());
             }
+            window_region_notify_changed(hexapp->window_regions + WINREGION_TILEINFO);
         }
 
         for (size_t i = 0; i < WINREGIONS_NUMBER; i++) {
@@ -246,15 +246,14 @@ static void winregion_hexaworld_on_refresh(vector_2d_cartesian_t target_dim, voi
 static void winregion_hexaworld_on_click(vector_2d_cartesian_t region_dim, u32 x, u32 y, void *world_data) {
     hexaworld_application_data_t *hexaworld_data = (hexaworld_application_data_t *) world_data;
     hexa_cell_t *clicked_cell = NULL;
+    u32 array_x = 0u;
+    u32 array_y = 0u;
 
     f32 target_rectangle[4u] = { 0.0f, 0.0f, region_dim.v, region_dim.w };
 
-    clicked_cell = hexaworld_tile_at(hexaworld_data->hexaworld, x, y, target_rectangle);
+    clicked_cell = hexaworld_tile_at(hexaworld_data->hexaworld, x, y, target_rectangle, &array_x, &array_y);
 
-    if (!clicked_cell) {
-        return;
-    }
-
+    info_panel_set_examined_cell(hexaworld_data->linked_panel, clicked_cell, array_x, array_y);
 }
 
 // -------------------------------------------------------------------------------------------------

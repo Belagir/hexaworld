@@ -168,7 +168,7 @@ void hexaworld_raze(hexaworld_t *world) {
 }
 
 // -------------------------------------------------------------------------------------------------
-hexa_cell_t *hexaworld_tile_at(hexaworld_t *world, u32 x, u32 y, f32 reference_rectangle[4u]) {
+hexa_cell_t *hexaworld_tile_at(hexaworld_t *world, u32 x, u32 y, f32 reference_rectangle[4u], u32 *out_x, u32 *out_y) {
     vector_2d_cartesian_t array_coords = { 0u };
     i32 wanted_x = 0;
     i32 wanted_y = 0;
@@ -179,8 +179,14 @@ hexa_cell_t *hexaworld_tile_at(hexaworld_t *world, u32 x, u32 y, f32 reference_r
     wanted_y = (i32) floor(array_coords.w);
     
     if ((wanted_x < 0) || (wanted_x >= (i32) world->width) || (wanted_y < 0) || (wanted_y >= (i32) world->height)) {
+        *out_x = world->width;
+        *out_y = world->height;
+        
         return NULL;
     }
+
+    *out_x = wanted_x;
+    *out_y = wanted_y;
 
     return world->tiles[wanted_x] + wanted_y;
 }

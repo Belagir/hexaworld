@@ -70,6 +70,6 @@ void hexaworld_raze(hexaworld_t *world);
  * @param y 
  * @return hexa_cell_t* 
  */
-hexa_cell_t *hexaworld_tile_at(hexaworld_t *world, u32 x, u32 y, f32 reference_rectangle[4u]);
+hexa_cell_t *hexaworld_tile_at(hexaworld_t *world, u32 x, u32 y, f32 reference_rectangle[4u], u32 *out_x, u32 *out_y);
 
 #endif

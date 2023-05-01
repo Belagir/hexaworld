@@ -31,7 +31,7 @@ void info_panel_destroy(info_panel_t **panel);
  * @param panel 
  * @param cell 
  */
-void info_panel_set_examined_cell(info_panel_t *panel, hexa_cell_t *cell);
+void info_panel_set_examined_cell(info_panel_t *panel, hexa_cell_t *cell, u32 cell_pos_x, u32 cell_pos_y);
 
 /**
  * @brief 
