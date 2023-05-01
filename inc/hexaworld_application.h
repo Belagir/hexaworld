@@ -21,7 +21,7 @@ typedef struct hexaworld_raylib_app_handle_t hexaworld_raylib_app_handle_t;
 /**
  * @brief De-initialize the data beihnd an application handle and sets the handle to NULL
  * 
- * @param hexapp double pointer to an initialized application handle
+ * @param[inout] hexapp double pointer to an initialized application handle
  */
 void hexaworld_raylib_app_deinit(hexaworld_raylib_app_handle_t **hexapp);
 
@@ -30,11 +30,11 @@ void hexaworld_raylib_app_deinit(hexaworld_raylib_app_handle_t **hexapp);
  * This will start an empty raylib window. If this function is ran multiple times, all the returned handles point
  * to the same data.
  * 
- * @param random_seed any intgerer that will be used to seed the random number generator.
- * @param window_width width of the raylib window, in pixels
- * @param window_height height of the raylib window, in pixels
- * @param world_width width of the world, in number of tiles
- * @param world_height height of the world, in number of tiles
+ * @param[in] random_seed any intgerer that will be used to seed the random number generator.
+ * @param[in] window_width width of the raylib window, in pixels
+ * @param[in] window_height height of the raylib window, in pixels
+ * @param[in] world_width width of the world, in number of tiles
+ * @param[in] world_height height of the world, in number of tiles
  * @return hexaworld_raylib_app_handle_t* a handle to the application service data
  */
 hexaworld_raylib_app_handle_t * hexaworld_raylib_app_init(i32 random_seed, u32 window_width, u32 window_height, u32 world_width, u32 world_height);

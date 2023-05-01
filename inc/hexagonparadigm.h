@@ -15,6 +15,9 @@
 
 #define HEXAGON_SIDES_NB (6u)     ///< number of sides of an hexagon. tough.
 
+/**
+ * @brief Ways a hexagon can be drawn.
+ */
 typedef enum hexagon_draw_fillmode_t {
     DRAW_HEXAGON_FILL,
     DRAW_HEXAGON_LINES
@@ -40,22 +43,30 @@ typedef struct hexagon_shape_t {
  */
 hexagon_shape_t hexagon_pixel_position_in_rectangle(f32 boundaries[4u], u32 x, u32 y, u32 width, u32 height);
 
+/**
+ * @brief Computes the hexagonal tile's position containing a certain point in a rectangle.
+ * 
+ * @param[in] boundaries rectangle defined by the topleft coordinates and its sides' length (in pixels)
+ * @param[in] pix_x x-coordinates of a point in pixels
+ * @param[in] pix_y y-coordinates of a point in pixels
+ * @param[in] array_width width, in tiles, of the world array
+ * @param[in] array_height height, in tiles, of the world array
+ * @return vector_2d_cartesian_t integer coordinates of the tile if the point lies in the radius of an hexagon, or the array width and height if invalid
+ */
 vector_2d_cartesian_t hexagon_array_coords_from_rectangle(f32 boundaries[4u], u32 pix_x, u32 pix_y, u32 array_width, u32 array_height);
 
 /**
- * @brief 
+ * @brief Draws a regular hexagon shape to the current raylib context.
  * 
- * @param target_shape 
- * @param color 
- * @param scale 
- * @param fill 
+ * @param[in] target_shape shape describing an hexagon
+ * @param[in] color u32-coded color
+ * @param[in] scale scale to be applied to the hexagon's radius
+ * @param[in] fill wether to fill or not the hexagon
  */
 void draw_hexagon(hexagon_shape_t *target_shape, u32 color, f32 scale, hexagon_draw_fillmode_t fill);
 
 /**
- * 
  * @brief Possible directions from a hexagonal cell to another. Ordered along the unit circle.
- * 
  */
 typedef enum cell_direction_t {
     DIRECTION_E,    ///< Right cell

@@ -95,8 +95,8 @@ u32 float_equal(f32 val1, f32 val2, u32 max_ulps_diff);
 /**
  * @brief Returns the minimum of two numbers.
  * 
- * @param v1 first number
- * @param v2 second number
+ * @param[in] v1 first number
+ * @param[in] v2 second number
  * @return u64 the smallest of the two numbers.
  */
 u64 min(u64 v1, u64 v2);

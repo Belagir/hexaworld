@@ -43,7 +43,9 @@ static void vegetation_seed(hexaworld_t *world) {
                     NORMAL_DISTRIBUTION(VEGETATION_TEMPERATURE_MEAN, VEGETATION_TEMPERATURE_VARI, world->tiles[x][y].temperature / 2)
                     / NORMAL_DISTRIBUTION(VEGETATION_TEMPERATURE_MEAN, VEGETATION_TEMPERATURE_VARI, VEGETATION_TEMPERATURE_MEAN);
 
-            world->tiles[x][y].vegetation_cover = humidity_rating * temperature_rating * (world->tiles[x][y].altitude > 0);
+            world->tiles[x][y].vegetation_cover = 
+                    humidity_rating * temperature_rating 
+                    * ((world->tiles[x][y].altitude > 0) || hexa_cell_has_flag(world->tiles[x] + y, HEXAW_FLAG_ISLES));
         }
     }
 }

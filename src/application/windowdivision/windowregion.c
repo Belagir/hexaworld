@@ -1,4 +1,13 @@
-
+/**
+ * @file windowregion.c
+ * @author gabriel 
+ * @brief Window regions utilities definition file.
+ * @version 0.1
+ * @date 2023-05-01
+ * 
+ * @copyright Copyright (c) 2023
+ * 
+ */
 #include "windowregion.h"
 
 #include <raylib.h>

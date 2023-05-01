@@ -114,7 +114,7 @@ hexaworld_raylib_app_handle_t * hexaworld_raylib_app_init(i32 random_seed, u32 w
 
     // hexaworld allocation & initialisation of the companion data
     handle->hexaworld_data = (hexaworld_application_data_t) {
-            .hexaworld = hexaworld_create_empty(world_width, world_height, random_seed),
+            .hexaworld = hexaworld_create_empty(world_width, world_height, (random_seed == 0) ? time(NULL) : random_seed),
             .current_layer = HEXAW_LAYER_WHOLE_WORLD,
             .linked_panel = info_panel_create(),
     };

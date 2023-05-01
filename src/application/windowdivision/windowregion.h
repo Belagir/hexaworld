@@ -48,13 +48,13 @@ typedef struct window_region_t {
  * @brief Initialize a region data from some information.
  * The internal texture buffer size will be set to the real size of the region relative to the window.
  * 
- * @param w_region target window region data
- * @param ratio_coords_rectangle ratios of the window's sizes, representing the zone attributed to the region
- * @param window_width window pixel width
- * @param window_height window pixel height
- * @param on_click_f function to be called on a click on the region (can be NULL)
- * @param on_refresh_f function to be called when the region needs to be re-drawn (can be NULL)
- * @param related_data pointer to some anonymous data needed by the two previous functions
+ * @param[out] w_region target window region data
+ * @param[in] ratio_coords_rectangle ratios of the window's sizes, representing the zone attributed to the region
+ * @param[in] window_width window pixel width
+ * @param[in] window_height window pixel height
+ * @param[in] on_click_f function to be called on a click on the region (can be NULL)
+ * @param[in] on_refresh_f function to be called when the region needs to be re-drawn (can be NULL)
+ * @param[in] related_data pointer to some anonymous data needed by the two previous functions
  */
 void window_region_init(
             window_region_t *w_region,
@@ -67,36 +67,36 @@ void window_region_init(
 /**
  * @brief Re-draw a region's state to its internal texture.
  * 
- * @param w_region target region
+ * @param[inout] w_region target region
  */
 void window_region_refresh(window_region_t *w_region);
 
 /**
  * @brief Draws the internal texture to the active raylib context.
  * 
- * @param w_region target region
+ * @param[in] w_region target region
  */
 void window_region_draw(window_region_t *w_region);
 /**
  * @brief Processes a click at a certain pair of coordinates using the data held in the region structure.
  * 
- * @param w_region target region
- * @param x mouse click x-coordinate
- * @param y mouse click y-coordinate
+ * @param[inout] w_region target region
+ * @param[in] x mouse click x-coordinate
+ * @param[in] y mouse click y-coordinate
  */
 void window_region_process_click(window_region_t *w_region, i32 x, i32 y);
 
 /**
  * @brief Releases resources held by the structure.
  * 
- * @param w_region target region
+ * @param[inout] w_region target region
  */
 void window_region_deinit(window_region_t *w_region);
 
 /**
  * @brief Notifies a region that it has changed
  * 
- * @param w_region target window region
+ * @param[inout] w_region target window region
  */
 void window_region_notify_changed(window_region_t *w_region);
 

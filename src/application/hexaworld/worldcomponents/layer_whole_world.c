@@ -6,21 +6,74 @@
 #include <raylib.h>
 #include <colorpalette.h>
 
+// -------------------------------------------------------------------------------------------------
+// -------------------------------------------------------------------------------------------------
+
 #define ITERATION_NB_WHOLE_WORLD (0u)
 
 #define WHOLE_WORLD_RANDOM_GENERATION_STEP_ANGLE (4u)
 #define WHOLE_WORLD_RANDOM_GENERATION_STEP_RADIUS (2u)
-#define WHOLE_WORLD_ISLES_MAX_NB (4u)
+#define WHOLE_WORLD_ISLES_MAX_NB (2u)
 
+#define WHOLE_WORLD_AUTOMATIC_SNOW_TEMP (-20)
+
+// -------------------------------------------------------------------------------------------------
+// -------------------------------------------------------------------------------------------------
+
+/**
+ * @brief Determines the color of a tile if it were an ocean tile.
+ * 
+ * @param[in] cell cell containing the information about the tile
+ * @return Color ocean color
+ */
 static Color color_ocean_tile(hexa_cell_t *cell);
+
+/**
+ * @brief Determines the color of a tile if it were an earth tile.
+ * 
+ * @param[in] cell cell containing the information about the tile
+ * @return Color earth color
+ */
 static Color color_earth_tile(hexa_cell_t *cell);
 
-static void draw_vegetation(hexa_cell_t *cell, hexagon_shape_t *target_shape);
-static void draw_snow(hexa_cell_t *cell, hexagon_shape_t *target_shape);
+/**
+ * @brief Determines the snow accent color of a tile.
+ * 
+ * @param[in] cell cell containing the information about the tile
+ * @return Color snow color
+ */
+static Color color_snowy_tile(hexa_cell_t *cell);
 
+/**
+ * @brief Determines the vegetation accent color of a tile.
+ * 
+ * @param[in] cell cell containing the information about the tile
+ * @return Color vegetation color
+ */
+static Color color_veget_tile(hexa_cell_t *cell);
+
+/**
+ * @brief Draws the potential mountain or canyon present on a tile.
+ * 
+ * @param[in] cell cell containing the information about the tile
+ * @param[in] target_shape destination hexagon shape
+ */
 static void draw_mountains_canyon(hexa_cell_t *cell, hexagon_shape_t *target_shape);
+
+/**
+ * @brief Draws the potential isles present on a tile.
+ * 
+ * @param[in] cell cell containing the information about the tile
+ * @param[in] target_shape destination hexagon shape
+ */
 static void draw_isles(hexa_cell_t *cell, hexagon_shape_t *target_shape);
 
+/**
+ * @brief Draws the potential freshwater feature present on a tile.
+ * 
+ * @param[in] cell cell containing the information about the tile
+ * @param[in] target_shape destination hexagon shape
+ */
 static void draw_freshwater(hexa_cell_t *cell, hexagon_shape_t *target_shape);
 
 // -------------------------------------------------------------------------------------------------
@@ -35,17 +88,14 @@ static void whole_world_draw(hexa_cell_t *cell, hexagon_shape_t *target_shape) {
     } else {
         tile_color = color_ocean_tile(cell);
     }
-
     draw_hexagon(target_shape, FROM_RAYLIB_COLOR(tile_color), 1.0f , DRAW_HEXAGON_FILL);
+    draw_hexagon(target_shape, FROM_RAYLIB_COLOR(color_snowy_tile(cell)), 1.0f , DRAW_HEXAGON_FILL);
 
     if  (cell->altitude > 0) {
-        draw_vegetation(cell, target_shape);
+        draw_hexagon(target_shape, FROM_RAYLIB_COLOR(color_veget_tile(cell)), 1.0f , DRAW_HEXAGON_FILL);
     }
 
     draw_isles(cell, target_shape);
-    
-    draw_snow(cell, target_shape);
-
     draw_mountains_canyon(cell, target_shape);
     draw_freshwater(cell, target_shape);
 
@@ -55,7 +105,7 @@ static void whole_world_draw(hexa_cell_t *cell, hexagon_shape_t *target_shape) {
 static Color color_ocean_tile(hexa_cell_t *cell) {
     Color tile_color = AS_RAYLIB_COLOR(COLOR_DUSK_BLUE);
 
-    if ((cell->temperature <= -10) && (cell->altitude > (ALTITUDE_MIN / 4)) || (cell->temperature <= -20)) {
+    if ((cell->temperature <= (WHOLE_WORLD_AUTOMATIC_SNOW_TEMP / 2)) && (cell->altitude > (ALTITUDE_MIN / 4)) || (cell->temperature <= WHOLE_WORLD_AUTOMATIC_SNOW_TEMP)) {
         tile_color = AS_RAYLIB_COLOR(COLOR_ICE_BLUE);
     } else if (cell->altitude > (WHOLE_WORLD_OCEAN_REEF_CUTOUT * ALTITUDE_MIN)) {
         tile_color = AS_RAYLIB_COLOR(COLOR_AZURE);
@@ -82,25 +132,26 @@ static Color color_earth_tile(hexa_cell_t *cell) {
 }
 
 // -------------------------------------------------------------------------------------------------
-static void draw_vegetation(hexa_cell_t *cell, hexagon_shape_t *target_shape) {
+static Color color_snowy_tile(hexa_cell_t *cell) {
+    Color tile_color = AS_RAYLIB_COLOR(COLOR_ICE_BLUE);
+
+    if (cell->temperature <= WHOLE_WORLD_AUTOMATIC_SNOW_TEMP) {
+        tile_color.a = 0xFF;
+    } else if ((cell->temperature > 0) || (cell->altitude <= 0)) {
+        tile_color.a = 0x00;
+    } else {
+        tile_color.a = (1.0f - ((f32) (cell->temperature - TEMPERATURE_MIN) / (f32) -TEMPERATURE_MIN)) * cell->humidity * 0xFF;
+    }
+    
+    return tile_color;
+}
+
+static Color color_veget_tile(hexa_cell_t *cell) {
     Color tile_color = AS_RAYLIB_COLOR(COLOR_LEAFY_GREEN);
 
     tile_color.a = cell->vegetation_cover * 0xFF;
     
-    draw_hexagon(target_shape, FROM_RAYLIB_COLOR(tile_color), 1.0f , DRAW_HEXAGON_FILL);
-}
-
-// -------------------------------------------------------------------------------------------------
-static void draw_snow(hexa_cell_t *cell, hexagon_shape_t *target_shape) {
-    Color tile_color = AS_RAYLIB_COLOR(COLOR_ICE_BLUE);
-
-    if ((cell->temperature > 0) || (cell->altitude <= 0)) {
-        return;
-    }
-
-    tile_color.a = ((f32) (cell->temperature - TEMPERATURE_MIN) / (f32) TEMPERATURE_RANGE) * 0xFF;
-    
-    draw_hexagon(target_shape, FROM_RAYLIB_COLOR(tile_color), 1.0f , DRAW_HEXAGON_FILL);
+    return tile_color;
 }
 
 // -------------------------------------------------------------------------------------------------
@@ -137,10 +188,9 @@ static void draw_isles(hexa_cell_t *cell, hexagon_shape_t *target_shape) {
 
     isle_shape.radius = target_shape->radius * 0.4f;
 
-    tile_color.a = cell->vegetation_cover * 0xFF;
+    tile_color = color_veget_tile(cell);
 
-
-    random_nb_isles = (u32) ((i32) (rand() % (WHOLE_WORLD_ISLES_MAX_NB - 1)) + 1);
+    random_nb_isles = (u32) ((i32) (rand() % WHOLE_WORLD_ISLES_MAX_NB));
     for (size_t i = 0u ; i < random_nb_isles ; i++) {
         random_isle_pos.angle = ((f32) (rand() % WHOLE_WORLD_RANDOM_GENERATION_STEP_ANGLE) / (f32) WHOLE_WORLD_RANDOM_GENERATION_STEP_ANGLE) * PI_T_2;
         random_isle_pos.magnitude = (f32) (rand() % WHOLE_WORLD_RANDOM_GENERATION_STEP_RADIUS) / (f32) WHOLE_WORLD_RANDOM_GENERATION_STEP_RADIUS;
@@ -151,6 +201,7 @@ static void draw_isles(hexa_cell_t *cell, hexagon_shape_t *target_shape) {
         isle_shape.center.w += target_shape->center.w;
 
         draw_hexagon(&isle_shape, FROM_RAYLIB_COLOR(color_earth_tile(cell)), 1.0f, DRAW_HEXAGON_FILL);
+        draw_hexagon(&isle_shape, FROM_RAYLIB_COLOR(color_snowy_tile(cell)), 1.0f, DRAW_HEXAGON_FILL);
         draw_hexagon(&isle_shape, FROM_RAYLIB_COLOR(tile_color), 1.0f, DRAW_HEXAGON_FILL);
     }
 }
@@ -181,7 +232,6 @@ static void draw_freshwater(hexa_cell_t *cell, hexagon_shape_t *target_shape) {
 
     if (hexa_cell_has_flag(cell, HEXAW_FLAG_LAKE)) {
         draw_hexagon(target_shape, FROM_RAYLIB_COLOR(color_line), 0.66f , DRAW_HEXAGON_FILL);
-        draw_hexagon(target_shape, FROM_RAYLIB_COLOR(color_ice), 0.66f , DRAW_HEXAGON_FILL);
     }
 
     for (size_t i = 0u ; i < DIRECTIONS_NB ; i++) {
@@ -204,20 +254,6 @@ static void draw_freshwater(hexa_cell_t *cell, hexagon_shape_t *target_shape) {
                     
                     target_shape->radius / 5.0f, 
                     color_line
-            );
-            DrawLineBezierQuad(
-                    (Vector2) {
-                            .x = target_shape->center.v + water_start.v * target_shape->radius, 
-                            .y = target_shape->center.w + water_start.w * target_shape->radius },
-                    (Vector2) {
-                            .x = target_shape->center.v + water_end.v * target_shape->radius, 
-                            .y = target_shape->center.w + water_end.w * target_shape->radius },
-                    (Vector2) {
-                            .x = target_shape->center.v, 
-                            .y = target_shape->center.w },
-                    
-                    target_shape->radius / 5.0f, 
-                    color_ice
             );
         }
     }

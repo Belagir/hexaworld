@@ -50,7 +50,7 @@
 #define FRESHWATER_LAKE_DEPTH_THRESHOLD (5u)        ///< depth from which a body of water is considered a lake
 
 #define VEGETATION_TEMPERATURE_MEAN (18)    ///< ideal temperature for things to grow
-#define VEGETATION_TEMPERATURE_VARI (10)    ///< squared variation in temperature tolerated by plants
+#define VEGETATION_TEMPERATURE_VARI (8)    ///< squared variation in temperature tolerated by plants
 #define VEGETATION_CUTOUT_THRESHOLD (0.01f) ///< thrshold from which the vegetation cover is ignored by some methods
 
 #define WHOLE_WORLD_OCEAN_ABYSS_CUTOUT (0.50f)  ///< height ratio for abyss ocean -> normal ocean drawing 

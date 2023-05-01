@@ -1,4 +1,13 @@
-
+/**
+ * @file infopanel.c
+ * @author gabriel 
+ * @brief DEfinition file for the info panel object.
+ * @version 0.1
+ * @date 2023-05-01
+ * 
+ * @copyright Copyright (c) 2023
+ * 
+ */
 #include "infopanel.h"
 
 #include <stdio.h>
@@ -8,21 +17,28 @@
 #include <colorpalette.h>
 #include <raylib.h>
 
-#define TILE_FLAG_NO_DESCRIPTION ""
+// -------------------------------------------------------------------------------------------------
+// -------------------------------------------------------------------------------------------------
 
-#define TILE_INFO_BUFFER_SIZE (1024u)
-#define TILE_INFO_FORMAT_STRING ("TILE AT %3d : %3d\n - mean altitude : % 6dm\n - mean temperature : %+ 3d°C\n - vegetation cover : %.1f%%\n\n")
-#define TILE_INFO_FONT_SIZE (18)
+#define TILE_FLAG_NO_DESCRIPTION ("")     ///< constant to signal that a cell flag has no description 
+
+#define TILE_INFO_BUFFER_SIZE (1024u)       ///< number of ascii signs that an info panel can display
+#define TILE_INFO_FORMAT_STRING ("TILE AT %3d : %3d\n - mean altitude : % 6dm\n - mean temperature : %+ 3d°C\n - vegetation cover : %.1f%%\n\n")        ///< main format string do display cell information
+#define TILE_INFO_FONT_SIZE (18)        ///< font size for the panel
 
 // -------------------------------------------------------------------------------------------------
 // -------------------------------------------------------------------------------------------------
 
 // -------------------------------------------------------------------------------------------------
 typedef struct info_panel_t {
+    /// currently examined cell, watch out for NULL !
     hexa_cell_t *target_cell;
+    /// cell's x position
     u32 cell_x;
+    /// cell's y position
     u32 cell_y;
 
+    /// pointer to the string buffer
     char *tile_description_buffer;
 } info_panel_t;
 
@@ -54,10 +70,11 @@ const char *tile_flag_description_map[HEXAW_FLAGS_NB] = {
 
 // -------------------------------------------------------------------------------------------------
 // -------------------------------------------------------------------------------------------------
+
 /**
- * @brief 
+ * @brief Updates the description buffer from the examined cell
  * 
- * @param panel 
+ * @param[inout] panel target panel
  */
 void update_tile_description_buffer(info_panel_t *panel);
 

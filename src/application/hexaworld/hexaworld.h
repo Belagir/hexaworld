@@ -65,8 +65,8 @@ void hexaworld_raze(hexaworld_t *world);
 /**
  * @brief Changes the random seed value of the world.
  * 
- * @param world target world
- * @param new_seed new seed for the RNG
+ * @param[inout] world target world
+ * @param[in] new_seed new seed for the RNG
  */
 void hexaworld_reseed(hexaworld_t *world, i32 new_seed);
 
@@ -74,10 +74,13 @@ void hexaworld_reseed(hexaworld_t *world, i32 new_seed);
  * @brief Returns a pointer to a tile at the position (x, y) inside a reference rectangle.
  * Returns NULL if the coordinates are out of bounds.
  * 
- * @param world 
- * @param x 
- * @param y 
- * @return hexa_cell_t* 
+ * @param[in] world target world
+ * @param[in] x x pixel coordinates
+ * @param[in] y y pixel coordinates
+ * @param[in] reference_rectangle reference rectangle
+ * @param[out] out_x outgoing x array coordinates
+ * @param[out] out_y outgoing y array coordinates
+ * @return hexa_cell_t* wanted cell, NULL if it does not exists
  */
 hexa_cell_t *hexaworld_tile_at(hexaworld_t *world, u32 x, u32 y, f32 reference_rectangle[4u], u32 *out_x, u32 *out_y);
 
