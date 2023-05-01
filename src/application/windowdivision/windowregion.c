@@ -29,6 +29,8 @@ void window_region_init(
     w_region->on_click_f = on_click_f;
     w_region->on_refresh_f = on_refresh_f;
 
+    w_region->flag_changed = 1u;
+
     w_region->buffer_rendertexture = LoadRenderTexture(w_region->px_coords_rectangle[2u], w_region->px_coords_rectangle[3u]);
 
     w_region->related_data = related_data;
@@ -36,7 +38,7 @@ void window_region_init(
 
 // -------------------------------------------------------------------------------------------------
 void window_region_refresh(window_region_t *w_region) {
-    if ((!w_region) || (!w_region->on_refresh_f)) {
+    if ((!w_region) || (!w_region->on_refresh_f) || (!w_region->flag_changed)) {
         return;
     }
 
@@ -54,6 +56,8 @@ void window_region_refresh(window_region_t *w_region) {
 
     GenTextureMipmaps(&(w_region->buffer_rendertexture.texture));
     SetTextureFilter(w_region->buffer_rendertexture.texture, TEXTURE_FILTER_BILINEAR);
+
+    w_region->flag_changed = 0u;
 }
 
 // -------------------------------------------------------------------------------------------------
@@ -95,4 +99,9 @@ void window_region_deinit(window_region_t *w_region) {
     }
 
     UnloadRenderTexture(w_region->buffer_rendertexture);
+}
+
+// -------------------------------------------------------------------------------------------------
+void window_region_notify_changed(window_region_t *w_region) {
+    w_region->flag_changed = 1u;
 }

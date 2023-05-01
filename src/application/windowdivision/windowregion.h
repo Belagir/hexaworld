@@ -15,16 +15,6 @@
 #include <raylib.h>
 
 /**
- * @brief Lists the registered window region in the application
- */
-typedef enum registered_window_region_t {
-    WINREGION_HEXAWORLD,
-    WINREGION_TILEINFO,
-
-    WINREGIONS_NUMBER
-} registered_window_region_t;
-
-/**
  * @brief function handling a click on the region
  */
 typedef void (*on_region_click_func_t)(vector_2d_cartesian_t region_dim, u32 relative_x, u32 relative_y, void *data);
@@ -40,6 +30,9 @@ typedef struct window_region_t {
     /// actual window-relative pixel coordinates of the region
     f32 px_coords_rectangle[4u];
     
+    /// "need redraw" flag
+    u32 flag_changed;
+
     /// function executed when the user clicks on the region 
     on_region_click_func_t on_click_f;
     /// function executed when something needs to refresh the buffer from the internal data
@@ -100,5 +93,11 @@ void window_region_process_click(window_region_t *w_region, i32 x, i32 y);
  */
 void window_region_deinit(window_region_t *w_region);
 
+/**
+ * @brief Notifies a region that it has changed
+ * 
+ * @param w_region target window region
+ */
+void window_region_notify_changed(window_region_t *w_region);
 
 #endif
