@@ -28,6 +28,7 @@
 #define TELLURIC_VECTOR_UNIT_ANGLE ((PI_T_2) / (TELLURIC_VECTOR_DIRECTIONS_NB))      ///< telluric vector minimum angle 
 
 #define LANDMASS_SEEDING_CHANCE (0x03)    ///< the greater, the bigger the chance a land tile is seeded.
+#define LANDMASS_NO_ISLE_CHANCE (0x03)    ///<  the greater, the smaller the chance a sile flag is created.
 
 #define ALTITUDE_MAX (4000)  ///< maximum altitude, in meters
 #define ALTITUDE_MIN (-3000)  ///< minimum altitude, in meters

@@ -8,6 +8,10 @@
 
 #define ITERATION_NB_WHOLE_WORLD (0u)
 
+#define WHOLE_WORLD_RANDOM_GENERATION_STEP_ANGLE (4u)
+#define WHOLE_WORLD_RANDOM_GENERATION_STEP_RADIUS (2u)
+#define WHOLE_WORLD_ISLES_MAX_NB (4u)
+
 static Color color_ocean_tile(hexa_cell_t *cell);
 static Color color_earth_tile(hexa_cell_t *cell);
 
@@ -37,10 +41,14 @@ static void whole_world_draw(hexa_cell_t *cell, hexagon_shape_t *target_shape) {
     if  (cell->altitude > 0) {
         draw_vegetation(cell, target_shape);
     }
+
+    draw_isles(cell, target_shape);
+    
     draw_snow(cell, target_shape);
 
     draw_mountains_canyon(cell, target_shape);
     draw_freshwater(cell, target_shape);
+
 }
 
 // -------------------------------------------------------------------------------------------------
@@ -119,14 +127,32 @@ static void draw_mountains_canyon(hexa_cell_t *cell, hexagon_shape_t *target_sha
 // -------------------------------------------------------------------------------------------------
 static void draw_isles(hexa_cell_t *cell, hexagon_shape_t *target_shape) {
     Color tile_color = AS_RAYLIB_COLOR(COLOR_LEAFY_GREEN);
+    vector_2d_polar_t random_isle_pos = { 0u };
+    u32 random_nb_isles = 0u;
+    hexagon_shape_t isle_shape = { 0u };
 
     if (!hexa_cell_has_flag(cell, HEXAW_FLAG_ISLES)) {
         return;
     }
 
+    isle_shape.radius = target_shape->radius * 0.4f;
+
     tile_color.a = cell->vegetation_cover * 0xFF;
 
 
+    random_nb_isles = (u32) ((i32) (rand() % (WHOLE_WORLD_ISLES_MAX_NB - 1)) + 1);
+    for (size_t i = 0u ; i < random_nb_isles ; i++) {
+        random_isle_pos.angle = ((f32) (rand() % WHOLE_WORLD_RANDOM_GENERATION_STEP_ANGLE) / (f32) WHOLE_WORLD_RANDOM_GENERATION_STEP_ANGLE) * PI_T_2;
+        random_isle_pos.magnitude = (f32) (rand() % WHOLE_WORLD_RANDOM_GENERATION_STEP_RADIUS) / (f32) WHOLE_WORLD_RANDOM_GENERATION_STEP_RADIUS;
+        random_isle_pos.magnitude = (random_isle_pos.magnitude * (target_shape->radius - isle_shape.radius));
+
+        isle_shape.center = vector2d_polar_to_cartesian(random_isle_pos);
+        isle_shape.center.v += target_shape->center.v;
+        isle_shape.center.w += target_shape->center.w;
+
+        draw_hexagon(&isle_shape, FROM_RAYLIB_COLOR(color_earth_tile(cell)), 1.0f, DRAW_HEXAGON_FILL);
+        draw_hexagon(&isle_shape, FROM_RAYLIB_COLOR(tile_color), 1.0f, DRAW_HEXAGON_FILL);
+    }
 }
 
 // -------------------------------------------------------------------------------------------------

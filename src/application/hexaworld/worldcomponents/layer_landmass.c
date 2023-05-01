@@ -74,7 +74,7 @@ static void landmass_flag_gen(void *target_cell, void *neighbors[DIRECTIONS_NB])
             hexa_cell_set_flag(cell, HEXAW_FLAG_CANYONS);
         }
     } else {
-        if (is_a_ridge) {
+        if ((is_a_ridge) && ((rand() % LANDMASS_NO_ISLE_CHANCE) == 0)) {
             hexa_cell_set_flag(cell, HEXAW_FLAG_ISLES);
         } else if (is_a_rift) {
             hexa_cell_set_flag(cell, HEXAW_FLAG_UNDERWATER_CANYONS);
