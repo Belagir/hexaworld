@@ -16,6 +16,7 @@
 #include <colorpalette.h>
 
 #include "hexaworld/hexaworld.h"
+#include "infopanel/infopanel.h"
 #include "windowdivision/windowregion.h"
 
 // -------------------------------------------------------------------------------------------------
@@ -54,6 +55,9 @@ typedef struct hexaworld_application_data_t {
 typedef struct hexaworld_raylib_app_handle_t {
     /// application-specific world data
     hexaworld_application_data_t hexaworld_data;
+
+    /// application-specific info panel
+    info_panel_t *infopanel;
 
     /// pixel width of the window
     i32 window_width;
@@ -94,43 +98,58 @@ static void winregion_hexaworld_on_refresh(vector_2d_cartesian_t target_dim, voi
 
 static void winregion_hexaworld_on_click(vector_2d_cartesian_t region_dim, u32 x, u32 y, void *world_data);
 
+static void winregion_infopanel_on_refresh(vector_2d_cartesian_t target_dim, void *info_panel_data);
+
+
 // -------------------------------------------------------------------------------------------------
 // ---- HEADER FUNCTIONS DEFINITIONS ---------------------------------------------------------------
 // -------------------------------------------------------------------------------------------------
 
 // -------------------------------------------------------------------------------------------------
 hexaworld_raylib_app_handle_t * hexaworld_raylib_app_init(i32 random_seed, u32 window_width, u32 window_height, u32 world_width, u32 world_height) {
+    hexaworld_raylib_app_handle_t *handle = &module_data.real_app;
+
     // window dimensions
-    module_data.real_app.window_height = window_height;
-    module_data.real_app.window_width  = window_width;
+    handle->window_height = window_height;
+    handle->window_width  = window_width;
 
     // hexaworld allocation & initialisation of the companion data
-    module_data.real_app.hexaworld_data = (hexaworld_application_data_t) {
+    handle->hexaworld_data = (hexaworld_application_data_t) {
             .hexaworld = hexaworld_create_empty(world_width, world_height),
             .current_layer = HEXAW_LAYER_WHOLE_WORLD,
     };
+    handle->infopanel = info_panel_create();
 
     // raylib window
-    InitWindow(module_data.real_app.window_width, module_data.real_app.window_height, HEXAPP_WINDOW_TITLE);
+    InitWindow(handle->window_width, handle->window_height, HEXAPP_WINDOW_TITLE);
     // random number generator
     srand(random_seed);
 
-    if (module_data.real_app.hexaworld_data.hexaworld) {
+    if (handle->hexaworld_data.hexaworld) {
         // generate ALL the LAYERS !
-        generate_world(module_data.real_app.hexaworld_data.hexaworld);
+        generate_world(handle->hexaworld_data.hexaworld);
     }
 
     // assign window regions to some data
     window_region_init(
-            module_data.real_app.window_regions + WINREGION_HEXAWORLD, 
+            handle->window_regions + WINREGION_HEXAWORLD, 
             window_position_map[WINREGION_HEXAWORLD], 
-            module_data.real_app.window_width, 
-            module_data.real_app.window_height,
+            handle->window_width, 
+            handle->window_height,
             &winregion_hexaworld_on_click,
             &winregion_hexaworld_on_refresh,
-            (void *) &module_data.real_app.hexaworld_data);
+            (void *) &handle->hexaworld_data);
+    window_region_init(
+            handle->window_regions + WINREGION_TILEINFO, 
+            window_position_map[WINREGION_TILEINFO], 
+            handle->window_width, 
+            handle->window_height,
+            NULL,
+            &winregion_infopanel_on_refresh,
+            (void *) &handle->hexaworld_data);
+    
 
-    return &(module_data.real_app);
+    return handle;
 }
 
 // -------------------------------------------------------------------------------------------------
@@ -139,6 +158,7 @@ void hexaworld_raylib_app_deinit(hexaworld_raylib_app_handle_t **hexapp) {
         window_region_deinit((*hexapp)->window_regions + i);
     }
 
+    info_panel_destroy(&((*hexapp)->infopanel));
     hexaworld_destroy(&((*hexapp)->hexaworld_data.hexaworld));
 
     if (IsWindowReady()) {
@@ -235,4 +255,11 @@ static void winregion_hexaworld_on_click(vector_2d_cartesian_t region_dim, u32 x
         return;
     }
 
+}
+
+// -------------------------------------------------------------------------------------------------
+static void winregion_infopanel_on_refresh(vector_2d_cartesian_t target_dim, void *info_panel_data) {
+    info_panel_t *panel = (info_panel_t *) info_panel_data;
+
+    info_panel_draw(panel);
 }
