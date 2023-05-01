@@ -35,7 +35,7 @@
 #define ALTITUDE_EROSION_RAND_VARIATION (30)    ///< random variation of altitude
 
 #define TEMPERATURE_MAX (40)    ///< maximum temperature (on the equator at sea level)
-#define TEMPERATURE_MIN (-30)   ///< minimum temperature (on the poles at sea level)
+#define TEMPERATURE_MIN (-25)   ///< minimum temperature (on the poles at sea level)
 #define TEMPERATURE_RANGE (TEMPERATURE_MAX - TEMPERATURE_MIN)   ///< total temperature range
 #define TEMPERATURE_ALTITUDE_MULTIPLIER (-0.00625f)     ///< °C lost with every meter of altitude
 
@@ -99,6 +99,9 @@ typedef struct layer_calls_t {
 
 // -------------------------------------------------------------------------------------------------
 typedef struct hexaworld_t { 
+    /// layers generation functions
+    layer_calls_t hexaworld_layers_functions[HEXAW_LAYERS_NUMBER];
+
     /// 2d heap-allocated array of the tiles
     hexa_cell_t **tiles;
     /// number of tiles on the x-axis
@@ -109,8 +112,8 @@ typedef struct hexaworld_t {
     /// pointer to an heap-allocated cellular automaton for layer generation
     cell_automaton_t *automaton;
 
-    /// layers generation functions
-    layer_calls_t hexaworld_layers_functions[HEXAW_LAYERS_NUMBER];
+    /// seed used for the map generation
+    i32 map_seed;
 } hexaworld_t;
 
 // -------------------------------------------------------------------------------------------------

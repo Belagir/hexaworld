@@ -11,6 +11,8 @@
 #include <hexaworld_application.h>
 
 #include <stdlib.h>
+#include <time.h>
+
 #include <raylib.h>
 
 #include <colorpalette.h>
@@ -112,15 +114,13 @@ hexaworld_raylib_app_handle_t * hexaworld_raylib_app_init(i32 random_seed, u32 w
 
     // hexaworld allocation & initialisation of the companion data
     handle->hexaworld_data = (hexaworld_application_data_t) {
-            .hexaworld = hexaworld_create_empty(world_width, world_height),
+            .hexaworld = hexaworld_create_empty(world_width, world_height, random_seed),
             .current_layer = HEXAW_LAYER_WHOLE_WORLD,
             .linked_panel = info_panel_create(),
     };
 
     // raylib window
     InitWindow(handle->window_width, handle->window_height, HEXAPP_WINDOW_TITLE);
-    // random number generator
-    srand(random_seed);
 
     if (handle->hexaworld_data.hexaworld) {
         // generate ALL the LAYERS !
@@ -184,8 +184,11 @@ void hexaworld_raylib_app_run(hexaworld_raylib_app_handle_t *hexapp, u32 target_
     while (!WindowShouldClose()) {
 
         if (IsKeyPressed(KEY_ENTER) && IsKeyDown(KEY_LEFT_SHIFT)) {
+            hexaworld_reseed(hexapp->hexaworld_data.hexaworld, time(NULL));
             generate_world(hexapp->hexaworld_data.hexaworld);
+
             info_panel_set_examined_cell(hexapp->hexaworld_data.linked_panel, NULL, 0u, 0u);
+
             window_region_notify_changed(hexapp->window_regions + WINREGION_HEXAWORLD);
             window_region_notify_changed(hexapp->window_regions + WINREGION_TILEINFO);
 

@@ -26,9 +26,10 @@ typedef struct hexaworld_t hexaworld_t;
  * 
  * @param[in] width number of tiles on the x-axis
  * @param[in] height number of tiles on the y-axis
+ * @param[in] random_seed seed for the RNG
  * @return hexaworld_t* a pointer to the world data, NULL if allocation failed
  */
-hexaworld_t *hexaworld_create_empty(size_t width, size_t height);
+hexaworld_t *hexaworld_create_empty(size_t width, size_t height, i32 random_seed);
 
 /**
  * @brief Deallocates the world and sets the pointer to NULL.
@@ -60,6 +61,14 @@ void hexaworld_genlayer(hexaworld_t *world, hexaworld_layer_t layer);
  * @param[inout] world target world.
  */
 void hexaworld_raze(hexaworld_t *world);
+
+/**
+ * @brief Changes the random seed value of the world.
+ * 
+ * @param world target world
+ * @param new_seed new seed for the RNG
+ */
+void hexaworld_reseed(hexaworld_t *world, i32 new_seed);
 
 /**
  * @brief Returns a pointer to a tile at the position (x, y) inside a reference rectangle.

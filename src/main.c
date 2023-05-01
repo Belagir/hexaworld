@@ -2,7 +2,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <time.h>
 
 #include <hexaworld_application.h>
 #include <unstandard.h>
@@ -11,7 +10,7 @@ i32 main(u32 argc, char const *argv[]) {
     hexaworld_raylib_app_handle_t *application = NULL;
 
     u32 index_args = 1u;
-    u32 seed = time(NULL);
+    i32 seed = 0;
     u32 width = 20u;
     u32 height = 20u;
 

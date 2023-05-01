@@ -11,7 +11,7 @@
 #define TILE_FLAG_NO_DESCRIPTION ""
 
 #define TILE_INFO_BUFFER_SIZE (1024u)
-#define TILE_INFO_FORMAT_STRING ("TILE AT %3d : %3d\n - mean altitude : % 6dm\n - mean cloud cover : ~%.1f%%\n - mean temperature : %+ 3d°C\n - vegetation cover : %.1f%%\n\n")
+#define TILE_INFO_FORMAT_STRING ("TILE AT %3d : %3d\n - mean altitude : % 6dm\n - mean temperature : %+ 3d°C\n - vegetation cover : %.1f%%\n\n")
 #define TILE_INFO_FONT_SIZE (18)
 
 // -------------------------------------------------------------------------------------------------
@@ -132,7 +132,6 @@ void update_tile_description_buffer(info_panel_t *panel) {
             panel->cell_x,
             panel->cell_y,
             panel->target_cell->altitude,
-            panel->target_cell->humidity * 100.0f,
             panel->target_cell->temperature,
             panel->target_cell->vegetation_cover * 100.0f
     );

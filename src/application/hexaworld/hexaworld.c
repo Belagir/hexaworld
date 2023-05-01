@@ -36,7 +36,7 @@ static void hexaworld_draw_grid(hexaworld_t *world, f32 rectangle_target[4u]);
 // -------------------------------------------------------------------------------------------------
 
 // -------------------------------------------------------------------------------------------------
-hexaworld_t *hexaworld_create_empty(size_t width, size_t height) {
+hexaworld_t *hexaworld_create_empty(size_t width, size_t height, i32 random_seed) {
     hexaworld_t *world = NULL;
 
     // overall data structure
@@ -89,6 +89,7 @@ hexaworld_t *hexaworld_create_empty(size_t width, size_t height) {
 
     world->width = width;
     world->height = height;
+    world->map_seed = random_seed;
 
     return world;
 }
@@ -124,6 +125,8 @@ void hexaworld_draw(hexaworld_t *world, hexaworld_layer_t layer, f32 rectangle_t
 
     layer_function = world->hexaworld_layers_functions[layer].draw_func;
 
+    srand(world->map_seed ^ layer);
+
     // drawing each cell
     for (size_t x = 0u ; x < world->width ; x++) {
         for (size_t y = 0u ; y < world->height ; y++) {
@@ -139,6 +142,8 @@ void hexaworld_draw(hexaworld_t *world, hexaworld_layer_t layer, f32 rectangle_t
 // -------------------------------------------------------------------------------------------------
 void hexaworld_genlayer(hexaworld_t *world, hexaworld_layer_t layer) {
     size_t iteration_number = 0u;
+
+    srand(world->map_seed ^ layer);
 
     if (world->hexaworld_layers_functions[layer].seed_func) {
         world->hexaworld_layers_functions[layer].seed_func(world);
@@ -165,6 +170,11 @@ void hexaworld_raze(hexaworld_t *world) {
             world->tiles[x][y] = (hexa_cell_t) { 0u };
         }
     }
+}
+
+// -------------------------------------------------------------------------------------------------
+void hexaworld_reseed(hexaworld_t *world, i32 new_seed) {
+    world->map_seed = new_seed;
 }
 
 // -------------------------------------------------------------------------------------------------

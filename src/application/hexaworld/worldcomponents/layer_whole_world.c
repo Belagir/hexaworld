@@ -15,6 +15,7 @@ static void draw_vegetation(hexa_cell_t *cell, hexagon_shape_t *target_shape);
 static void draw_snow(hexa_cell_t *cell, hexagon_shape_t *target_shape);
 
 static void draw_mountains_canyon(hexa_cell_t *cell, hexagon_shape_t *target_shape);
+static void draw_isles(hexa_cell_t *cell, hexagon_shape_t *target_shape);
 
 static void draw_freshwater(hexa_cell_t *cell, hexagon_shape_t *target_shape);
 
@@ -46,7 +47,9 @@ static void whole_world_draw(hexa_cell_t *cell, hexagon_shape_t *target_shape) {
 static Color color_ocean_tile(hexa_cell_t *cell) {
     Color tile_color = AS_RAYLIB_COLOR(COLOR_DUSK_BLUE);
 
-    if (cell->altitude > (WHOLE_WORLD_OCEAN_REEF_CUTOUT * ALTITUDE_MIN)) {
+    if ((cell->temperature <= -10) && (cell->altitude > (ALTITUDE_MIN / 4)) || (cell->temperature <= -20)) {
+        tile_color = AS_RAYLIB_COLOR(COLOR_ICE_BLUE);
+    } else if (cell->altitude > (WHOLE_WORLD_OCEAN_REEF_CUTOUT * ALTITUDE_MIN)) {
         tile_color = AS_RAYLIB_COLOR(COLOR_AZURE);
     } else if (cell->altitude > (WHOLE_WORLD_OCEAN_ABYSS_CUTOUT * ALTITUDE_MIN)) {
         tile_color = AS_RAYLIB_COLOR(COLOR_CERULEAN);
@@ -114,8 +117,22 @@ static void draw_mountains_canyon(hexa_cell_t *cell, hexagon_shape_t *target_sha
 }
 
 // -------------------------------------------------------------------------------------------------
+static void draw_isles(hexa_cell_t *cell, hexagon_shape_t *target_shape) {
+    Color tile_color = AS_RAYLIB_COLOR(COLOR_LEAFY_GREEN);
+
+    if (!hexa_cell_has_flag(cell, HEXAW_FLAG_ISLES)) {
+        return;
+    }
+
+    tile_color.a = cell->vegetation_cover * 0xFF;
+
+
+}
+
+// -------------------------------------------------------------------------------------------------
 static void draw_freshwater(hexa_cell_t *cell, hexagon_shape_t *target_shape) {
     Color color_line = AS_RAYLIB_COLOR(COLOR_CERULEAN);
+    Color color_ice = AS_RAYLIB_COLOR(COLOR_ICE_BLUE);
     vector_2d_cartesian_t water_end = { 0u };
     vector_2d_cartesian_t water_start = { 0u };
 
@@ -123,8 +140,12 @@ static void draw_freshwater(hexa_cell_t *cell, hexagon_shape_t *target_shape) {
         return;
     }
 
-    if (cell->temperature <= 0) {
-        color_line = AS_RAYLIB_COLOR(COLOR_AZURE);
+    if (cell->temperature < -10) {
+         color_ice.a = 0xFF;
+    } else if (cell->temperature <= 0) {
+        color_ice.a = (u8) (0xFF * ((f32) (cell->temperature + 10) / 10.0));
+    } else {
+        color_ice.a = 0x00;
     }
     
     water_end = vector2d_polar_to_cartesian((vector_2d_polar_t) { 
@@ -134,7 +155,7 @@ static void draw_freshwater(hexa_cell_t *cell, hexagon_shape_t *target_shape) {
 
     if (hexa_cell_has_flag(cell, HEXAW_FLAG_LAKE)) {
         draw_hexagon(target_shape, FROM_RAYLIB_COLOR(color_line), 0.66f , DRAW_HEXAGON_FILL);
-
+        draw_hexagon(target_shape, FROM_RAYLIB_COLOR(color_ice), 0.66f , DRAW_HEXAGON_FILL);
     }
 
     for (size_t i = 0u ; i < DIRECTIONS_NB ; i++) {
@@ -157,6 +178,20 @@ static void draw_freshwater(hexa_cell_t *cell, hexagon_shape_t *target_shape) {
                     
                     target_shape->radius / 5.0f, 
                     color_line
+            );
+            DrawLineBezierQuad(
+                    (Vector2) {
+                            .x = target_shape->center.v + water_start.v * target_shape->radius, 
+                            .y = target_shape->center.w + water_start.w * target_shape->radius },
+                    (Vector2) {
+                            .x = target_shape->center.v + water_end.v * target_shape->radius, 
+                            .y = target_shape->center.w + water_end.w * target_shape->radius },
+                    (Vector2) {
+                            .x = target_shape->center.v, 
+                            .y = target_shape->center.w },
+                    
+                    target_shape->radius / 5.0f, 
+                    color_ice
             );
         }
     }
