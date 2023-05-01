@@ -66,6 +66,10 @@ static void vegetation_apply(void *target_cell, void *neighbors[DIRECTIONS_NB]) 
         vegetation_mean += tmp_cell->vegetation_cover;
         nb_cells_with_vegetation += (tmp_cell->vegetation_cover > VEGETATION_CUTOUT_THRESHOLD);
     }
+
+    if (nb_cells_with_vegetation == 0u) {
+        return;
+    }
     vegetation_mean /= nb_cells_with_vegetation;
 
     cell->vegetation_cover = vegetation_mean 

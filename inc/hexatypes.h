@@ -2,7 +2,10 @@
 #ifndef __HEXATYPES_H__
 #define __HEXATYPES_H__
 
+#include <unstandard.h>
+
 /**
+ * 
  * @brief Possible directions from a hexagonal cell to another. Ordered along the unit circle.
  * 
  */
@@ -85,5 +88,23 @@ typedef struct hexa_cell_t {
     /// bit flags representing wether a direction is considered as a freshwater source
     flag_set8_t freshwater_sources_directions;
 } hexa_cell_t;
+
+/**
+ * @brief Sets an bit flag in a cell.
+ * 
+ * @param[inout] cell target cell
+ * @param[in] flag flag to set to 1
+ */
+void hexa_cell_set_flag(hexa_cell_t *cell, u32 flag);
+
+/**
+ * @brief Checks for the presence of a bit flag in  a cell.
+ * 
+ * @param[inout] cell target cell
+ * @param[in] flag flag to check
+ * @return 1 if the flag is set to 1, 0 otherwise
+ */
+u32 hexa_cell_has_flag(hexa_cell_t *cell, u32 flag);
+
 
 #endif

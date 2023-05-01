@@ -8,7 +8,7 @@
  * @copyright Copyright (c) 2023
  * 
  */
-#include "hexaworldcomponents.h"
+#include <hexatypes.h>
 
 // -------------------------------------------------------------------------------------------------
 void hexa_cell_set_flag(hexa_cell_t *cell, u32 flag) {

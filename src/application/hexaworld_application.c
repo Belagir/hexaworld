@@ -36,8 +36,6 @@ typedef enum registered_window_region_t {
     WINREGIONS_NUMBER
 } registered_window_region_t;
 
-
-
 // -------------------------------------------------------------------------------------------------
 // ---- TYPE DEFINITIONS ---------------------------------------------------------------------------
 // -------------------------------------------------------------------------------------------------
@@ -187,7 +185,9 @@ void hexaworld_raylib_app_run(hexaworld_raylib_app_handle_t *hexapp, u32 target_
 
         if (IsKeyPressed(KEY_ENTER) && IsKeyDown(KEY_LEFT_SHIFT)) {
             generate_world(hexapp->hexaworld_data.hexaworld);
+            info_panel_set_examined_cell(hexapp->hexaworld_data.linked_panel, NULL, 0u, 0u);
             window_region_notify_changed(hexapp->window_regions + WINREGION_HEXAWORLD);
+            window_region_notify_changed(hexapp->window_regions + WINREGION_TILEINFO);
 
         } else if (IsKeyPressed(KEY_RIGHT)) {
             hexapp->hexaworld_data.current_layer = (hexapp->hexaworld_data.current_layer + 1u) % HEXAW_LAYERS_NUMBER;

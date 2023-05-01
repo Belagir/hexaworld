@@ -8,11 +8,14 @@
 #include <colorpalette.h>
 #include <raylib.h>
 
+#define TILE_FLAG_NO_DESCRIPTION ""
+
 #define TILE_INFO_BUFFER_SIZE (1024u)
-
-#define TILE_INFO_FORMAT_STRING ("TILE AT %3d : %3d\n - mean altitude : % 6dm\n - mean cloud cover : ~%.1f%%\n - mean temperature : %+ 3d°C\n- vegetation cover : %.1f%%\n")
-
+#define TILE_INFO_FORMAT_STRING ("TILE AT %3d : %3d\n - mean altitude : % 6dm\n - mean cloud cover : ~%.1f%%\n - mean temperature : %+ 3d°C\n - vegetation cover : %.1f%%\n\n")
 #define TILE_INFO_FONT_SIZE (18)
+
+// -------------------------------------------------------------------------------------------------
+// -------------------------------------------------------------------------------------------------
 
 // -------------------------------------------------------------------------------------------------
 typedef struct info_panel_t {
@@ -23,6 +26,34 @@ typedef struct info_panel_t {
     char *tile_description_buffer;
 } info_panel_t;
 
+// -------------------------------------------------------------------------------------------------
+// -------------------------------------------------------------------------------------------------
+
+const char *tile_flag_description_map[HEXAW_FLAGS_NB] = {
+        // HEXAW_FLAG_TELLURIC_RIDGE
+        TILE_FLAG_NO_DESCRIPTION,
+        // HEXAW_FLAG_TELLURIC_RIFT
+        TILE_FLAG_NO_DESCRIPTION,
+        // HEXAW_FLAG_MOUNTAIN
+        "MOUNTAINS\n",
+        // HEXAW_FLAG_ISLES
+        "ISLES\n",
+        // HEXAW_FLAG_CANYONS
+        "CANYONS\n",
+        // HEXAW_FLAG_UNDERWATER_CANYONS
+        "ABYSS\n",
+        // HEXAW_FLAG_MEANDERS
+        "WETLANDS\n",
+        // HEXAW_FLAG_WATERFALLS
+        "WATERFALLS\n",
+        // HEXAW_FLAG_RIVER_MOUTH
+        TILE_FLAG_NO_DESCRIPTION,
+        // HEXAW_FLAG_LAKE
+        "LAKE\n"
+};
+
+// -------------------------------------------------------------------------------------------------
+// -------------------------------------------------------------------------------------------------
 /**
  * @brief 
  * 
@@ -105,4 +136,10 @@ void update_tile_description_buffer(info_panel_t *panel) {
             panel->target_cell->temperature,
             panel->target_cell->vegetation_cover * 100.0f
     );
+
+    for (size_t i_flag = 0u ; i_flag < HEXAW_FLAGS_NB ; i_flag++) {
+        if (hexa_cell_has_flag(panel->target_cell, i_flag)) {
+            strncat(panel->tile_description_buffer, tile_flag_description_map[i_flag], strlen(tile_flag_description_map[i_flag]));
+        }
+    }
 }
