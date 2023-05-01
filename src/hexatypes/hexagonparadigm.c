@@ -8,10 +8,20 @@
  * @copyright Copyright (c) 2023
  * 
  */
-#include "hexagonparadigm.h"
+#include <hexagonparadigm.h>
 
 #include <raylib.h>
 #include <colorpalette.h>
+
+// -------------------------------------------------------------------------------------------------
+void hexa_cell_set_flag(hexa_cell_t *cell, u32 flag) {
+    cell->flags = (cell->flags | (0x01 << flag));
+}
+
+// -------------------------------------------------------------------------------------------------
+u32 hexa_cell_has_flag(hexa_cell_t *cell, u32 flag) {
+    return (cell->flags & (0x01 << flag));
+}
 
 // -------------------------------------------------------------------------------------------------
 hexagon_shape_t hexagon_pixel_position_in_rectangle(f32 boundaries[4u], u32 x, u32 y, u32 width, u32 height) {

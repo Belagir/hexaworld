@@ -13,9 +13,8 @@
 
 #include <unstandard.h>
 #include <cellotomaton.h>
-#include <hexatypes.h>
+#include <hexagonparadigm.h>
 
-#include "hexagon/hexagonparadigm.h"
 #include "layers.h"
 
 // -------------------------------------------------------------------------------------------------

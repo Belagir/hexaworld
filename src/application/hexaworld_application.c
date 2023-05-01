@@ -14,9 +14,9 @@
 #include <raylib.h>
 
 #include <colorpalette.h>
+#include <hexagonparadigm.h>
 
 #include "hexaworld/hexaworld.h"
-#include "hexaworld/worldcomponents/hexagon/hexagonparadigm.h"
 #include "infopanel/infopanel.h"
 #include "windowdivision/windowregion.h"
 

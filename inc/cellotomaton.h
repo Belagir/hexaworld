@@ -12,7 +12,7 @@
 #define __CELLOTOMATON_H__
 
 #include <unstandard.h>
-#include <hexatypes.h>
+#include <hexagonparadigm.h>
 
 /**
  * @brief Sructure holding the data describing a cell automaton.

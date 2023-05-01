@@ -3,7 +3,7 @@
 #define __INFOPANEL_H__
 
 #include <unstandard.h>
-#include <hexatypes.h>
+#include <hexagonparadigm.h>
 
 /**
  * @brief 

@@ -12,7 +12,7 @@
 #define __HEXAWORLD_H__
 
 #include <unstandard.h>
-#include <hexatypes.h>
+#include <hexagonparadigm.h>
 
 #include "worldcomponents/layers.h"
 
