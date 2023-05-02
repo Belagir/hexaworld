@@ -1,13 +1,14 @@
 
 #include "hexaworldcomponents.h"
 
+#include <math.h>
 #include <stdlib.h>
 
 #include <raylib.h>
 
 #include <colorpalette.h>
 
-#define ITERATION_NB_TEMPERATURE (1u)    ///< number of automaton iteration for the landmass layer
+#define ITERATION_NB_TEMPERATURE (0u)    ///< number of automaton iteration for the landmass layer
 
 // -------------------------------------------------------------------------------------------------
 // -- TEMPERATURE ----------------------------------------------------------------------------------
@@ -38,31 +39,28 @@ static void temperature_draw(hexa_cell_t *cell, hexagon_shape_t *target_shape) {
 
 // -------------------------------------------------------------------------------------------------
 static void temperature_seed(hexaworld_t *world) {
+    const f32 equator = (f32) world->height * 0.5f;
+    const f32 temp_variance = (f32) world->height * 0.25f;
+
     for (size_t x = 0u ; x < world->width ; x++) {
         for (size_t y = 0u ; y < world->height ; y++) {
-            world->tiles[x][y].temperature = 
-                    // inverse distance to equator 
-                    (1.0f - (((f32) abs((i32) y - (i32) (world->height/2))) / (f32) (world->height/2)))
-                    // temperature ratio and shifting toward the colder temps
-                    * TEMPERATURE_RANGE + TEMPERATURE_MIN;
+            world->tiles[x][y].temperature =
+                    ((NORMAL_DISTRIBUTION(equator, temp_variance, y)
+                    / NORMAL_DISTRIBUTION(equator, temp_variance, equator))
+                    * TEMPERATURE_RANGE)
+                    + TEMPERATURE_MIN;
+            
+            if ( world->tiles[x][y].altitude >= 0) {
+                world->tiles[x][y].temperature += TEMPERATURE_ALTITUDE_MULTIPLIER * (world->tiles[x][y].altitude);
+            }
         }
     }
-}
-
-// -------------------------------------------------------------------------------------------------
-static void temperature_apply(void *target_cell, void *neighbors[DIRECTIONS_NB]) {
-    hexa_cell_t *cell = (hexa_cell_t *) target_cell;
-
-    if (cell->altitude <= 0) {
-        return;
-    }
-    cell->temperature = cell->temperature + TEMPERATURE_ALTITUDE_MULTIPLIER * (cell->altitude);
 }
 
 const layer_calls_t temperature_layer_calls = {
         .draw_func = &temperature_draw,
         .seed_func = &temperature_seed,
-        .automaton_func = &temperature_apply,
+        .automaton_func = NULL,
         .flag_gen_func = NULL,
         .automaton_iter = ITERATION_NB_TEMPERATURE,
         .iteration_flavour = LAYER_GEN_ITERATE_ABSOLUTE

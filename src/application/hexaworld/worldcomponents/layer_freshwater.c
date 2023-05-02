@@ -75,7 +75,7 @@ static void freshwater_seed(hexaworld_t *world){
     for (size_t x = 0u ; x < world->width ; x++) {
         for (size_t y = 0u ; y < world->height ; y++) {
 
-            if (world->tiles[x][y].altitude <= 0) {
+            if ((world->tiles[x][y].altitude <= 0) || (world->tiles[x][y].temperature <= -5)) {
                 continue;
             }
 
