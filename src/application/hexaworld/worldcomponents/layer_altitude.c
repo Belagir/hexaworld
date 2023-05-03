@@ -39,9 +39,9 @@ static void altitude_seed(hexaworld_t *world) {
             tmp_cell = world->tiles[x] + y;
 
             if (hexa_cell_has_flag(tmp_cell, HEXAW_FLAG_MOUNTAIN)) {
-                tmp_cell->altitude = (alt_m_t) ALTITUDE_MAX;
+                tmp_cell->altitude = (alt_m_t) ((ALTITUDE_MAX / 4) + (rand() % (3*ALTITUDE_MAX / 4)));
             } else if (hexa_cell_has_flag(tmp_cell, HEXAW_FLAG_UNDERWATER_CANYONS)) {
-                tmp_cell->altitude = (alt_m_t) ALTITUDE_MIN;
+                tmp_cell->altitude = (alt_m_t) ((ALTITUDE_MIN / 2) - (rand() % (abs(ALTITUDE_MIN) / 2)));
             } else if (tmp_cell->altitude > 0) {
                 tmp_cell->altitude = (alt_m_t) ((ALTITUDE_MAX / 4) - (rand() % ALTITUDE_EROSION_RAND_VARIATION));
             } else {
