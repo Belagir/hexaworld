@@ -8,7 +8,7 @@
 
 #include <colorpalette.h>
 
-#define ITERATION_NB_TELLURIC (2u)    ///< number of automaton iteration for the telluric layer
+#define ITERATION_NB_TELLURIC (10u)    ///< number of automaton iteration for the telluric layer
 
 // -------------------------------------------------------------------------------------------------
 // -- TELLURIC -------------------------------------------------------------------------------------
@@ -132,5 +132,5 @@ const layer_calls_t telluric_layer_calls = {
         .automaton_func     = &telluric_apply,
         .flag_gen_func      = &telluric_flag_gen, 
         .automaton_iter     = ITERATION_NB_TELLURIC,
-        .iteration_flavour  = LAYER_GEN_ITERATE_RELATIVE
+        .iteration_flavour  = LAYER_GEN_ITERATE_ABSOLUTE
 };

@@ -17,6 +17,7 @@
 
 #define SQRT_OF_3 (1.73205f)      ///< approximation of the square root of 3
 #define THREE_HALVES (1.5f)       ///< not an *approximation* of 3 / 2
+#define PI_T_2 ((2.0f) * (PI))    ///< 2 times pi
 
 /// returns the sign bitfield of a 32-bit signed integer
 #define SGN_I32(_v) ((_v) & (0x80000000))

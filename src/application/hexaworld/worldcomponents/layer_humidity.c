@@ -57,7 +57,8 @@ static void humidity_apply(void *target_cell, void *neighbors[DIRECTIONS_NB]) {
         return;
     }
     
-    cell->humidity = source_humidity * (cell->winds_vector.magnitude);
+    cell->humidity = 
+            source_humidity * (cell->winds_vector.magnitude);
     cell->precipitations = source_humidity - cell->humidity;
 }
 

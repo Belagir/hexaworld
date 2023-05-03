@@ -106,7 +106,7 @@ static void winds_apply(void *target_cell, void *neighbors[DIRECTIONS_NB]) {
 
     // difference between the current cell's altitude and the main winded upon cell
     normalized_altitude_diff = (f32) abs(cell->altitude * (cell->altitude > 0) - cell_altitudes[definitive_direction]) / (f32) ALTITUDE_MAX;
-    cell->winds_vector.magnitude = (1.0f - normalized_altitude_diff);
+    cell->winds_vector.magnitude = (1.0f - (normalized_altitude_diff) * (normalized_altitude_diff > 0.25f));
 }
 
 const layer_calls_t winds_layer_calls = {

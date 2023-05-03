@@ -21,8 +21,6 @@
 // ---- CONSTANTS ----------------------------------------------------------------------------------
 // -------------------------------------------------------------------------------------------------
 
-#define PI_T_2 ((2.0f) * (PI))    ///< 2 times pi
-
 #define TELLURIC_VECTOR_SEEDING_INV_CHANCE (0x40)  ///< the greater, the bigger the chance a telluric tile is NOT seeded.
 #define TELLURIC_VECTOR_DIRECTIONS_NB (32)     ///< number of possible directions for a telluric vector
 #define TELLURIC_VECTOR_UNIT_ANGLE ((PI_T_2) / (TELLURIC_VECTOR_DIRECTIONS_NB))      ///< telluric vector minimum angle 
@@ -35,7 +33,7 @@
 #define ALTITUDE_EROSION_INERTIA_WEIGHT (100) ///< inertia of the eroded cell
 #define ALTITUDE_EROSION_RAND_VARIATION (30)    ///< random variation of altitude
 
-#define TEMPERATURE_MAX (40)    ///< maximum temperature (on the equator at sea level)
+#define TEMPERATURE_MAX (30)    ///< maximum temperature (on the equator at sea level)
 #define TEMPERATURE_MIN (-25)   ///< minimum temperature (on the poles at sea level)
 #define TEMPERATURE_RANGE (TEMPERATURE_MAX - TEMPERATURE_MIN)   ///< total temperature range
 #define TEMPERATURE_ALTITUDE_MULTIPLIER (-0.00625f)     ///< °C lost with every meter of altitude

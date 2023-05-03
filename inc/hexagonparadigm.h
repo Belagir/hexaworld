@@ -16,56 +16,6 @@
 #define HEXAGON_SIDES_NB (6u)     ///< number of sides of an hexagon. tough.
 
 /**
- * @brief Ways a hexagon can be drawn.
- */
-typedef enum hexagon_draw_fillmode_t {
-    DRAW_HEXAGON_FILL,
-    DRAW_HEXAGON_LINES
-} hexagon_draw_fillmode_t;
-
-/**
- * @brief just the shape of an hexagon.
- */
-typedef struct hexagon_shape_t {
-    vector_2d_cartesian_t center;
-    f32 radius;
-} hexagon_shape_t;
-
-/**
- * @brief Computes the position and radius of a hexagonal cell in a pixel rectangle.
- * 
- * @param[in] boundaries rectangle defined by the topleft coordinates and its sides' length (in pixels)
- * @param[in] x tile x-position in the world array
- * @param[in] y tile y-position in the world array
- * @param[in] width width, in tiles, of the world array
- * @param[in] height height, in tiles, of the world array
- * @return hexagon_shape_t pixel shape of the hexagon representing the cell's coordinates
- */
-hexagon_shape_t hexagon_pixel_position_in_rectangle(f32 boundaries[4u], u32 x, u32 y, u32 width, u32 height);
-
-/**
- * @brief Computes the hexagonal tile's position containing a certain point in a rectangle.
- * 
- * @param[in] boundaries rectangle defined by the topleft coordinates and its sides' length (in pixels)
- * @param[in] pix_x x-coordinates of a point in pixels
- * @param[in] pix_y y-coordinates of a point in pixels
- * @param[in] array_width width, in tiles, of the world array
- * @param[in] array_height height, in tiles, of the world array
- * @return vector_2d_cartesian_t integer coordinates of the tile if the point lies in the radius of an hexagon, or the array width and height if invalid
- */
-vector_2d_cartesian_t hexagon_array_coords_from_rectangle(f32 boundaries[4u], u32 pix_x, u32 pix_y, u32 array_width, u32 array_height);
-
-/**
- * @brief Draws a regular hexagon shape to the current raylib context.
- * 
- * @param[in] target_shape shape describing an hexagon
- * @param[in] color u32-coded color
- * @param[in] scale scale to be applied to the hexagon's radius
- * @param[in] fill wether to fill or not the hexagon
- */
-void draw_hexagon(hexagon_shape_t *target_shape, u32 color, f32 scale, hexagon_draw_fillmode_t fill);
-
-/**
  * @brief Possible directions from a hexagonal cell to another. Ordered along the unit circle.
  */
 typedef enum cell_direction_t {
@@ -97,6 +47,14 @@ typedef enum hexaworld_cell_flag_t {
 
     HEXAW_FLAGS_NB,     ///< Total number of flags
 } hexaworld_cell_flag_t;
+
+/**
+ * @brief Ways a hexagon can be drawn.
+ */
+typedef enum hexagon_draw_fillmode_t {
+    DRAW_HEXAGON_FILL,
+    DRAW_HEXAGON_LINES
+} hexagon_draw_fillmode_t;
 
 /// @brief a 16-width set of bit flags
 typedef u16 flag_set16_t;
@@ -147,6 +105,58 @@ typedef struct hexa_cell_t {
     /// bit flags representing wether a direction is considered as a freshwater source
     flag_set8_t freshwater_sources_directions;
 } hexa_cell_t;
+
+/**
+ * @brief just the shape of an hexagon.
+ */
+typedef struct hexagon_shape_t {
+    vector_2d_cartesian_t center;
+    f32 radius;
+} hexagon_shape_t;
+
+/**
+ * @brief Computes the position and radius of a hexagonal cell in a pixel rectangle.
+ * 
+ * @param[in] boundaries rectangle defined by the topleft coordinates and its sides' length (in pixels)
+ * @param[in] x tile x-position in the world array
+ * @param[in] y tile y-position in the world array
+ * @param[in] width width, in tiles, of the world array
+ * @param[in] height height, in tiles, of the world array
+ * @return hexagon_shape_t pixel shape of the hexagon representing the cell's coordinates
+ */
+hexagon_shape_t hexagon_pixel_position_in_rectangle(f32 boundaries[4u], u32 x, u32 y, u32 width, u32 height);
+
+/**
+ * @brief Computes the hexagonal tile's position containing a certain point in a rectangle.
+ * 
+ * @param[in] boundaries rectangle defined by the topleft coordinates and its sides' length (in pixels)
+ * @param[in] pix_x x-coordinates of a point in pixels
+ * @param[in] pix_y y-coordinates of a point in pixels
+ * @param[in] array_width width, in tiles, of the world array
+ * @param[in] array_height height, in tiles, of the world array
+ * @return vector_2d_cartesian_t integer coordinates of the tile if the point lies in the radius of an hexagon, or the array width and height if invalid
+ */
+vector_2d_cartesian_t hexagon_array_coords_from_rectangle(f32 boundaries[4u], u32 pix_x, u32 pix_y, u32 array_width, u32 array_height);
+
+/**
+ * @brief Draws a regular hexagon shape to the current raylib context.
+ * 
+ * @param[in] target_shape shape describing an hexagon
+ * @param[in] color u32-coded color
+ * @param[in] scale scale to be applied to the hexagon's radius
+ * @param[in] fill wether to fill or not the hexagon
+ */
+void draw_hexagon(hexagon_shape_t *target_shape, u32 color, f32 scale, hexagon_draw_fillmode_t fill);
+
+/**
+ * @brief Determines the hexagonal cells pointed by an angle in radians going from a point in the center of those cell.
+ * 
+ * @param[in] cells_around pointer to cells around the given angle
+ * @param[in] angle angle in radians
+ * @param[out] out_pointed_cells outgoing pair of pointed cells by the angle. The first one is toward-antiradial cell, the second the toward-radial cell.
+ * @param[out] out_pointed_cells_ratios outgoing ratio of "pointing" of the angle to the two cells.
+ */
+void hexa_cell_angle_pointed_cells(hexa_cell_t *cells_around[HEXAGON_SIDES_NB], f32 angle, hexa_cell_t *out_pointed_cells[2u], ratio_t out_pointed_cells_ratios[2u]);
 
 /**
  * @brief Sets an bit flag in a cell.

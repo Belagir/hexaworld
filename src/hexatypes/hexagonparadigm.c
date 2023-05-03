@@ -10,6 +10,8 @@
  */
 #include <hexagonparadigm.h>
 
+#include <math.h>
+
 #include <raylib.h>
 #include <colorpalette.h>
 
@@ -21,6 +23,20 @@ void hexa_cell_set_flag(hexa_cell_t *cell, u32 flag) {
 // -------------------------------------------------------------------------------------------------
 u32 hexa_cell_has_flag(hexa_cell_t *cell, u32 flag) {
     return (cell->flags & (0x01 << flag));
+}
+
+// -------------------------------------------------------------------------------------------------
+void hexa_cell_angle_pointed_cells(hexa_cell_t *cells_around[HEXAGON_SIDES_NB], f32 angle, hexa_cell_t *out_pointed_cells[2u], ratio_t out_pointed_cells_ratios[2u]) {
+    const f32 bound_angle = fmodf(angle, PI_T_2);
+    const size_t anti_radial_index = (size_t) (ceilf(angle / PI_T_2)  * (f32) HEXAGON_SIDES_NB) % HEXAGON_SIDES_NB;
+    const size_t radial_index      = (size_t) (floorf(angle / PI_T_2) * (f32) HEXAGON_SIDES_NB) % HEXAGON_SIDES_NB;
+    const f32 angle_max_difference = PI_T_2 / (f32) HEXAGON_SIDES_NB;
+
+    out_pointed_cells[0u] = cells_around[anti_radial_index];
+    out_pointed_cells[1u] = cells_around[radial_index];
+
+    out_pointed_cells_ratios[0u] = 1.0f - (fabsf(bound_angle - (anti_radial_index * angle_max_difference)) / angle_max_difference);
+    out_pointed_cells_ratios[1u] = 1.0f - (fabsf(bound_angle - (radial_index      * angle_max_difference)) / angle_max_difference);
 }
 
 // -------------------------------------------------------------------------------------------------
