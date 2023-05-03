@@ -39,8 +39,10 @@ static void temperature_draw(hexa_cell_t *cell, hexagon_shape_t *target_shape) {
 
 // -------------------------------------------------------------------------------------------------
 static void temperature_seed(hexaworld_t *world) {
-    const f32 equator = (f32) world->height * 0.5f;
-    const f32 temp_variance = (f32) world->height * 0.25f;
+    const f32 equator_rand_shift = (((f32) (rand() % 128u)) / 128.0f) * TEMPERATURE_RANDOM_SHIFT - (TEMPERATURE_RANDOM_SHIFT / 2.0f);
+
+    const f32 equator = (f32) (world->height) * (0.5f + equator_rand_shift);
+    const f32 temp_variance = (f32) world->height * TEMPERATURE_VARIANCE_LATITUDE;
 
     for (size_t x = 0u ; x < world->width ; x++) {
         for (size_t y = 0u ; y < world->height ; y++) {
