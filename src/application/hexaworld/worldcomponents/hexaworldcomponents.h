@@ -21,7 +21,8 @@
 // ---- CONSTANTS ----------------------------------------------------------------------------------
 // -------------------------------------------------------------------------------------------------
 
-#define TELLURIC_VECTOR_SEEDING_INV_CHANCE (0x40)  ///< the greater, the bigger the chance a telluric tile is NOT seeded.
+#define TELLURIC_SEED_NB_MIN (3u)
+#define TELLURIC_SEED_NB_PER_TILE (0.005f)
 #define TELLURIC_VECTOR_DIRECTIONS_NB (32)     ///< number of possible directions for a telluric vector
 #define TELLURIC_VECTOR_UNIT_ANGLE ((PI_T_2) / (TELLURIC_VECTOR_DIRECTIONS_NB))      ///< telluric vector minimum angle 
 

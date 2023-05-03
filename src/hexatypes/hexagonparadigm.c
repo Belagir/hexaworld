@@ -26,18 +26,30 @@ u32 hexa_cell_has_flag(hexa_cell_t *cell, u32 flag) {
 }
 
 // -------------------------------------------------------------------------------------------------
-void hexa_cell_angle_pointed_cells(hexa_cell_t *cells_around[HEXAGON_SIDES_NB], f32 angle, hexa_cell_t *out_pointed_cells[2u], ratio_t out_pointed_cells_ratios[2u]) {
+void hexa_cell_get_surrounding_cells_pointed(hexa_cell_t *cells_around[HEXAGON_SIDES_NB], f32 angle, hexa_cell_t *out_pointed_cells[2u], ratio_t out_pointed_cells_ratios[2u]) {
     const f32 bound_angle = fmodf(angle, PI_T_2);
-    const size_t anti_radial_index = (size_t) (ceilf(angle / PI_T_2)  * (f32) HEXAGON_SIDES_NB) % HEXAGON_SIDES_NB;
-    const size_t radial_index      = (size_t) (floorf(angle / PI_T_2) * (f32) HEXAGON_SIDES_NB) % HEXAGON_SIDES_NB;
+    const size_t anti_radial_index = (size_t) (floorf((angle / PI_T_2) * (f32) HEXAGON_SIDES_NB)) % DIRECTIONS_NB;
+    const size_t radial_index      = (size_t) (ceilf((angle / PI_T_2) * (f32) HEXAGON_SIDES_NB)) % DIRECTIONS_NB;
     const f32 angle_max_difference = PI_T_2 / (f32) HEXAGON_SIDES_NB;
 
     out_pointed_cells[0u] = cells_around[anti_radial_index];
     out_pointed_cells[1u] = cells_around[radial_index];
 
-    out_pointed_cells_ratios[0u] = 1.0f - (fabsf(bound_angle - (anti_radial_index * angle_max_difference)) / angle_max_difference);
-    out_pointed_cells_ratios[1u] = 1.0f - (fabsf(bound_angle - (radial_index      * angle_max_difference)) / angle_max_difference);
+    out_pointed_cells_ratios[0u] = 1.0f - (fabsf(fmodf(bound_angle - (anti_radial_index * angle_max_difference), PI_T_2)) / angle_max_difference);
+    out_pointed_cells_ratios[1u] = 1.0f - (fabsf(fmodf(bound_angle - (radial_index      * angle_max_difference), PI_T_2)) / angle_max_difference);
 }
+
+// -------------------------------------------------------------------------------------------------
+void hexa_cell_directioness_of_surrounding_angles(void *angles_around, size_t stride, f32 out_angles[HEXAGON_SIDES_NB]) {
+    f32 tmp_angle = 0.0f;
+
+    for (size_t i = 0u ; i < HEXAGON_SIDES_NB ; i++) {
+        tmp_angle = fmodf(*((f32 *) angles_around + (stride * i)), PI_T_2);
+
+        out_angles[i] = fmodf(tmp_angle + ((f32) i * (f32) HEXAGON_SIDES_NB), PI_T_2);
+    }
+}
+
 
 // -------------------------------------------------------------------------------------------------
 hexagon_shape_t hexagon_pixel_position_in_rectangle(f32 boundaries[4u], u32 x, u32 y, u32 width, u32 height) {

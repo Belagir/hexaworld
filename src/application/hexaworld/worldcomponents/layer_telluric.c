@@ -8,7 +8,7 @@
 
 #include <colorpalette.h>
 
-#define ITERATION_NB_TELLURIC (10u)    ///< number of automaton iteration for the telluric layer
+#define ITERATION_NB_TELLURIC (5u)    ///< number of automaton iteration for the telluric layer
 
 // -------------------------------------------------------------------------------------------------
 // -- TELLURIC -------------------------------------------------------------------------------------
@@ -38,20 +38,35 @@ static void telluric_draw(hexa_cell_t *cell, hexagon_shape_t *target_shape) {
 
 // -------------------------------------------------------------------------------------------------
 static void telluric_seed(hexaworld_t *world) {
+    size_t nb_seeds = 0u;
+    size_t x_random = 0u;
+    size_t y_random = 0u;
+
+    // choosing a number of seeds, with a minimum required number
+    nb_seeds = (size_t) (TELLURIC_SEED_NB_PER_TILE * world->height * world->width);
+    if (nb_seeds < TELLURIC_SEED_NB_MIN) {
+        nb_seeds = TELLURIC_SEED_NB_MIN;
+    }
+
+    // initialising the array
     for (size_t x = 0u ; x < world->width ; x++) {
         for (size_t y = 0u ; y < world->height ; y++) {
-            if ((rand() % TELLURIC_VECTOR_SEEDING_INV_CHANCE) == 0) {
-                world->tiles[x][y].telluric_vector = (vector_2d_polar_t) {
-                        .angle = (rand() % TELLURIC_VECTOR_DIRECTIONS_NB) * TELLURIC_VECTOR_UNIT_ANGLE,
-                        .magnitude = 1.0f
-                };
-            } else {
-                world->tiles[x][y].telluric_vector = (vector_2d_polar_t) { 
-                        .angle = 0.0f,
-                        .magnitude = 0.0f
-                };
-            }
+            world->tiles[x][y].telluric_vector = (vector_2d_polar_t) { 
+                    .angle = 0.0f,
+                    .magnitude = 0.0f
+            };
         }
+    }
+
+    // putting about the good number of seeds
+    for (size_t i = 0u ; i < nb_seeds ; i++) {
+        x_random = rand() % world->width;
+        y_random = rand() % world->height;
+
+        world->tiles[x_random][y_random].telluric_vector = (vector_2d_polar_t) {
+                .angle = (rand() % TELLURIC_VECTOR_DIRECTIONS_NB) * TELLURIC_VECTOR_UNIT_ANGLE,
+                .magnitude = 1.0f
+        };
     }
 }
 
@@ -107,22 +122,20 @@ static void telluric_apply(void *target_cell, void *neighbors[DIRECTIONS_NB]) {
 static void telluric_flag_gen(void *target_cell, void *neighbors[DIRECTIONS_NB]) {
     hexa_cell_t *cell = (hexa_cell_t *) target_cell;
 
-    hexa_cell_t *pushed_against_cell = NULL;
-    size_t pushed_against_cell_index = 0u;
+    hexa_cell_t *pushed_against_cells[2u] = { 0u };
+    f32 pushed_against_ratios[2u] = { 0u };
+    hexa_cell_t *pushed_from_cells[2u] = { 0u };
+    f32 pushed_from_ratios[2u] = { 0u };
 
-    hexa_cell_t *pushed_from_cell = NULL;
-    size_t pushed_from_cell_index = 0u;
+    hexa_cell_get_surrounding_cells_pointed((hexa_cell_t **) neighbors, cell->telluric_vector.angle, pushed_against_cells, pushed_against_ratios);
+    hexa_cell_get_surrounding_cells_pointed((hexa_cell_t **) neighbors, cell->telluric_vector.angle + PI, pushed_from_cells, pushed_from_ratios);
 
-    pushed_against_cell_index = (size_t) (((cell->telluric_vector.angle / (PI_T_2))) * DIRECTIONS_NB);
-    pushed_against_cell = neighbors[pushed_against_cell_index];
-
-    pushed_from_cell_index = (size_t) (((fmod(cell->telluric_vector.angle+PI, (PI_T_2)) / (PI_T_2))) * DIRECTIONS_NB);
-    pushed_from_cell = neighbors[pushed_from_cell_index];
-
-    if (!float_equal(cell->telluric_vector.angle, pushed_against_cell->telluric_vector.angle, 1u)) {
-        hexa_cell_set_flag(cell, HEXAW_FLAG_TELLURIC_RIDGE);
-    } else if (!float_equal(cell->telluric_vector.angle, pushed_from_cell->telluric_vector.angle, 1u)) {
-        hexa_cell_set_flag(cell, HEXAW_FLAG_TELLURIC_RIFT);
+    for (size_t i = 0u ; i < 2u ; i++) {
+        if (!float_equal(cell->telluric_vector.angle, pushed_from_cells[i]->telluric_vector.angle, 1u)) {
+            hexa_cell_set_flag(cell, HEXAW_FLAG_TELLURIC_RIDGE);
+        } else if (!float_equal(cell->telluric_vector.angle, pushed_against_cells[i]->telluric_vector.angle, 1u)) {
+            hexa_cell_set_flag(cell, HEXAW_FLAG_TELLURIC_RIFT);
+        }
     }
 }
 
@@ -132,5 +145,5 @@ const layer_calls_t telluric_layer_calls = {
         .automaton_func     = &telluric_apply,
         .flag_gen_func      = &telluric_flag_gen, 
         .automaton_iter     = ITERATION_NB_TELLURIC,
-        .iteration_flavour  = LAYER_GEN_ITERATE_ABSOLUTE
+        .iteration_flavour  = LAYER_GEN_ITERATE_RELATIVE
 };
