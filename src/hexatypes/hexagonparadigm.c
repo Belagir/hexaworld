@@ -26,21 +26,21 @@ u32 hexa_cell_has_flag(hexa_cell_t *cell, u32 flag) {
 }
 
 // -------------------------------------------------------------------------------------------------
-void hexa_cell_get_surrounding_cells_pointed(hexa_cell_t *cells_around[HEXAGON_SIDES_NB], f32 angle, hexa_cell_t *out_pointed_cells[2u], ratio_t out_pointed_cells_ratios[2u]) {
+void hexa_cell_get_surrounding_cells_pointed(f32 angle, size_t *out_pointed_cells_indexes, ratio_t *out_pointed_cells_ratios) {
     const f32 bound_angle = fmodf(angle, PI_T_2);
-    const size_t anti_radial_index = (size_t) (floorf((angle / PI_T_2) * (f32) HEXAGON_SIDES_NB)) % DIRECTIONS_NB;
-    const size_t radial_index      = (size_t) (ceilf((angle / PI_T_2) * (f32) HEXAGON_SIDES_NB)) % DIRECTIONS_NB;
-    const f32 angle_max_difference = PI_T_2 / (f32) HEXAGON_SIDES_NB;
+    const size_t anti_radial_index = (size_t) floorf((bound_angle / (PI_T_2)) * (f32) DIRECTIONS_NB) % DIRECTIONS_NB;
+    const size_t radial_index      = (size_t) ceilf((bound_angle / (PI_T_2)) * (f32) DIRECTIONS_NB) % DIRECTIONS_NB;
+    const f32 angle_max_difference = PI_T_2 / (f32) DIRECTIONS_NB;
 
-    out_pointed_cells[0u] = cells_around[anti_radial_index];
-    out_pointed_cells[1u] = cells_around[radial_index];
+    out_pointed_cells_indexes[0u] = radial_index;
+    out_pointed_cells_indexes[1u] = anti_radial_index;
 
-    out_pointed_cells_ratios[0u] = 1.0f - (fabsf(fmodf(bound_angle - (anti_radial_index * angle_max_difference), PI_T_2)) / angle_max_difference);
-    out_pointed_cells_ratios[1u] = 1.0f - (fabsf(fmodf(bound_angle - (radial_index      * angle_max_difference), PI_T_2)) / angle_max_difference);
+    out_pointed_cells_ratios[0u] = 1.0f - (fmodf(bound_angle, angle_max_difference) / angle_max_difference);
+    out_pointed_cells_ratios[1u] = (fmodf(bound_angle, angle_max_difference) / angle_max_difference);
 }
 
 // -------------------------------------------------------------------------------------------------
-void hexa_cell_directioness_of_surrounding_angles(void *angles_around, size_t stride, f32 out_angles[HEXAGON_SIDES_NB]) {
+void hexa_cell_directioness_of_surrounding_angles(void *angles_around, size_t stride, f32 *out_angles) {
     f32 tmp_angle = 0.0f;
 
     for (size_t i = 0u ; i < HEXAGON_SIDES_NB ; i++) {

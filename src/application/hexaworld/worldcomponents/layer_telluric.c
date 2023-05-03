@@ -122,18 +122,18 @@ static void telluric_apply(void *target_cell, void *neighbors[DIRECTIONS_NB]) {
 static void telluric_flag_gen(void *target_cell, void *neighbors[DIRECTIONS_NB]) {
     hexa_cell_t *cell = (hexa_cell_t *) target_cell;
 
-    hexa_cell_t *pushed_against_cells[2u] = { 0u };
+    size_t pushed_against_cells[2u] = { 0u };
     f32 pushed_against_ratios[2u] = { 0u };
-    hexa_cell_t *pushed_from_cells[2u] = { 0u };
+    size_t pushed_from_cells[2u] = { 0u };
     f32 pushed_from_ratios[2u] = { 0u };
 
-    hexa_cell_get_surrounding_cells_pointed((hexa_cell_t **) neighbors, cell->telluric_vector.angle, pushed_against_cells, pushed_against_ratios);
-    hexa_cell_get_surrounding_cells_pointed((hexa_cell_t **) neighbors, cell->telluric_vector.angle + PI, pushed_from_cells, pushed_from_ratios);
+    hexa_cell_get_surrounding_cells_pointed(cell->telluric_vector.angle, pushed_against_cells, pushed_against_ratios);
+    hexa_cell_get_surrounding_cells_pointed(cell->telluric_vector.angle + PI, pushed_from_cells, pushed_from_ratios);
 
     for (size_t i = 0u ; i < 2u ; i++) {
-        if (!float_equal(cell->telluric_vector.angle, pushed_from_cells[i]->telluric_vector.angle, 1u)) {
+        if (!float_equal(cell->telluric_vector.angle, ((hexa_cell_t *) neighbors[pushed_from_cells[i]])->telluric_vector.angle, 1u)) {
             hexa_cell_set_flag(cell, HEXAW_FLAG_TELLURIC_RIDGE);
-        } else if (!float_equal(cell->telluric_vector.angle, pushed_against_cells[i]->telluric_vector.angle, 1u)) {
+        } else if (!float_equal(cell->telluric_vector.angle, ((hexa_cell_t *) neighbors[pushed_against_cells[i]])->telluric_vector.angle, 1u)) {
             hexa_cell_set_flag(cell, HEXAW_FLAG_TELLURIC_RIFT);
         }
     }

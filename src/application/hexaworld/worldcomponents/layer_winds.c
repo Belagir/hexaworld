@@ -8,7 +8,7 @@
 
 #include <colorpalette.h>
 
-#define ITERATION_NB_WINDS (1u)       ///< number of automaton iteration for the winds layer
+#define ITERATION_NB_WINDS (10u)       ///< number of automaton iteration for the winds layer
 
 /**
  * @brief Cells directions needed for the automaton function
@@ -53,7 +53,7 @@ static void winds_seed(hexaworld_t *world) {
     for (size_t x = 0u ; x < world->width ; x++) {
         for (size_t y = 0u ; y < world->height ; y++) {
             world->tiles[x][y].winds_vector = (vector_2d_polar_t) {
-                    .angle = starting_angle + (PI * ((f32) (world->tiles[x][y].temperature - TEMPERATURE_MIN) / (f32) TEMPERATURE_RANGE)),
+                    .angle = fmodf(starting_angle + (PI * ((f32) (world->tiles[x][y].temperature - TEMPERATURE_MIN) / (f32) TEMPERATURE_RANGE)), PI_T_2),
                     .magnitude = 1.0f
             };
         }
@@ -70,10 +70,12 @@ static void winds_apply(void *target_cell, void *neighbors[DIRECTIONS_NB]) {
     f32 mean_weight = 0.0f;
     f32 mean_angle = 0.0f;
     f32 normalized_altitude_diff = 0.0f;
+    alt_m_t mean_altitude = 0.0f;
 
     // since the angle is not always divisible by 6, the wind goes to two cells
     size_t possible_directions[TWO_CELLS] = { 0u };
-    i32 cell_altitudes[TWO_CELLS] = { 0 };
+    f32 possible_directions_ratios[TWO_CELLS] = { 0u };
+    alt_m_t cell_altitudes[TWO_CELLS] = { 0 };
     // cell index later chosen as the least resistance
     size_t definitive_direction = 0u;
 
@@ -87,14 +89,13 @@ static void winds_apply(void *target_cell, void *neighbors[DIRECTIONS_NB]) {
     mean_angle = atan2f(mean_weight * x_axis_sum, mean_weight * y_axis_sum);
     cell->winds_vector.angle = mean_angle;
 
-    // leftmost cell
-    possible_directions[LEFT_CELL] = (size_t) ceilf((cell->winds_vector.angle / (PI_T_2)) * (f32) DIRECTIONS_NB) % DIRECTIONS_NB;
-    cell_altitudes[LEFT_CELL] = ((hexa_cell_t *) neighbors[possible_directions[LEFT_CELL]])->altitude;
-    cell_altitudes[LEFT_CELL] *= (cell_altitudes[LEFT_CELL] > 0); /* altitude below 0 has water over it */
-    // rightmost cell
-    possible_directions[RIGHT_CELL] = (size_t) floorf((cell->winds_vector.angle / (PI_T_2)) * (f32) DIRECTIONS_NB) % DIRECTIONS_NB;
-    cell_altitudes[RIGHT_CELL] = ((hexa_cell_t *) neighbors[possible_directions[RIGHT_CELL]])->altitude;
-    cell_altitudes[RIGHT_CELL] *= (cell_altitudes[RIGHT_CELL] > 0); /* altitude below 0 has water over it */
+    hexa_cell_get_surrounding_cells_pointed(cell->winds_vector.angle, possible_directions, possible_directions_ratios);
+
+    for (size_t i = 0u ; i < TWO_CELLS ; i++) {
+        cell_altitudes[i] = ((hexa_cell_t *) neighbors[possible_directions[i]])->altitude;
+        cell_altitudes[i] *= (alt_m_t) (cell_altitudes[i] > 0); /* altitude below 0 has water over it */
+        mean_altitude += (alt_m_t) ((f32) cell_altitudes[i] * possible_directions_ratios[i]);
+    }
 
     definitive_direction = (cell_altitudes[LEFT_CELL] < cell_altitudes[RIGHT_CELL])
             ? possible_directions[LEFT_CELL]
@@ -105,8 +106,8 @@ static void winds_apply(void *target_cell, void *neighbors[DIRECTIONS_NB]) {
     cell->winds_vector.angle += ((definitive_direction / (f32) DIRECTIONS_NB) * (PI_T_2)) * normalized_altitude_diff;
 
     // difference between the current cell's altitude and the main winded upon cell
-    normalized_altitude_diff = (f32) abs(cell->altitude * (cell->altitude > 0) - cell_altitudes[definitive_direction]) / (f32) ALTITUDE_MAX;
-    cell->winds_vector.magnitude = (1.0f - (normalized_altitude_diff) * (normalized_altitude_diff > 0.25f));
+    normalized_altitude_diff = (f32) abs(cell->altitude * (cell->altitude > 0) - mean_altitude) / ((f32) ALTITUDE_MAX);
+    cell->winds_vector.magnitude *= (1.0f - (normalized_altitude_diff) * (normalized_altitude_diff > 0.10f));
 }
 
 const layer_calls_t winds_layer_calls = {

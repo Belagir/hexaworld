@@ -156,7 +156,7 @@ void draw_hexagon(hexagon_shape_t *target_shape, u32 color, f32 scale, hexagon_d
  * @param[out] out_pointed_cells outgoing pair of pointed cells by the angle. The first one is toward-antiradial cell, the second the toward-radial cell.
  * @param[out] out_pointed_cells_ratios outgoing ratio of "pointing" of the angle to the two cells.
  */
-void hexa_cell_get_surrounding_cells_pointed(hexa_cell_t *cells_around[HEXAGON_SIDES_NB], f32 angle, hexa_cell_t *out_pointed_cells[2u], ratio_t out_pointed_cells_ratios[2u]);
+void hexa_cell_get_surrounding_cells_pointed(f32 angle, size_t *out_pointed_cells_indexes, ratio_t *out_pointed_cells_ratios);
 
 /**
  * @brief Computes the subjective angles of the surronding cells.
@@ -166,7 +166,7 @@ void hexa_cell_get_surrounding_cells_pointed(hexa_cell_t *cells_around[HEXAGON_S
  * @param[in] stride
  * @param[out] out_angles 
  */
-void hexa_cell_directioness_of_surrounding_angles(void *angles_around, size_t stride, f32 out_angles[HEXAGON_SIDES_NB]);
+void hexa_cell_directioness_of_surrounding_angles(void *angles_around, size_t stride, f32 *out_angles);
 
 /**
  * @brief Sets an bit flag in a cell.
