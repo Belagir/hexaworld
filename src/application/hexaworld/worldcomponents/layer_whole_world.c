@@ -140,7 +140,7 @@ static Color color_snowy_tile(hexa_cell_t *cell) {
     } else if ((cell->temperature > 0) || (cell->altitude <= 0)) {
         tile_color.a = 0x00;
     } else {
-        tile_color.a = (1.0f - ((f32) (cell->temperature - TEMPERATURE_MIN) / (f32) -TEMPERATURE_MIN)) * cell->humidity * 0xFF;
+        tile_color.a = (1.0f - ((f32) (cell->temperature - TEMPERATURE_MIN) / (f32) -TEMPERATURE_MIN)) * cell->cloud_cover * 0xFF;
     }
     
     return tile_color;

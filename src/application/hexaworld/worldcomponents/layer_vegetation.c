@@ -33,18 +33,18 @@ static void vegetation_draw(hexa_cell_t *cell, hexagon_shape_t *target_shape) {
 // -------------------------------------------------------------------------------------------------
 static void vegetation_seed(hexaworld_t *world) {
     
-    ratio_t humidity_rating = 0.0f;
+    ratio_t cloud_cover_rating = 0.0f;
     ratio_t temperature_rating = 0.0f;
 
     for (size_t x = 0u ; x < world->width ; x++) {
         for (size_t y = 0u ; y < world->height ; y++) {
-            humidity_rating = (world->tiles[x][y].humidity * (world->tiles[x][y].freshwater_height == 0u)) + (world->tiles[x][y].freshwater_height > 0u);
+            cloud_cover_rating = (world->tiles[x][y].cloud_cover * (world->tiles[x][y].freshwater_height == 0u)) + (world->tiles[x][y].freshwater_height > 0u);
             temperature_rating = 
                     NORMAL_DISTRIBUTION(VEGETATION_TEMPERATURE_MEAN, VEGETATION_TEMPERATURE_VARI, world->tiles[x][y].temperature / 2)
                     / NORMAL_DISTRIBUTION(VEGETATION_TEMPERATURE_MEAN, VEGETATION_TEMPERATURE_VARI, VEGETATION_TEMPERATURE_MEAN);
 
             world->tiles[x][y].vegetation_cover = 
-                    humidity_rating * temperature_rating 
+                    cloud_cover_rating * temperature_rating 
                     * ((world->tiles[x][y].altitude > 0) || hexa_cell_has_flag(world->tiles[x] + y, HEXAW_FLAG_ISLES));
         }
     }

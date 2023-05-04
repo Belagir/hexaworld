@@ -75,7 +75,7 @@ Here is my rough roadmap :
 - `[x]` landmass layer
 - `[x]` altitude layer
 - `[x]` wind direction layer
-- `[x]` humidity layer
+- `[x]` ~~humidity~~ cloud cover layer
 - `[x]` freshwater & rivers layer
 - `[x]` (bonus !) temperature layer
 - `[x]` vegetation layer

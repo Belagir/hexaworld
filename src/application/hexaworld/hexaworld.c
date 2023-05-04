@@ -79,7 +79,7 @@ hexaworld_t *hexaworld_create_empty(size_t width, size_t height, i32 random_seed
     // adding the wind mean direction layer
     world->hexaworld_layers_functions[HEXAW_LAYER_WINDS]       = winds_layer_calls;
     // adding the cloud cover layer
-    world->hexaworld_layers_functions[HEXAW_LAYER_HUMIDITY]    = humidity_layer_calls;
+    world->hexaworld_layers_functions[HEXAW_LAYER_CLOUD_COVER] = cloud_cover_layer_calls;
     // adding the river & lakes layer
     world->hexaworld_layers_functions[HEXAW_LAYER_FRESHWATER]  = freshwater_layer_calls;
     // adding the vegetation cover layer

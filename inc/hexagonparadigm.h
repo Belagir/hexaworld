@@ -87,7 +87,7 @@ typedef struct hexa_cell_t {
     cell_direction_t freshwater_direction;
 
     /// mean humidty on the tile
-    ratio_t humidity;
+    ratio_t cloud_cover;
     /// mean precipitations on the tile
     ratio_t precipitations;
     // vegetation coefficient
