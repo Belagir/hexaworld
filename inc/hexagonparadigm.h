@@ -40,6 +40,9 @@ typedef enum hexaworld_cell_flag_t {
     HEXAW_FLAG_CANYONS,             ///< Some old tectonic event or river dug a long path here
     HEXAW_FLAG_UNDERWATER_CANYONS,  ///< Tectonic forces are at work here and create some heavy drop on the ocean floor
 
+    HEXAW_FLAG_SMALL_COAST,
+    HEXAW_FLAG_LONG_COAST,
+
     HEXAW_FLAG_MEANDERS,            ///< A river here twists and turns, creating a marsh, a bog, or maybe a swamp
     HEXAW_FLAG_WATERFALLS,          ///< Great waterfalls run down the landscape here
     HEXAW_FLAG_RIVER_MOUTH,         ///< The river on the tile goes directly to an ocean or sea 
@@ -90,8 +93,9 @@ typedef struct hexa_cell_t {
     ratio_t cloud_cover;
     /// mean precipitations on the tile
     ratio_t precipitations;
-    // vegetation coefficient
+    // vegetation coefficients
     ratio_t vegetation_cover;
+    ratio_t vegetation_lushness;
 
     /// freshwater excess height
     frwtr_m_t freshwater_height;

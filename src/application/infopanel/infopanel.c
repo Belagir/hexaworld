@@ -58,6 +58,10 @@ const char *tile_flag_description_map[HEXAW_FLAGS_NB] = {
         "CANYONS\n",
         // HEXAW_FLAG_UNDERWATER_CANYONS
         "ABYSS\n",
+        // HEXAW_FLAG_SMALL_COAST,
+        "SMALL COASTLINE\n",
+        // HEXAW_FLAG_LONG_COAST,
+        "LONG COASTLINE\n",
         // HEXAW_FLAG_MEANDERS
         "WETLANDS\n",
         // HEXAW_FLAG_WATERFALLS

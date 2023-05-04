@@ -71,6 +71,14 @@ typedef struct vector_2d_polar_t {
 void bytewise_copy(void *dest, void *source, size_t nb_bytes);
 
 /**
+ * @brief Counts the number of set bits in a byte.
+ * 
+ * @param value 
+ * @return u8 
+ */
+u8 count_set_bits(u8 value);
+
+/**
  * @brief Converts a 2d vector from a polar coordinate pair to a cartesian one.
  * 
  * @param[in] vec vector to convert

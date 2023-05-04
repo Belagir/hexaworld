@@ -7,7 +7,7 @@
 
 #include <colorpalette.h>
 
-#define ITERATION_NB_CLOUD_COVER (10u)    ///< number of automaton iteration for the cloud cover layer
+#define ITERATION_NB_CLOUD_COVER (100u)    ///< number of automaton iteration for the cloud cover layer
 
 // -------------------------------------------------------------------------------------------------
 // -- CLOUD COVER -----------------------------------------------------------------------------------
@@ -42,11 +42,11 @@ static void cloud_cover_apply(void *target_cell, void *neighbors[DIRECTIONS_NB])
     hexa_cell_t *cell = (hexa_cell_t *) target_cell;
 
     const f32 step_angle = PI_T_2 / (f32) DIRECTIONS_NB;
-    const ratio_t cell_abv_sea_altitude_ratio = MIN((f32) (cell->altitude * (cell->altitude > 0)) / ((f32) ALTITUDE_MAX / 2), 1.0f); 
 
     f32 diff_angle_of_neighbors[DIRECTIONS_NB] = { 0.0f };
     ratio_t cell_given_clouds[DIRECTIONS_NB] = { 0.0f };
     f32 mirrored_angle = 0.0f;
+    f32 sources_counter = 0.0f;
 
     if (cell->altitude <= 0) {
         return;
@@ -66,11 +66,12 @@ static void cloud_cover_apply(void *target_cell, void *neighbors[DIRECTIONS_NB])
                 ? -(mirrored_angle - PI_T_2)
                 : mirrored_angle;
                 
-        if ((mirrored_angle > (step_angle)) || float_equal(mirrored_angle, step_angle, 1u)) {
+        if (mirrored_angle > (step_angle * CLOUD_COVER_DIFFUSION)) {
             // if the angle is pointing to another cell
             cell_given_clouds[i] = 0.0f;
         } else {
-            cell_given_clouds[i] = (mirrored_angle / (step_angle)) * ((hexa_cell_t *) neighbors[i])->cloud_cover;
+            cell_given_clouds[i] = (mirrored_angle / (step_angle * CLOUD_COVER_DIFFUSION)) * ((hexa_cell_t *) neighbors[i])->cloud_cover;
+            sources_counter += mirrored_angle / (step_angle * CLOUD_COVER_DIFFUSION);
         }
     }
 
@@ -79,14 +80,12 @@ static void cloud_cover_apply(void *target_cell, void *neighbors[DIRECTIONS_NB])
     for (size_t i = 0u ; i < DIRECTIONS_NB ; i++) {
         cell->cloud_cover += cell_given_clouds[i];
     }
+    cell->cloud_cover /= (f32) sources_counter;
     cell->cloud_cover = MIN(cell->cloud_cover, 1.0f);
 
     // making the clouds rain a bit depending of the altitude
-    cell->precipitations = 
-            ((cell->cloud_cover + cell_abv_sea_altitude_ratio) > 1.0f) 
-            * fabs(cell->cloud_cover - cell_abv_sea_altitude_ratio);
-    // cell->cloud_cover -= cell->precipitations;
-    // cell->cloud_cover *= cell->winds_vector.magnitude;
+    cell->precipitations = (1.0f - cell->winds_vector.magnitude) * cell->cloud_cover;
+    cell->cloud_cover -= cell->precipitations;
 }
 
 const layer_calls_t cloud_cover_layer_calls = {

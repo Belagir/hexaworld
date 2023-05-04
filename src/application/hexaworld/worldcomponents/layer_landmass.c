@@ -66,6 +66,11 @@ static void landmass_flag_gen(void *target_cell, void *neighbors[DIRECTIONS_NB])
     const u32 is_above_sea_level = cell->altitude;
     const u32 is_a_ridge = hexa_cell_has_flag(cell, HEXAW_FLAG_TELLURIC_RIDGE);
     const u32 is_a_rift = hexa_cell_has_flag(cell, HEXAW_FLAG_TELLURIC_RIFT);
+    u32 ocean_tiles_nb = 0u;
+
+    for (size_t i = 0u ; i < DIRECTIONS_NB ; i++) {
+        ocean_tiles_nb += (((hexa_cell_t *) neighbors[i])->altitude <= 0);
+    }
 
     if (is_above_sea_level) {
         if (is_a_ridge) {
@@ -73,6 +78,13 @@ static void landmass_flag_gen(void *target_cell, void *neighbors[DIRECTIONS_NB])
         } else if (is_a_rift) {
             hexa_cell_set_flag(cell, HEXAW_FLAG_CANYONS);
         }
+
+        if ((ocean_tiles_nb > 0u) && (ocean_tiles_nb < (DIRECTIONS_NB / 2))) {
+            hexa_cell_set_flag(cell, HEXAW_FLAG_SMALL_COAST);
+        } else if (ocean_tiles_nb >= (DIRECTIONS_NB / 2)) {
+            hexa_cell_set_flag(cell, HEXAW_FLAG_LONG_COAST);
+        }
+
     } else {
         if ((is_a_ridge) && ((rand() % LANDMASS_NO_ISLE_CHANCE) == 0)) {
             hexa_cell_set_flag(cell, HEXAW_FLAG_ISLES);

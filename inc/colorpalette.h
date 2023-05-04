@@ -30,6 +30,7 @@
 
 #define COLOR_AQUA_GREEN    (0x25E496FF)    ///< green-ish turquoise-ish color
 #define COLOR_LEAFY_GREEN   (0x4FBB3AFF)    ///< nice green color
+#define COLOR_TREE_GREEN    (0x197E15FF)    ///< dark green color
 
 #define COLOR_WHEAT         (0xFFD07BFF)    ///< pale yellow-brownish color
 #define COLOR_SAND_BROWN    (0xD8B168FF)    ///< sand color

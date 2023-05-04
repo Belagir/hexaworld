@@ -104,9 +104,11 @@ static void freshwater_apply(void *target_cell, void *neighbors[DIRECTIONS_NB]) 
 
     // this is an ocean tile !
     if (cell->altitude <= 0) {
+        cell->freshwater_height = 0;
         return;
     }
 
+    // update source directions
     cell->freshwater_sources_directions = 0x00;
     for (size_t i = 0u ; i < DIRECTIONS_NB ; i++) {
         tmp_cell = (hexa_cell_t *) neighbors[i];

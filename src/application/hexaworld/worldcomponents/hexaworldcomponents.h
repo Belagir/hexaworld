@@ -44,7 +44,9 @@
 #define WINDS_VECTOR_DIRECTIONS_NB (32)     ///< number of possible direction for a wind vector 
 #define WINDS_VECTOR_UNIT_ANGLE ((PI_T_2) / (WINDS_VECTOR_DIRECTIONS_NB))      ///< winds vector minimum angle 
 
-#define FRESHWATER_PRECIPITATIONS_THRESHOLD (0.2f)      ///< threshold from which a precipitation on a tiles creates a source of water.
+#define CLOUD_COVER_DIFFUSION (1.2f)
+
+#define FRESHWATER_PRECIPITATIONS_THRESHOLD (0.15f)      ///< threshold from which a precipitation on a tiles creates a source of water.
 #define FRESHWATER_SOURCE_START_DEPTH (1u)      ///< start value for freshwater
 #define FRESHWATER_MOUNTAIN_NO_SOURCE_CHANCE (0x10)    ///< chance that a source is generated on a mountain
 #define FRESHWATER_WATERFALL_HEIGHT_THRESHOLD (2000)    ///< height in meters between two tiles needed for a waterfall to form
