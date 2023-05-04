@@ -40,13 +40,20 @@ void hexa_cell_get_surrounding_cells_pointed(f32 angle, size_t *out_pointed_cell
 }
 
 // -------------------------------------------------------------------------------------------------
-void hexa_cell_directioness_of_surrounding_angles(void *angles_around, size_t stride, f32 *out_angles) {
+void hexa_cell_direction_of_surrounding_angles(hexa_cell_t **angles_around, void *angle_field_offset, f32 *out_angles) {
     f32 tmp_angle = 0.0f;
+    f32 direction_angle = 0.0f;
 
     for (size_t i = 0u ; i < HEXAGON_SIDES_NB ; i++) {
-        tmp_angle = fmodf(*((f32 *) angles_around + (stride * i)), PI_T_2);
+        tmp_angle = fmodf(*((f32 *) ((void *) angles_around[i] + (size_t) angle_field_offset)), PI_T_2);
+        tmp_angle += PI_T_2 * (tmp_angle < 0.0f);
 
-        out_angles[i] = fmodf(tmp_angle + ((f32) i * (f32) HEXAGON_SIDES_NB), PI_T_2);
+        direction_angle = (i != 0u)
+            ? (f32) i * (PI_T_2 / (f32) HEXAGON_SIDES_NB)
+            : 0.0f;
+
+        out_angles[i] = fmodf(tmp_angle - direction_angle, PI_T_2);
+        out_angles[i] += PI_T_2 * (out_angles[i] < 0.0f);
     }
 }
 

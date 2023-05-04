@@ -25,6 +25,9 @@
 /// Calculates a normal distribution of a certain mean and variance (not squared variance !). Needs math.h.
 #define NORMAL_DISTRIBUTION(_mean, _variance, _x) ((1.0f / (_variance * sqrt(2.0f * (PI)))) * exp(-0.5f * pow(((_x) - (_mean)) / (_variance), 2)))
 
+#define MAX(_a, _b) (((_a) > (_b)) ? (_a) : (_b))
+#define MIN(_a, _b) (((_a) < (_b)) ? (_a) : (_b))
+
 typedef char  i8;   ///< convenience type redefinition
 typedef short i16;  ///< convenience type redefinition
 typedef int   i32;  ///< convenience type redefinition
@@ -92,14 +95,5 @@ vector_2d_polar_t vector2d_cartesian_to_polar(vector_2d_cartesian_t vec);
  * @return u32 0 if unequal, 1 if equal (up to the max difference)
  */
 u32 float_equal(f32 val1, f32 val2, u32 max_ulps_diff);
-
-/**
- * @brief Returns the minimum of two numbers.
- * 
- * @param[in] v1 first number
- * @param[in] v2 second number
- * @return u64 the smallest of the two numbers.
- */
-u64 min(u64 v1, u64 v2);
 
 #endif

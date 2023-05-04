@@ -166,7 +166,7 @@ void hexa_cell_get_surrounding_cells_pointed(f32 angle, size_t *out_pointed_cell
  * @param[in] stride
  * @param[out] out_angles 
  */
-void hexa_cell_directioness_of_surrounding_angles(void *angles_around, size_t stride, f32 *out_angles);
+void hexa_cell_direction_of_surrounding_angles(hexa_cell_t **angles_around, void *angle_field_offset, f32 *out_angles);
 
 /**
  * @brief Sets an bit flag in a cell.
