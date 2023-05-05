@@ -7,7 +7,7 @@
 
 #include <colorpalette.h>
 
-#define ITERATION_NB_CLOUD_COVER (100u)    ///< number of automaton iteration for the cloud cover layer
+#define ITERATION_NB_CLOUD_COVER (30u)    ///< number of automaton iteration for the cloud cover layer
 
 // -------------------------------------------------------------------------------------------------
 // -- CLOUD COVER -----------------------------------------------------------------------------------
