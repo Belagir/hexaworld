@@ -54,7 +54,11 @@
 
 #define VEGETATION_TEMPERATURE_MEAN (18)    ///< ideal temperature for things to grow
 #define VEGETATION_TEMPERATURE_VARI (8)    ///< squared variation in temperature tolerated by plants
-#define VEGETATION_CUTOUT_THRESHOLD (0.01f) ///< thrshold from which the vegetation cover is ignored by some methods
+#define VEGETATION_CUTOUT_THRESHOLD (0.01f) ///< threshold from which the vegetation cover is ignored by some methods
+#define VEGETATION_COVER_DIFFUSION_FACTOR (0.85f)   ///< dictates how much neighboring grassy tiles influence a tile to be more grassy even without wwater
+#define VEGETATION_COVER_HELP_FOR_TREES (0.85f)     ///< how grass and small vegetation helps trees to grow
+#define VEGETATION_TREES_PROPAGATION_WEIGHT (17.0f) ///< the greater, the clearer the cutout will be between forests (good results from 10.0f)
+#define VEGETATION_TREES_PROPAGATION_OFFSET (0.35f) ///< offseting the transfer function from a forested tile to an empty one, the greater the harder it will be for a forested tile to expand
 
 #define WHOLE_WORLD_OCEAN_ABYSS_CUTOUT (0.50f)  ///< height ratio for abyss ocean -> normal ocean drawing 
 #define WHOLE_WORLD_OCEAN_REEF_CUTOUT  (0.25f)  ///< height ratio for normal ocean -> reef ocean drawing

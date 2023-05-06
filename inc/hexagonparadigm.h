@@ -95,7 +95,7 @@ typedef struct hexa_cell_t {
     ratio_t precipitations;
     // vegetation coefficients
     ratio_t vegetation_cover;
-    ratio_t vegetation_volume;
+    ratio_t vegetation_trees;
 
     /// freshwater excess height
     frwtr_m_t freshwater_height;

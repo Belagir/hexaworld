@@ -29,7 +29,7 @@ static void vegetation_draw(hexa_cell_t *cell, hexagon_shape_t *target_shape) {
     }
 
     tile_color.a = (u8) (0xFF * cell->vegetation_cover);
-    inner_color.a = (u8) (0xFF * cell->vegetation_volume);
+    inner_color.a = (u8) (0xFF * cell->vegetation_trees);
     draw_hexagon(target_shape, FROM_RAYLIB_COLOR(tile_color), 1.0f , DRAW_HEXAGON_FILL);
     draw_hexagon(target_shape, FROM_RAYLIB_COLOR(inner_color), 0.5f , DRAW_HEXAGON_FILL);
     
@@ -39,8 +39,6 @@ static void vegetation_draw(hexa_cell_t *cell, hexagon_shape_t *target_shape) {
 
 // -------------------------------------------------------------------------------------------------
 static void vegetation_seed(hexaworld_t *world) {
-#if 1
-#else
     // more water (precipitations & freshwater) means more overall vegetation
     ratio_t water_rating = 0.0f;
     // there is a precise temperature range needed by the plants to grow
@@ -51,59 +49,52 @@ static void vegetation_seed(hexaworld_t *world) {
     ratio_t cloudiness_rating = 0.0f;
 
     hexa_cell_t *tmp_tile = NULL;
-
-    // only abiotic factors for seeding
     for (size_t x = 0u ; x < world->width ; x++) {
         for (size_t y = 0u ; y < world->height ; y++) {
             tmp_tile = world->tiles[x] + y;
 
-            water_rating = get_water_rating(tmp_tile);
             temperature_rating = get_temperature_rating(tmp_tile);
-            terrain_rating = get_terrain_rating(tmp_tile);
             cloudiness_rating = get_cloudiness_rating(tmp_tile);
 
-            tmp_tile->vegetation_cover = temperature_rating * (water_rating + cloudiness_rating) / 2.0f;
-            tmp_tile->vegetation_volume = tmp_tile->vegetation_cover * temperature_rating * (water_rating + terrain_rating) / 2.0f;
+            tmp_tile->vegetation_cover = temperature_rating * cloudiness_rating;
+            tmp_tile->vegetation_trees = 
+                    (tmp_tile->vegetation_cover > VEGETATION_CUTOUT_THRESHOLD)
+                    * ((tmp_tile->freshwater_height > 0) || tmp_tile->precipitations > 0)
+                    * MIN(temperature_rating + (tmp_tile->vegetation_cover * VEGETATION_COVER_HELP_FOR_TREES), 1.0f);
         }
     }
- #endif
 }
 
 // -------------------------------------------------------------------------------------------------
 static void vegetation_apply(void *target_cell, void *neighbors[DIRECTIONS_NB]) {
     hexa_cell_t *cell = (hexa_cell_t *) target_cell;
-#if 1
-#else
     hexa_cell_t *tmp_cell = NULL;
-    f32 max_veg_volume = 0.0f;
-
+    f32 max_veg_cover = 0.0f;
+    f32 mean_veg_trees = 0.0f;
     f32 temperature_rating = 0.0f;
-    f32 terrain_rating = 0.0f;
-    f32 shade_rating = 0.0f;
-    f32 water_rating = 0.0f;
+
+    temperature_rating = get_temperature_rating(cell);
 
     for (size_t i = 0u ; i < DIRECTIONS_NB ; i++) {
         tmp_cell = (hexa_cell_t *) neighbors[i];
 
-        if (tmp_cell->vegetation_volume > max_veg_volume) {
-            max_veg_volume = tmp_cell->vegetation_volume;
+        if (tmp_cell->vegetation_cover > max_veg_cover) {
+            max_veg_cover = tmp_cell->vegetation_cover;
         }
+        mean_veg_trees += tmp_cell->vegetation_trees;
     }
+    mean_veg_trees /= (f32) DIRECTIONS_NB;
 
-    temperature_rating = get_temperature_rating(cell);
-    shade_rating = MIN(get_cloudiness_rating(cell) + cell->vegetation_volume, 1.0f);
-    water_rating = get_water_rating(cell);
-    terrain_rating = get_terrain_rating(cell);
-
-    cell->vegetation_cover = temperature_rating * MIN((water_rating + shade_rating) / 2.0f + max_veg_volume, 1.0f);
-    cell->vegetation_volume = cell->vegetation_cover * temperature_rating * (water_rating + terrain_rating) / 2.0f;
-#endif
+    cell->vegetation_cover = MAX(max_veg_cover * VEGETATION_COVER_DIFFUSION_FACTOR * temperature_rating, cell->vegetation_cover);
+    if (cell->vegetation_trees < VEGETATION_CUTOUT_THRESHOLD) {
+        cell->vegetation_trees = sigmoid(mean_veg_trees - VEGETATION_TREES_PROPAGATION_OFFSET, VEGETATION_TREES_PROPAGATION_WEIGHT);
+    }
 }
 
 // -------------------------------------------------------------------------------------------------
 static f32 get_temperature_rating(hexa_cell_t *cell) {
-    return NORMAL_DISTRIBUTION(VEGETATION_TEMPERATURE_MEAN, VEGETATION_TEMPERATURE_VARI, cell->temperature / 2)
-            / NORMAL_DISTRIBUTION(VEGETATION_TEMPERATURE_MEAN, VEGETATION_TEMPERATURE_VARI, VEGETATION_TEMPERATURE_MEAN);
+    return normal_distribution((f32) (cell->temperature / 2), VEGETATION_TEMPERATURE_MEAN, VEGETATION_TEMPERATURE_VARI)
+            / normal_distribution(VEGETATION_TEMPERATURE_MEAN, VEGETATION_TEMPERATURE_MEAN, VEGETATION_TEMPERATURE_VARI);
 }
 
 // -------------------------------------------------------------------------------------------------

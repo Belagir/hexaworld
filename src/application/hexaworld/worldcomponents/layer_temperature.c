@@ -47,8 +47,8 @@ static void temperature_seed(hexaworld_t *world) {
     for (size_t x = 0u ; x < world->width ; x++) {
         for (size_t y = 0u ; y < world->height ; y++) {
             world->tiles[x][y].temperature =
-                    ((NORMAL_DISTRIBUTION(equator, temp_variance, y)
-                    / NORMAL_DISTRIBUTION(equator, temp_variance, equator))
+                    ((normal_distribution(y, equator, temp_variance)
+                    / normal_distribution(equator, equator, temp_variance))
                     * TEMPERATURE_RANGE)
                     + TEMPERATURE_MIN;
             

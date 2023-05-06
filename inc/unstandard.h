@@ -22,9 +22,6 @@
 /// returns the sign bitfield of a 32-bit signed integer
 #define SGN_I32(_v) ((_v) & (0x80000000))
 
-/// Calculates a normal distribution of a certain mean and variance (not squared variance !). Needs math.h.
-#define NORMAL_DISTRIBUTION(_mean, _variance, _x) ((1.0f / (_variance * sqrt(2.0f * (PI)))) * exp(-0.5f * pow(((_x) - (_mean)) / (_variance), 2)))
-
 #define MAX(_a, _b) (((_a) > (_b)) ? (_a) : (_b))
 #define MIN(_a, _b) (((_a) < (_b)) ? (_a) : (_b))
 
@@ -103,5 +100,24 @@ vector_2d_polar_t vector2d_cartesian_to_polar(vector_2d_cartesian_t vec);
  * @return u32 0 if unequal, 1 if equal (up to the max difference)
  */
 u32 float_equal(f32 val1, f32 val2, u32 max_ulps_diff);
+
+/**
+ * @brief Calculates a normal distribution of a certain mean and variance (not squared variance !). 
+ * 
+ * @param x 
+ * @param mean 
+ * @param variance 
+ * @return f32 
+ */
+f32 normal_distribution(f32 x, f32 mean, f32 variance);
+
+/**
+ * @brief 
+ * 
+ * @param x 
+ * @param weight 
+ * @return f32 
+ */
+f32 sigmoid(f32 x, f32 weight);
 
 #endif
