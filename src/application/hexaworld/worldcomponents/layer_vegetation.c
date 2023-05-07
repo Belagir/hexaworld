@@ -132,6 +132,10 @@ static void vegetation_flag_gen(void *target_cell, void *neighbors[DIRECTIONS_NB
     const size_t cell_veg_cover_subdivision = (size_t) ceilf(cell->vegetation_cover * (f32) NB_SUBDIVISIONS_COVER) - 1u;
     const size_t cell_veg_trees_subdivision = (size_t) ceilf(cell->vegetation_trees * (f32) NB_SUBDIVISIONS_TREES) - 1u;
 
+    if (cell->altitude <= 0) {
+        return;
+    }
+
     hexa_cell_set_flag(cell, cover_and_trees_to_flag[cell_veg_cover_subdivision][cell_veg_trees_subdivision]);
 
     if (hexa_cell_has_flag(cell, HEXAW_FLAG_MEANDERS) && hexa_cell_has_flag(cell, HEXAW_FLAG_RIVER_MOUTH)) {
