@@ -26,29 +26,12 @@ typedef void (*on_region_refreshed_func_t)(vector_2d_cartesian_t target_dim, voi
 /**
  * @brief Data defining a window region
  */
-typedef struct window_region_t {
-    /// actual window-relative pixel coordinates of the region
-    f32 px_coords_rectangle[4u];
-    
-    /// "need redraw" flag
-    u32 flag_changed;
-
-    /// function executed when the user clicks on the region 
-    on_region_click_func_t on_click_f;
-    /// function executed when something needs to refresh the buffer from the internal data
-    on_region_refreshed_func_t on_refresh_f;
-    /// pointer to some data related to the region's functionality
-    void *related_data;
-
-    /// texture buffer for rendering the region 
-    RenderTexture2D buffer_rendertexture;
-} window_region_t;
+typedef struct window_region_t window_region_t;
 
 /**
  * @brief Initialize a region data from some information.
  * The internal texture buffer size will be set to the real size of the region relative to the window.
  * 
- * @param[out] w_region target window region data
  * @param[in] ratio_coords_rectangle ratios of the window's sizes, representing the zone attributed to the region
  * @param[in] window_width window pixel width
  * @param[in] window_height window pixel height
@@ -56,8 +39,7 @@ typedef struct window_region_t {
  * @param[in] on_refresh_f function to be called when the region needs to be re-drawn (can be NULL)
  * @param[in] related_data pointer to some anonymous data needed by the two previous functions
  */
-void window_region_init(
-            window_region_t *w_region,
+window_region_t * window_region_create(
             const f32 ratio_coords_rectangle[4u],
             u32 window_width,
             u32 window_height,
@@ -91,7 +73,7 @@ void window_region_process_click(window_region_t *w_region, i32 x, i32 y);
  * 
  * @param[inout] w_region target region
  */
-void window_region_deinit(window_region_t *w_region);
+void window_region_destroy(window_region_t **w_region);
 
 /**
  * @brief Notifies a region that it has changed

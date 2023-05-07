@@ -10,13 +10,32 @@
  */
 #include "windowregion.h"
 
+#include <stdlib.h>
 #include <raylib.h>
 
 #include <colorpalette.h>
 
 // -------------------------------------------------------------------------------------------------
-void window_region_init(
-            window_region_t *w_region,
+typedef struct window_region_t {
+    /// actual window-relative pixel coordinates of the region
+    f32 px_coords_rectangle[4u];
+    
+    /// "need redraw" flag
+    u32 flag_changed;
+
+    /// function executed when the user clicks on the region 
+    on_region_click_func_t on_click_f;
+    /// function executed when something needs to refresh the buffer from the internal data
+    on_region_refreshed_func_t on_refresh_f;
+    /// pointer to some data related to the region's functionality
+    void *related_data;
+
+    /// texture buffer for rendering the region 
+    RenderTexture2D buffer_rendertexture;
+} window_region_t;
+
+// -------------------------------------------------------------------------------------------------
+window_region_t * window_region_create(
             const f32 ratio_coords_rectangle[4u],
             u32 window_width,
             u32 window_height,
@@ -24,7 +43,7 @@ void window_region_init(
             on_region_refreshed_func_t on_refresh_f,
             void *related_data) {
     
-    (*w_region) = (window_region_t) { 0u };
+    window_region_t *w_region = malloc(sizeof(*w_region));
 
     // x
     w_region->px_coords_rectangle[0u] = ratio_coords_rectangle[0u] * window_width,
@@ -102,12 +121,14 @@ void window_region_process_click(window_region_t *w_region, i32 x, i32 y) {
 }
 
 // -------------------------------------------------------------------------------------------------
-void window_region_deinit(window_region_t *w_region) {
-    if (!w_region) {
+void window_region_destroy(window_region_t **w_region) {
+    if ((!w_region) || (!(*w_region))) {
         return;
     }
 
-    UnloadRenderTexture(w_region->buffer_rendertexture);
+    UnloadRenderTexture((*w_region)->buffer_rendertexture);
+    free(*w_region);
+    (*w_region) = NULL;
 }
 
 // -------------------------------------------------------------------------------------------------

@@ -2,12 +2,20 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <signal.h>
 
+#include <endoftheline.h>
 #include <hexaworld_application.h>
 #include <unstandard.h>
 
+static void intHandler(int val) {
+    end_of_the_line(END_OF_THE_LINE_EXIT_INTERRUPTED, "interrupted by signal.");
+}
+
 i32 main(u32 argc, char const *argv[]) {
     hexaworld_raylib_app_handle_t *application = NULL;
+
+    signal(SIGINT, &intHandler);
 
     u32 index_args = 1u;
     i32 seed = 0;
@@ -26,7 +34,7 @@ i32 main(u32 argc, char const *argv[]) {
             index_args += 1u;
             height = strtoul(argv[index_args], NULL, 0);
         } else {
-            printf("usage : \n$ %s [-s seed] [-x width] [-y height]\n", argv[0]);
+            end_of_the_line(END_OF_THE_LINE_EXIT_INVALID_ARGS, "\n\tusage :\n\t$ otomaton [-s seed] [-x width] [-y height]\n");
             return -1;
         }
         index_args += 1u;
@@ -34,9 +42,6 @@ i32 main(u32 argc, char const *argv[]) {
 
     // creating application
     application = hexaworld_raylib_app_init(seed, 1200u, 800u, width, height);
-    if (!application) {
-        return -1;
-    }
 
     // running the application
     hexaworld_raylib_app_run(application, 20u);
