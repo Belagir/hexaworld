@@ -53,6 +53,10 @@ static void vegetation_seed(hexaworld_t *world) {
         for (size_t y = 0u ; y < world->height ; y++) {
             tmp_tile = world->tiles[x] + y;
 
+            if (tmp_tile->altitude <= 0) {
+                continue;
+            }
+
             temperature_rating = get_temperature_rating(tmp_tile);
             cloudiness_rating = get_cloudiness_rating(tmp_tile);
 
@@ -72,6 +76,10 @@ static void vegetation_apply(void *target_cell, void *neighbors[DIRECTIONS_NB]) 
     f32 max_veg_cover = 0.0f;
     f32 mean_veg_trees = 0.0f;
     f32 temperature_rating = 0.0f;
+
+    if (cell->altitude <= 0) {
+        return;
+    }
 
     temperature_rating = get_temperature_rating(cell);
 

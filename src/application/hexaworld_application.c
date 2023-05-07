@@ -184,7 +184,7 @@ void hexaworld_raylib_app_run(hexaworld_raylib_app_handle_t *hexapp, u32 target_
     while (!WindowShouldClose()) {
 
         if (IsKeyPressed(KEY_ENTER) && IsKeyDown(KEY_LEFT_SHIFT)) {
-            hexaworld_reseed(hexapp->hexaworld_data.hexaworld, time(NULL));
+            hexaworld_reseed(hexapp->hexaworld_data.hexaworld, rand());
             generate_world(hexapp->hexaworld_data.hexaworld);
 
             info_panel_set_examined_cell(hexapp->hexaworld_data.linked_panel, NULL, 0u, 0u);

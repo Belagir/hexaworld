@@ -53,7 +53,7 @@
 #define FRESHWATER_LAKE_DEPTH_THRESHOLD (5u)        ///< depth from which a body of water is considered a lake
 
 #define VEGETATION_TEMPERATURE_MEAN (18)    ///< ideal temperature for things to grow
-#define VEGETATION_TEMPERATURE_VARI (8)    ///< squared variation in temperature tolerated by plants
+#define VEGETATION_TEMPERATURE_VARI (12)    ///< squared variation in temperature tolerated by plants
 #define VEGETATION_CUTOUT_THRESHOLD (0.01f) ///< threshold from which the vegetation cover is ignored by some methods
 #define VEGETATION_COVER_DIFFUSION_FACTOR (0.85f)   ///< dictates how much neighboring grassy tiles influence a tile to be more grassy even without wwater
 #define VEGETATION_COVER_HELP_FOR_TREES (0.85f)     ///< how grass and small vegetation helps trees to grow

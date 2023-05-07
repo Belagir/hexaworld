@@ -11,9 +11,12 @@
 
 #define ITERATION_NB_WHOLE_WORLD (0u)
 
-#define WHOLE_WORLD_RANDOM_GENERATION_STEP_ANGLE (4u)
-#define WHOLE_WORLD_RANDOM_GENERATION_STEP_RADIUS (2u)
+#define WHOLE_WORLD_RANDOM_GEN_ISLE_STEP_ANGLE (4u)
+#define WHOLE_WORLD_RANDOM_GEN_ISLE_STEP_RADIUS (2u)
 #define WHOLE_WORLD_ISLES_MAX_NB (2u)
+
+#define WHOLE_WORLD_RANDOM_GEN_FOREST_STEP_ANGLE (12u)
+#define WHOLE_WORLD_RANDOM_GEN_FOREST_STEP_RADIUS (4u)
 
 #define WHOLE_WORLD_AUTOMATIC_SNOW_TEMP (-20)
 
@@ -76,6 +79,14 @@ static void draw_isles(hexa_cell_t *cell, hexagon_shape_t *target_shape);
  */
 static void draw_freshwater(hexa_cell_t *cell, hexagon_shape_t *target_shape);
 
+/**
+ * @brief 
+ * 
+ * @param cell 
+ * @param target_shape 
+ */
+static void draw_forests(hexa_cell_t *cell, hexagon_shape_t *target_shape);
+
 // -------------------------------------------------------------------------------------------------
 // -- WHOLE WORLD ----------------------------------------------------------------------------------
 
@@ -96,6 +107,7 @@ static void whole_world_draw(hexa_cell_t *cell, hexagon_shape_t *target_shape) {
     }
 
     draw_isles(cell, target_shape);
+    draw_forests(cell, target_shape);
     draw_mountains_canyon(cell, target_shape);
     draw_freshwater(cell, target_shape);
 
@@ -163,7 +175,7 @@ static void draw_mountains_canyon(hexa_cell_t *cell, hexagon_shape_t *target_sha
     }
 
     feature_color = AS_RAYLIB_COLOR(COLOR_LEATHER);
-    feature_color.a = 0x30 + (u8) ((f32) 0x80 * ((f32) cell->altitude / (f32) ALTITUDE_MAX));
+    feature_color.a = 0x8F + (u8) ((f32) 0x70 * ((f32) cell->altitude / (f32) ALTITUDE_MAX));
 
     if (hexa_cell_has_flag(cell, HEXAW_FLAG_MOUNTAIN)) {
         draw_hexagon(target_shape, FROM_RAYLIB_COLOR(feature_color), 0.66f, DRAW_HEXAGON_FILL);
@@ -192,8 +204,8 @@ static void draw_isles(hexa_cell_t *cell, hexagon_shape_t *target_shape) {
 
     random_nb_isles = (u32) ((i32) (rand() % WHOLE_WORLD_ISLES_MAX_NB));
     for (size_t i = 0u ; i < random_nb_isles ; i++) {
-        random_isle_pos.angle = ((f32) (rand() % WHOLE_WORLD_RANDOM_GENERATION_STEP_ANGLE) / (f32) WHOLE_WORLD_RANDOM_GENERATION_STEP_ANGLE) * PI_T_2;
-        random_isle_pos.magnitude = (f32) (rand() % WHOLE_WORLD_RANDOM_GENERATION_STEP_RADIUS) / (f32) WHOLE_WORLD_RANDOM_GENERATION_STEP_RADIUS;
+        random_isle_pos.angle = ((f32) (rand() % WHOLE_WORLD_RANDOM_GEN_ISLE_STEP_ANGLE) / (f32) WHOLE_WORLD_RANDOM_GEN_ISLE_STEP_ANGLE) * PI_T_2;
+        random_isle_pos.magnitude = (f32) (rand() % WHOLE_WORLD_RANDOM_GEN_ISLE_STEP_RADIUS) / (f32) WHOLE_WORLD_RANDOM_GEN_ISLE_STEP_RADIUS;
         random_isle_pos.magnitude = (random_isle_pos.magnitude * (target_shape->radius - isle_shape.radius));
 
         isle_shape.center = vector2d_polar_to_cartesian(random_isle_pos);
@@ -258,6 +270,22 @@ static void draw_freshwater(hexa_cell_t *cell, hexagon_shape_t *target_shape) {
         }
     }
 }
+
+// -------------------------------------------------------------------------------------------------
+static void draw_forests(hexa_cell_t *cell, hexagon_shape_t *target_shape) {
+    Color forest_color = AS_RAYLIB_COLOR(COLOR_TREE_GREEN);
+
+    if (cell->vegetation_trees < VEGETATION_CUTOUT_THRESHOLD) {
+        return;
+    }
+    forest_color.a = 0xFF * cell->vegetation_trees;
+
+    draw_hexagon(target_shape, FROM_RAYLIB_COLOR(forest_color), 0.75f, DRAW_HEXAGON_FILL);
+}
+
+// -------------------------------------------------------------------------------------------------
+// -------------------------------------------------------------------------------------------------
+
 
 const layer_calls_t whole_world_layer_calls = {
         .draw_func          = &whole_world_draw,
