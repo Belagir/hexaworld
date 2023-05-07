@@ -22,7 +22,7 @@
 
 #define TILE_FLAG_NO_DESCRIPTION ("")     ///< constant to signal that a cell flag has no description 
 
-#define TILE_INFO_BUFFER_SIZE (1024u)       ///< number of ascii signs that an info panel can display
+#define TILE_INFO_BUFFER_SIZE (2048u)       ///< number of ascii signs that an info panel can display
 #define TILE_INFO_FORMAT_STRING ("TILE AT %3d : %3d\n - mean altitude : % 6dm\n - mean temperature : %+ 3d°C\n - mean cloud cover : %.1f%%\n- vegetation cover : %.1f%%\n - vegetation trees : %.1f%%\n\n")        ///< main format string do display cell information
 #define TILE_INFO_FONT_SIZE (18)        ///< font size for the panel
 
@@ -63,13 +63,49 @@ const char *tile_flag_description_map[HEXAW_FLAGS_NB] = {
         // HEXAW_FLAG_LONG_COAST,
         "LONG COASTLINE\n",
         // HEXAW_FLAG_MEANDERS
-        "WETLANDS\n",
+        TILE_FLAG_NO_DESCRIPTION,
         // HEXAW_FLAG_WATERFALLS
         "WATERFALLS\n",
         // HEXAW_FLAG_RIVER_MOUTH
         TILE_FLAG_NO_DESCRIPTION,
         // HEXAW_FLAG_LAKE
-        "LAKE\n"
+        "LAKE\n",
+        // HEXAW_FLAG_DESERTIC
+        "DESERT\n",
+        // HEXAW_FLAG_ARID_SHRUBLAND
+        "ARID SHRUBLAND\n",
+        // HEXAW_FLAG_ARID_FOREST
+        "ARID FOREST\n",
+        // HEXAW_FLAG_STEPPES
+        "STEPPES\n",
+        // HEXAW_FLAG_SPARSE_FOREST
+        "SPARSE FOREST\n",
+        // HEXAW_FLAG_DRY_FOREST
+        "DRY FOREST\n",
+        // HEXAW_FLAG_PLAINS
+        "PLAINS\n",
+        // HEXAW_FLAG_FOREST
+        "FOREST\n",
+        // HEXAW_FLAG_DENSE_FOREST
+        "DENSE FOREST\n",
+        // HEXAW_FLAG_HIGH_GRASS_PLAINS
+        "HIGH GRASS PLAINS\n",
+        // HEXAW_FLAG_RICH_FOREST
+        "LUSH FOREST\n",
+        // HEXAW_FLAG_JUNGLE
+        "JUNGLE\n",
+        // HEXAW_FLAG_BOG
+        "BOG\n",
+        // HEXAW_FLAG_MARSH
+        "MARSH\n",
+        // HEXAW_FLAG_SWAMP
+        "SWAMP\n",
+        // HEXAW_FLAG_MANGROVE
+        "MANGROVE\n",
+        // HEXAW_FLAG_DELTA
+        "DELTA\n",
+        // HEXAW_FLAG_BRACKISH_MARSH
+        "SALTWATER MARSH\n",
 };
 
 // -------------------------------------------------------------------------------------------------

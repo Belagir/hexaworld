@@ -9,10 +9,36 @@
 
 #define ITERATION_NB_VEGETATION (10u)    ///< number of automaton iteration for the vegetation layer
 
+#define NB_SUBDIVISIONS_COVER (4u)
+#define NB_SUBDIVISIONS_TREES (3u)
+
 static f32 get_temperature_rating(hexa_cell_t *cell);
 static f32 get_terrain_rating(hexa_cell_t *cell);
 static f32 get_water_rating(hexa_cell_t *cell);
 static f32 get_cloudiness_rating(hexa_cell_t *cell);
+
+static const hexaworld_cell_flag_t cover_and_trees_to_flag[NB_SUBDIVISIONS_COVER][NB_SUBDIVISIONS_TREES] = {
+        // rare vegetation
+        { HEXAW_FLAG_DESERTIC,          HEXAW_FLAG_ARID_SHRUBLAND,  HEXAW_FLAG_ARID_FOREST },
+        // sparse vegetation
+        { HEXAW_FLAG_STEPPES,           HEXAW_FLAG_SPARSE_FOREST,   HEXAW_FLAG_DRY_FOREST },
+        // common vegetation
+        { HEXAW_FLAG_PLAINS,            HEXAW_FLAG_FOREST,          HEXAW_FLAG_DENSE_FOREST },
+        // lush vegetation
+        { HEXAW_FLAG_HIGH_GRASS_PLAINS, HEXAW_FLAG_RICH_FOREST,     HEXAW_FLAG_JUNGLE },
+};
+
+static const hexaworld_cell_flag_t wetland_and_trees_to_flag[NB_SUBDIVISIONS_TREES] = {
+        HEXAW_FLAG_BOG, 
+        HEXAW_FLAG_MARSH, 
+        HEXAW_FLAG_SWAMP,
+};
+
+static const hexaworld_cell_flag_t wet_rivermouth_and_trees_to_flag[NB_SUBDIVISIONS_TREES] = {
+        HEXAW_FLAG_BRACKISH_MARSH,
+        HEXAW_FLAG_DELTA,
+        HEXAW_FLAG_MANGROVE,
+};
 
 // -------------------------------------------------------------------------------------------------
 // -- VEGETATION -----------------------------------------------------------------------------------
@@ -100,6 +126,22 @@ static void vegetation_apply(void *target_cell, void *neighbors[DIRECTIONS_NB]) 
 }
 
 // -------------------------------------------------------------------------------------------------
+static void vegetation_flag_gen(void *target_cell, void *neighbors[DIRECTIONS_NB]) {
+    hexa_cell_t *cell = (hexa_cell_t *) target_cell;
+
+    const size_t cell_veg_cover_subdivision = (size_t) ceilf(cell->vegetation_cover * (f32) NB_SUBDIVISIONS_COVER) - 1u;
+    const size_t cell_veg_trees_subdivision = (size_t) ceilf(cell->vegetation_trees * (f32) NB_SUBDIVISIONS_TREES) - 1u;
+
+    hexa_cell_set_flag(cell, cover_and_trees_to_flag[cell_veg_cover_subdivision][cell_veg_trees_subdivision]);
+
+    if (hexa_cell_has_flag(cell, HEXAW_FLAG_MEANDERS) && hexa_cell_has_flag(cell, HEXAW_FLAG_RIVER_MOUTH)) {
+        hexa_cell_set_flag(cell, wet_rivermouth_and_trees_to_flag[cell_veg_trees_subdivision]);
+    } else if (hexa_cell_has_flag(cell, HEXAW_FLAG_MEANDERS)) {
+        hexa_cell_set_flag(cell, wetland_and_trees_to_flag[cell_veg_trees_subdivision]);
+    }
+}
+
+// -------------------------------------------------------------------------------------------------
 static f32 get_temperature_rating(hexa_cell_t *cell) {
     return normal_distribution((f32) (cell->temperature / 2), VEGETATION_TEMPERATURE_MEAN, VEGETATION_TEMPERATURE_VARI)
             / normal_distribution(VEGETATION_TEMPERATURE_MEAN, VEGETATION_TEMPERATURE_MEAN, VEGETATION_TEMPERATURE_VARI);
@@ -131,7 +173,7 @@ const layer_calls_t vegetation_layer_calls = {
         .draw_func          = &vegetation_draw,
         .seed_func          = &vegetation_seed,
         .automaton_func     = &vegetation_apply,
-        .flag_gen_func      = NULL, 
+        .flag_gen_func      = &vegetation_flag_gen, 
         .automaton_iter     = ITERATION_NB_VEGETATION,
         .iteration_flavour  = LAYER_GEN_ITERATE_ABSOLUTE
 };

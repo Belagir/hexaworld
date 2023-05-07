@@ -48,6 +48,27 @@ typedef enum hexaworld_cell_flag_t {
     HEXAW_FLAG_RIVER_MOUTH,         ///< The river on the tile goes directly to an ocean or sea 
     HEXAW_FLAG_LAKE,                ///< a lake has formed here
 
+    HEXAW_FLAG_DESERTIC,
+    HEXAW_FLAG_ARID_SHRUBLAND,
+    HEXAW_FLAG_ARID_FOREST,
+    HEXAW_FLAG_STEPPES,
+    HEXAW_FLAG_SPARSE_FOREST,
+    HEXAW_FLAG_DRY_FOREST,
+    HEXAW_FLAG_PLAINS,
+    HEXAW_FLAG_FOREST,
+    HEXAW_FLAG_DENSE_FOREST,
+    HEXAW_FLAG_HIGH_GRASS_PLAINS,
+    HEXAW_FLAG_RICH_FOREST,
+    HEXAW_FLAG_JUNGLE,
+
+    HEXAW_FLAG_BOG,
+    HEXAW_FLAG_MARSH,
+    HEXAW_FLAG_SWAMP,
+
+    HEXAW_FLAG_MANGROVE,
+    HEXAW_FLAG_DELTA,
+    HEXAW_FLAG_BRACKISH_MARSH,
+
     HEXAW_FLAGS_NB,     ///< Total number of flags
 } hexaworld_cell_flag_t;
 
@@ -61,6 +82,9 @@ typedef enum hexagon_draw_fillmode_t {
 
 /// @brief a 16-width set of bit flags
 typedef u16 flag_set16_t;
+
+/// @brief a 32-width set of bit flags
+typedef u32 flag_set32_t;
 
 /// @brief a 8-width set of bit flags
 typedef u8  flag_set8_t;
@@ -96,13 +120,14 @@ typedef struct hexa_cell_t {
     // vegetation coefficients
     ratio_t vegetation_cover;
     ratio_t vegetation_trees;
+    
+    /// unsigned integer containing the flags as bit offsets
+    flag_set32_t flags;
 
     /// freshwater excess height
     frwtr_m_t freshwater_height;
     /// mean altitude of the tile
     alt_m_t altitude;
-    /// unsigned integer containing the flags as bit offsets
-    flag_set16_t flags;
 
     /// expected temperature of the tile
     temp_c_t temperature;

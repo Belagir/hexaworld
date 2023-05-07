@@ -44,6 +44,9 @@ window_region_t * window_region_create(
             void *related_data) {
     
     window_region_t *w_region = malloc(sizeof(*w_region));
+    if (!w_region) {
+        return NULL;
+    }
 
     // x
     w_region->px_coords_rectangle[0u] = ratio_coords_rectangle[0u] * window_width,

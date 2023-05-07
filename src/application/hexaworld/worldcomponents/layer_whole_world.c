@@ -56,6 +56,14 @@ static Color color_snowy_tile(hexa_cell_t *cell);
 static Color color_veget_tile(hexa_cell_t *cell);
 
 /**
+ * @brief  Determines the trees accent color of a tile.
+ * 
+ * @param[in] cell cell containing the information about the tile
+ * @return Color trees color
+ */
+static Color color_trees_tile(hexa_cell_t *cell);
+
+/**
  * @brief Draws the potential mountain or canyon present on a tile.
  * 
  * @param[in] cell cell containing the information about the tile
@@ -167,6 +175,22 @@ static Color color_veget_tile(hexa_cell_t *cell) {
 }
 
 // -------------------------------------------------------------------------------------------------
+static Color color_trees_tile(hexa_cell_t *cell) {
+    Color arid_color = AS_RAYLIB_COLOR(COLOR_LEAF);
+    Color lush_color = AS_RAYLIB_COLOR(COLOR_TREE_GREEN);
+
+    Color tile_color = (Color) {
+            .r = arid_color.r + (lush_color.r - arid_color.r) * (cell->vegetation_cover),
+            .g = arid_color.g + (lush_color.g - arid_color.g) * (cell->vegetation_cover),
+            .b = arid_color.b + (lush_color.b - arid_color.b) * (cell->vegetation_cover),
+            .a = 0xFF * cell->vegetation_trees,
+    };
+
+    return tile_color;
+
+}
+
+// -------------------------------------------------------------------------------------------------
 static void draw_mountains_canyon(hexa_cell_t *cell, hexagon_shape_t *target_shape) {
     Color feature_color = { 0u };
 
@@ -273,14 +297,14 @@ static void draw_freshwater(hexa_cell_t *cell, hexagon_shape_t *target_shape) {
 
 // -------------------------------------------------------------------------------------------------
 static void draw_forests(hexa_cell_t *cell, hexagon_shape_t *target_shape) {
-    Color forest_color = AS_RAYLIB_COLOR(COLOR_TREE_GREEN);
+    Color forest_color = color_trees_tile(cell);
 
     if (cell->vegetation_trees < VEGETATION_CUTOUT_THRESHOLD) {
         return;
     }
-    forest_color.a = 0xFF * cell->vegetation_trees;
 
     draw_hexagon(target_shape, FROM_RAYLIB_COLOR(forest_color), 0.75f, DRAW_HEXAGON_FILL);
+    draw_hexagon(target_shape, COLOR_TREE_GREEN, 0.75f, DRAW_HEXAGON_LINES);
 }
 
 // -------------------------------------------------------------------------------------------------
