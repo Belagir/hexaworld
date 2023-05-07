@@ -62,7 +62,7 @@ window_region_t * window_region_create(
 
     w_region->flag_changed = 1u;
 
-    w_region->buffer_rendertexture = LoadRenderTexture(w_region->px_coords_rectangle[2u], w_region->px_coords_rectangle[3u]);
+    w_region->buffer_rendertexture = LoadRenderTexture(w_region->px_coords_rectangle[2u]*2, w_region->px_coords_rectangle[3u]*2);
 
     w_region->related_data = related_data;
 }

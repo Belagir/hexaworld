@@ -118,6 +118,12 @@ hexaworld_raylib_app_handle_t * hexaworld_raylib_app_init(i32 random_seed, u32 w
     handle->window_height = window_height;
     handle->window_width  = window_width;
 
+    // raylib window
+    InitWindow(handle->window_width, handle->window_height, HEXAPP_WINDOW_TITLE);
+    if (!IsWindowReady()) {
+        end_of_the_line(END_OF_THE_LINE_EXIT_RAYLIB_FAILED, "failure during application initialisation");
+    }
+    
     for (size_t i = 0u ; i < WINREGIONS_NUMBER ; i++) {
         handle->window_regions[i] = NULL;
     }
@@ -133,11 +139,6 @@ hexaworld_raylib_app_handle_t * hexaworld_raylib_app_init(i32 random_seed, u32 w
         end_of_the_line(END_OF_THE_LINE_EXIT_NO_MEMORY, "failure during application initialisation");
     }
 
-    // raylib window
-    InitWindow(handle->window_width, handle->window_height, HEXAPP_WINDOW_TITLE);
-    if (!IsWindowReady()) {
-        end_of_the_line(END_OF_THE_LINE_EXIT_RAYLIB_FAILED, "failure during application initialisation");
-    }
 
     // assign window regions to some data
     handle->window_regions[WINREGION_HEXAWORLD] = window_region_create(

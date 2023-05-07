@@ -16,14 +16,21 @@ INC_DIR = inc
 OBJ_DIR = build
 ## Executable directory. Contains the final binary file.
 EXC_DIR = bin
+## resources directory
+RESDIR = res
 
 ## compiler
 CC = gcc
+## resource packer
+RESPACKER = ld
+
 ## compilation flags
 LFLAGS += -lraylib -lGL -ldl -lpthread
 CFLAGS += -Wextra -g
 ## linker flags
 LFLAGS += -lm
+# resource packing flags
+RESFLAGS = -r -b binary -z noexecstack
 
 # additional flags for defines
 DFLAGS += 
@@ -38,6 +45,12 @@ SRC := $(notdir $(shell find $(SRC_DIR) -name *.c))
 DUPL_SRC := $(strip $(shell echo $(SRC) | tr ' ' '\n' | sort | uniq -d))
 ## list of all target object files with their path
 OBJ := $(addprefix $(OBJ_DIR)/, $(patsubst %.c, %.o, $(SRC)))
+## list of all resources files without their directory
+RES := $(notdir $(shell find $(RESDIR)/ -type f))
+## list of all target binaries resource files to include in the binary
+RES_BIN := $(addprefix $(OBJ_DIR)/, $(addsuffix .resbin, $(RES)))
+## list of all duplicate resource files to enforce uniqueness of filenames
+DUPL_RES := $(strip $(shell echo $(RES) | tr ' ' '\n' | sort | uniq -d))
 
 ## makefile-managed directories
 BUILD_DIRS = $(EXC_DIR) $(OBJ_DIR)
@@ -59,11 +72,14 @@ vpath %.c $(sort $(dir $(shell find $(SRC_DIR) -name *.c)))
 
 all: check $(BUILD_DIRS) $(TARGET) | count_lines
 
-$(TARGET): $(OBJ)
+$(TARGET): $(OBJ) $(RES_BIN)
 	$(CC) $^ -o $@ $(LFLAGS)
 
 $(OBJ_DIR)/%.o: %.c
 	$(CC) -c $? -o $@ $(ARGS_INCL) $(CFLAGS) $(DFLAGS)
+
+$(OBJ_DIR)/%.resbin: $(RESDIR)/%
+	$(RESPACKER) $(RESFLAGS) $? -o $@
 
 # -------- dir spawning ----------------
 
@@ -74,7 +90,10 @@ $(BUILD_DIRS):
 
 check:
 ifdef DUPL_SRC
-	$(error duplicate filenames: $(DUPL_SRC))
+	$(error duplicate source filenames: $(DUPL_SRC))
+endif
+ifdef DUPL_RES
+	$(error duplicate resource filenames: $(DUPL_RES))
 endif
 
 # -------- cleaning --------------------

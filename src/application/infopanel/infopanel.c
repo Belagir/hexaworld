@@ -15,7 +15,11 @@
 #include <string.h>
 
 #include <colorpalette.h>
+#include <res.h>
+
 #include <raylib.h>
+
+DECLARE_RES(default_font, "res_hackregular_ttf")
 
 // -------------------------------------------------------------------------------------------------
 // -------------------------------------------------------------------------------------------------
@@ -23,12 +27,12 @@
 #define TILE_FLAG_NO_DESCRIPTION ("")     ///< constant to signal that a cell flag has no description 
 
 #define TILE_INFO_BUFFER_SIZE (2048u)       ///< number of ascii signs that an info panel can display for the tile info part
-#define TILE_INFO_FORMAT_STRING ("TILE AT %3d : %3d\n - mean altitude : % 6dm\n - mean temperature : %+ 3d°C\n - mean cloud cover : %.1f%%\n- vegetation cover : %.1f%%\n - vegetation trees : %.1f%%\n\n")        ///< main format string to display tile information
-#define TILE_INFO_FONT_SIZE (18)        ///< font size for the tile info panel
+#define TILE_INFO_FORMAT_STRING ("TILE AT %3d : %3d\n - mean altitude : % 6dm\n - mean temperature : %+ 3d°C\n - mean cloud cover : %.1f%%\n - vegetation cover : %.1f%%\n - vegetation trees : %.1f%%\n\n")        ///< main format string to display tile information
+#define TILE_INFO_FONT_SIZE (36)        ///< font size for the tile info panel
 
 #define MAP_INFO_BUFFER_SIZE (1024u)        ///< number of ascii signs that an info panel can display for the map info part
 #define MAP_INFO_FORMAT_STRING ("MAP SEED : % 10d")     ///< main format string to display map information
-#define MAP_INFO_FONT_SIZE (16)        ///< font size for the map info
+#define MAP_INFO_FONT_SIZE (32)        ///< font size for the map info
 
 // -------------------------------------------------------------------------------------------------
 // -------------------------------------------------------------------------------------------------
@@ -37,6 +41,14 @@
 typedef struct info_panel_t {
     /// currently examined cell, watch out for NULL !
     hexa_cell_t *target_cell;
+    /// pointer to the string buffer for the tile's infos
+    char *tile_description_buffer;
+
+    /// pointer to the string buffer for the map's infos
+    char *map_info_buffer;
+
+    Font panel_font;
+
     /// cell's x position
     u32 cell_x;
     /// cell's y position
@@ -44,12 +56,6 @@ typedef struct info_panel_t {
 
     /// overall map seed
     i32 map_seed;
-
-    /// pointer to the string buffer for the tile's infos
-    char *tile_description_buffer;
-
-    /// pointer to the string buffer for the map's infos
-    char *map_info_buffer;
 } info_panel_t;
 
 // -------------------------------------------------------------------------------------------------
@@ -154,6 +160,8 @@ info_panel_t *info_panel_create(void) {
 
     update_tile_description_buffer(panel);
 
+    panel->panel_font = LoadFontFromMemory(".ttf", res__default_font_start, (res__default_font_end - res__default_font_start), 64, NULL, 252);
+
     return panel;
 }
 
@@ -171,6 +179,8 @@ void info_panel_destroy(info_panel_t **panel) {
         free((*panel)->map_info_buffer);
         (*panel)->map_info_buffer = NULL;
     }
+
+    UnloadFont((*panel)->panel_font);
 
     (*panel)->target_cell = NULL;
     free(*panel);
@@ -206,9 +216,8 @@ void info_panel_set_map_seed(info_panel_t *panel, i32 map_seed) {
 void info_panel_draw(info_panel_t *panel) {
     ClearBackground(AS_RAYLIB_COLOR(COLOR_WHITE));
 
-    DrawText(panel->map_info_buffer, 5, 5, MAP_INFO_FONT_SIZE, AS_RAYLIB_COLOR(COLOR_BLACK));
-    
-    DrawText(panel->tile_description_buffer, 5, 5 + (MAP_INFO_FONT_SIZE*2), TILE_INFO_FONT_SIZE, AS_RAYLIB_COLOR(COLOR_BLACK));
+    DrawTextEx(panel->panel_font, panel->map_info_buffer, (Vector2) { 5, 5 }, MAP_INFO_FONT_SIZE, 0, AS_RAYLIB_COLOR(COLOR_BLACK));
+    DrawTextEx(panel->panel_font, panel->tile_description_buffer, (Vector2) { 5, 5 + (MAP_INFO_FONT_SIZE*2) }, TILE_INFO_FONT_SIZE, 0, AS_RAYLIB_COLOR(COLOR_BLACK));
 }
 
 // -------------------------------------------------------------------------------------------------
