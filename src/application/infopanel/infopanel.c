@@ -24,7 +24,11 @@
 
 #define TILE_INFO_BUFFER_SIZE (2048u)       ///< number of ascii signs that an info panel can display
 #define TILE_INFO_FORMAT_STRING ("TILE AT %3d : %3d\n - mean altitude : % 6dm\n - mean temperature : %+ 3d°C\n - mean cloud cover : %.1f%%\n- vegetation cover : %.1f%%\n - vegetation trees : %.1f%%\n\n")        ///< main format string do display cell information
-#define TILE_INFO_FONT_SIZE (18)        ///< font size for the panel
+#define TILE_INFO_FONT_SIZE (18)        ///< font size for the tile info panel
+
+#define MAP_INFO_BUFFER_SIZE (1024u)
+#define MAP_INFO_FORMAT_STRING ("MAP SEED : % 10d")
+#define MAP_INFO_FONT_SIZE (16)        ///< font size for the map info
 
 // -------------------------------------------------------------------------------------------------
 // -------------------------------------------------------------------------------------------------
@@ -38,8 +42,14 @@ typedef struct info_panel_t {
     /// cell's y position
     u32 cell_y;
 
-    /// pointer to the string buffer
+    /// overall map seed
+    i32 map_seed;
+
+    /// pointer to the string buffer for the tile's infos
     char *tile_description_buffer;
+
+    /// pointer to the string buffer for the map's infos
+    char *map_info_buffer;
 } info_panel_t;
 
 // -------------------------------------------------------------------------------------------------
@@ -128,9 +138,16 @@ info_panel_t *info_panel_create(void) {
     }
 
     panel->tile_description_buffer = malloc(sizeof(*panel->tile_description_buffer) * TILE_INFO_BUFFER_SIZE);
+    panel->map_info_buffer = malloc(sizeof(*panel->map_info_buffer) * MAP_INFO_BUFFER_SIZE);
+    if ((!panel->tile_description_buffer) || (!panel->map_info_buffer)) {
+        return NULL;
+    }
+
     panel->target_cell = NULL;
     panel->cell_x = 0u;
     panel->cell_y = 0u;
+
+    panel->map_seed = 0;
 
     update_tile_description_buffer(panel);
 
@@ -146,6 +163,10 @@ void info_panel_destroy(info_panel_t **panel) {
     if ((*panel)->tile_description_buffer) {
         free((*panel)->tile_description_buffer);
         (*panel)->tile_description_buffer = NULL;
+    }
+    if ((*panel)->map_info_buffer) {
+        free((*panel)->map_info_buffer);
+        (*panel)->map_info_buffer = NULL;
     }
 
     (*panel)->target_cell = NULL;
@@ -168,10 +189,23 @@ void info_panel_set_examined_cell(info_panel_t *panel, hexa_cell_t *cell, u32 ce
 }
 
 // -------------------------------------------------------------------------------------------------
+void info_panel_set_map_seed(info_panel_t *panel, i32 map_seed) {
+    if (!panel) {
+        return;
+    }
+
+    panel->map_seed = map_seed;
+    update_tile_description_buffer(panel);
+}
+
+
+// -------------------------------------------------------------------------------------------------
 void info_panel_draw(info_panel_t *panel) {
     ClearBackground(AS_RAYLIB_COLOR(COLOR_WHITE));
 
-    DrawText(panel->tile_description_buffer, 5, 5, TILE_INFO_FONT_SIZE, AS_RAYLIB_COLOR(COLOR_BLACK));
+    DrawText(panel->map_info_buffer, 5, 5, MAP_INFO_FONT_SIZE, AS_RAYLIB_COLOR(COLOR_BLACK));
+    
+    DrawText(panel->tile_description_buffer, 5, 5 + (MAP_INFO_FONT_SIZE*2), TILE_INFO_FONT_SIZE, AS_RAYLIB_COLOR(COLOR_BLACK));
 }
 
 // -------------------------------------------------------------------------------------------------
@@ -180,6 +214,11 @@ void info_panel_draw(info_panel_t *panel) {
 
 // -------------------------------------------------------------------------------------------------
 void update_tile_description_buffer(info_panel_t *panel) {
+
+    snprintf(panel->map_info_buffer, MAP_INFO_BUFFER_SIZE, MAP_INFO_FORMAT_STRING,
+            panel->map_seed
+    );
+
     if (!panel->target_cell){
         panel->tile_description_buffer[0] = '\0';
         return;

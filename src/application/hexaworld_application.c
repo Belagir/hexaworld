@@ -110,6 +110,8 @@ static void winregion_infopanel_on_refresh(vector_2d_cartesian_t target_dim, voi
 hexaworld_raylib_app_handle_t * hexaworld_raylib_app_init(i32 random_seed, u32 window_width, u32 window_height, u32 world_width, u32 world_height) {
     hexaworld_raylib_app_handle_t *handle = &module_data.real_app;
 
+    i32 real_seed = (random_seed == 0) ? time(NULL) : random_seed;
+
     end_of_the_line_register_call(application_end_of_the_line_destroy, &(module_data.real_app));
 
     // window dimensions
@@ -122,7 +124,7 @@ hexaworld_raylib_app_handle_t * hexaworld_raylib_app_init(i32 random_seed, u32 w
 
     // hexaworld allocation & initialisation of the companion data
     handle->hexaworld_data = (hexaworld_application_data_t) {
-            .hexaworld = hexaworld_create_empty(world_width, world_height, (random_seed == 0) ? time(NULL) : random_seed),
+            .hexaworld = hexaworld_create_empty(world_width, world_height, real_seed),
             .current_layer = HEXAW_LAYER_WHOLE_WORLD,
             .linked_panel = info_panel_create(),
     };
@@ -159,6 +161,8 @@ hexaworld_raylib_app_handle_t * hexaworld_raylib_app_init(i32 random_seed, u32 w
         }
     }
 
+    info_panel_set_map_seed(handle->hexaworld_data.linked_panel, real_seed);
+
     if (handle->hexaworld_data.hexaworld) {
         // generate ALL the LAYERS !
         generate_world(handle->hexaworld_data.hexaworld);
@@ -192,6 +196,7 @@ void hexaworld_raylib_app_deinit(hexaworld_raylib_app_handle_t **hexapp) {
 
 // -------------------------------------------------------------------------------------------------
 void hexaworld_raylib_app_run(hexaworld_raylib_app_handle_t *hexapp, u32 target_fps) {
+    i32 new_seed = 0;
 
     if (!IsWindowReady() || (!hexapp) || (!hexapp->hexaworld_data.hexaworld)) {
         return;
@@ -206,9 +211,11 @@ void hexaworld_raylib_app_run(hexaworld_raylib_app_handle_t *hexapp, u32 target_
     while (!WindowShouldClose()) {
 
         if (IsKeyPressed(KEY_ENTER) && IsKeyDown(KEY_LEFT_SHIFT)) {
-            hexaworld_reseed(hexapp->hexaworld_data.hexaworld, rand());
+            new_seed = rand();
+            hexaworld_reseed(hexapp->hexaworld_data.hexaworld, new_seed);
             generate_world(hexapp->hexaworld_data.hexaworld);
 
+            info_panel_set_map_seed(hexapp->hexaworld_data.linked_panel, new_seed);
             info_panel_set_examined_cell(hexapp->hexaworld_data.linked_panel, NULL, 0u, 0u);
 
             window_region_notify_changed(hexapp->window_regions[WINREGION_HEXAWORLD]);
