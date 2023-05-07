@@ -24,12 +24,12 @@ typedef void (*on_region_click_func_t)(vector_2d_cartesian_t region_dim, u32 rel
 typedef void (*on_region_refreshed_func_t)(vector_2d_cartesian_t target_dim, void *data);
 
 /**
- * @brief Data defining a window region
+ * @brief Opaque type to the data defining a window region
  */
 typedef struct window_region_t window_region_t;
 
 /**
- * @brief Initialize a region data from some information.
+ * @brief Creates a region data structure on the heap from some information.
  * The internal texture buffer size will be set to the real size of the region relative to the window.
  * 
  * @param[in] ratio_coords_rectangle ratios of the window's sizes, representing the zone attributed to the region
@@ -38,6 +38,7 @@ typedef struct window_region_t window_region_t;
  * @param[in] on_click_f function to be called on a click on the region (can be NULL)
  * @param[in] on_refresh_f function to be called when the region needs to be re-drawn (can be NULL)
  * @param[in] related_data pointer to some anonymous data needed by the two previous functions
+ * @return window_region_t * a pointer to the new region, or NULL if allocation failed.
  */
 window_region_t * window_region_create(
             const f32 ratio_coords_rectangle[4u],
@@ -69,14 +70,14 @@ void window_region_draw(window_region_t *w_region);
 void window_region_process_click(window_region_t *w_region, i32 x, i32 y);
 
 /**
- * @brief Releases resources held by the structure.
+ * @brief Releases resources held by the structure, and sets to NULL the given pointer.
  * 
  * @param[inout] w_region target region
  */
 void window_region_destroy(window_region_t **w_region);
 
 /**
- * @brief Notifies a region that it has changed
+ * @brief Notifies a region that it has changed.
  * 
  * @param[inout] w_region target window region
  */

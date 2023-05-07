@@ -21,8 +21,8 @@
 // ---- CONSTANTS ----------------------------------------------------------------------------------
 // -------------------------------------------------------------------------------------------------
 
-#define TELLURIC_SEED_NB_MIN (3u)
-#define TELLURIC_SEED_NB_PER_TILE (0.005f)
+#define TELLURIC_SEED_NB_MIN (3u)       ///< minimum number of telluric plates seeded
+#define TELLURIC_SEED_NB_PER_TILE (0.005f)      ///< number of additional telluric plates seeded per number of tiles
 #define TELLURIC_VECTOR_DIRECTIONS_NB (32)     ///< number of possible directions for a telluric vector
 #define TELLURIC_VECTOR_UNIT_ANGLE ((PI_T_2) / (TELLURIC_VECTOR_DIRECTIONS_NB))      ///< telluric vector minimum angle 
 
@@ -38,13 +38,13 @@
 #define TEMPERATURE_MIN (-25)   ///< minimum temperature (on the poles at sea level)
 #define TEMPERATURE_RANGE (TEMPERATURE_MAX - TEMPERATURE_MIN)   ///< total temperature range
 #define TEMPERATURE_ALTITUDE_MULTIPLIER (-0.00625f)     ///< °C lost with every meter of altitude
-#define TEMPERATURE_RANDOM_SHIFT (0.3f)
-#define TEMPERATURE_VARIANCE_LATITUDE (0.3f)
+#define TEMPERATURE_RANDOM_SHIFT (0.3f)     ///< random equator displacement northward or southward, in map ratio
+#define TEMPERATURE_VARIANCE_LATITUDE (0.3f)    ///< variance of the temperature gradient
 
 #define WINDS_VECTOR_DIRECTIONS_NB (32)     ///< number of possible direction for a wind vector 
 #define WINDS_VECTOR_UNIT_ANGLE ((PI_T_2) / (WINDS_VECTOR_DIRECTIONS_NB))      ///< winds vector minimum angle 
 
-#define CLOUD_COVER_DIFFUSION (1.2f)
+#define CLOUD_COVER_DIFFUSION (1.2f)        ///< diffusion of the cloud cover wrom a tile to tiles neighboring it along its wind direction 
 
 #define FRESHWATER_PRECIPITATIONS_THRESHOLD (0.15f)      ///< threshold from which a precipitation on a tiles creates a source of water.
 #define FRESHWATER_SOURCE_START_DEPTH (1u)      ///< start value for freshwater

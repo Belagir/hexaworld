@@ -44,7 +44,7 @@ void info_panel_destroy(info_panel_t **panel);
 void info_panel_set_examined_cell(info_panel_t *panel, hexa_cell_t *cell, u32 cell_pos_x, u32 cell_pos_y);
 
 /**
- * @brief Sets the map seed displayed by the infopanel
+ * @brief Sets the map seed displayed by the infopanel.
  * 
  * @param[inout] panel target panel
  * @param[in] map_seed current seed of the map

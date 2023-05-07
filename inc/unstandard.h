@@ -22,7 +22,9 @@
 /// returns the sign bitfield of a 32-bit signed integer
 #define SGN_I32(_v) ((_v) & (0x80000000))
 
+/// maximum between two values
 #define MAX(_a, _b) (((_a) > (_b)) ? (_a) : (_b))
+/// minimum between two values
 #define MIN(_a, _b) (((_a) < (_b)) ? (_a) : (_b))
 
 typedef char  i8;   ///< convenience type redefinition
@@ -70,8 +72,8 @@ void bytewise_copy(void *dest, void *source, size_t nb_bytes);
 /**
  * @brief Counts the number of set bits in a byte.
  * 
- * @param value 
- * @return u8 
+ * @param[in] value a byte 
+ * @return u8 total number of set bits
  */
 u8 count_set_bits(u8 value);
 
@@ -104,20 +106,19 @@ u32 float_equal(f32 val1, f32 val2, u32 max_ulps_diff);
 /**
  * @brief Calculates a normal distribution of a certain mean and variance (not squared variance !). 
  * 
- * @param x 
- * @param mean 
- * @param variance 
- * @return f32 
+ * @param[in] x input value 
+ * @param[in] mean mean if the distribution
+ * @param[in] variance variance of the distribution
+ * @return f32 chance of x along the distribution
  */
 f32 normal_distribution(f32 x, f32 mean, f32 variance);
 
 /**
- * @brief 
+ * @brief Calculates the sigmoid function
  * 
- * @param x 
- * @param weight 
- * @return f32 
+ * @param[in] x input value
+ * @return f32 value mapped between 0.0 and 1.0
  */
-f32 sigmoid(f32 x, f32 weight);
+f32 sigmoid(f32 x);
 
 #endif

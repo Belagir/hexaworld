@@ -121,7 +121,7 @@ static void vegetation_apply(void *target_cell, void *neighbors[DIRECTIONS_NB]) 
 
     cell->vegetation_cover = MAX(max_veg_cover * VEGETATION_COVER_DIFFUSION_FACTOR * temperature_rating, cell->vegetation_cover);
     if (cell->vegetation_trees < VEGETATION_CUTOUT_THRESHOLD) {
-        cell->vegetation_trees = sigmoid(mean_veg_trees - VEGETATION_TREES_PROPAGATION_OFFSET, VEGETATION_TREES_PROPAGATION_WEIGHT);
+        cell->vegetation_trees = sigmoid((mean_veg_trees - VEGETATION_TREES_PROPAGATION_OFFSET) * VEGETATION_TREES_PROPAGATION_WEIGHT);
     }
 }
 

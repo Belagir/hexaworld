@@ -22,12 +22,12 @@
 
 #define TILE_FLAG_NO_DESCRIPTION ("")     ///< constant to signal that a cell flag has no description 
 
-#define TILE_INFO_BUFFER_SIZE (2048u)       ///< number of ascii signs that an info panel can display
-#define TILE_INFO_FORMAT_STRING ("TILE AT %3d : %3d\n - mean altitude : % 6dm\n - mean temperature : %+ 3d°C\n - mean cloud cover : %.1f%%\n- vegetation cover : %.1f%%\n - vegetation trees : %.1f%%\n\n")        ///< main format string do display cell information
+#define TILE_INFO_BUFFER_SIZE (2048u)       ///< number of ascii signs that an info panel can display for the tile info part
+#define TILE_INFO_FORMAT_STRING ("TILE AT %3d : %3d\n - mean altitude : % 6dm\n - mean temperature : %+ 3d°C\n - mean cloud cover : %.1f%%\n- vegetation cover : %.1f%%\n - vegetation trees : %.1f%%\n\n")        ///< main format string to display tile information
 #define TILE_INFO_FONT_SIZE (18)        ///< font size for the tile info panel
 
-#define MAP_INFO_BUFFER_SIZE (1024u)
-#define MAP_INFO_FORMAT_STRING ("MAP SEED : % 10d")
+#define MAP_INFO_BUFFER_SIZE (1024u)        ///< number of ascii signs that an info panel can display for the map info part
+#define MAP_INFO_FORMAT_STRING ("MAP SEED : % 10d")     ///< main format string to display map information
 #define MAP_INFO_FONT_SIZE (16)        ///< font size for the map info
 
 // -------------------------------------------------------------------------------------------------
@@ -55,6 +55,9 @@ typedef struct info_panel_t {
 // -------------------------------------------------------------------------------------------------
 // -------------------------------------------------------------------------------------------------
 
+/**
+ * @brief Map from a tile flag to its string representation
+ */
 const char *tile_flag_description_map[HEXAW_FLAGS_NB] = {
         // HEXAW_FLAG_TELLURIC_RIDGE
         TILE_FLAG_NO_DESCRIPTION,

@@ -32,44 +32,44 @@ typedef enum cell_direction_t {
  * @brief Possible flags held in a cell. (They claim they're innocent)
  */
 typedef enum hexaworld_cell_flag_t {
-    HEXAW_FLAG_TELLURIC_RIDGE,      ///< Two plates are clashing here, and forming mountains
-    HEXAW_FLAG_TELLURIC_RIFT,       ///< Two plates are growing from the ocean's floor, forming a deep crevasse
+        HEXAW_FLAG_TELLURIC_RIDGE,      ///< Two plates are clashing here, and forming mountains
+        HEXAW_FLAG_TELLURIC_RIFT,       ///< Two plates are growing from the ocean's floor, forming a deep crevasse
 
-    HEXAW_FLAG_MOUNTAIN,            ///< Some mountains are forming here, above the water
-    HEXAW_FLAG_ISLES,               ///< Some isles have been created by a tectonic force
-    HEXAW_FLAG_CANYONS,             ///< Some old tectonic event or river dug a long path here
-    HEXAW_FLAG_UNDERWATER_CANYONS,  ///< Tectonic forces are at work here and create some heavy drop on the ocean floor
+        HEXAW_FLAG_MOUNTAIN,            ///< Some mountains are forming here, above the water
+        HEXAW_FLAG_ISLES,               ///< Some isles have been created by a tectonic force
+        HEXAW_FLAG_CANYONS,             ///< Some old tectonic event or river dug a long path here
+        HEXAW_FLAG_UNDERWATER_CANYONS,  ///< Tectonic forces are at work here and create some heavy drop on the ocean floor
 
-    HEXAW_FLAG_SMALL_COAST,
-    HEXAW_FLAG_LONG_COAST,
+        HEXAW_FLAG_SMALL_COAST,         ///< This tile boasts a coast, but quite small
+        HEXAW_FLAG_LONG_COAST,          ///< This tile boasts a coast, but long
 
-    HEXAW_FLAG_MEANDERS,            ///< A river here twists and turns, creating a marsh, a bog, or maybe a swamp
-    HEXAW_FLAG_WATERFALLS,          ///< Great waterfalls run down the landscape here
-    HEXAW_FLAG_RIVER_MOUTH,         ///< The river on the tile goes directly to an ocean or sea 
-    HEXAW_FLAG_LAKE,                ///< a lake has formed here
+        HEXAW_FLAG_MEANDERS,            ///< A river here twists and turns, creating a marsh, a bog, or maybe a swamp
+        HEXAW_FLAG_WATERFALLS,          ///< Great waterfalls run down the landscape here
+        HEXAW_FLAG_RIVER_MOUTH,         ///< The river on the tile goes directly to an ocean or sea 
+        HEXAW_FLAG_LAKE,                ///< A lake has formed here
 
-    HEXAW_FLAG_DESERTIC,
-    HEXAW_FLAG_ARID_SHRUBLAND,
-    HEXAW_FLAG_ARID_FOREST,
-    HEXAW_FLAG_STEPPES,
-    HEXAW_FLAG_SPARSE_FOREST,
-    HEXAW_FLAG_DRY_FOREST,
-    HEXAW_FLAG_PLAINS,
-    HEXAW_FLAG_FOREST,
-    HEXAW_FLAG_DENSE_FOREST,
-    HEXAW_FLAG_HIGH_GRASS_PLAINS,
-    HEXAW_FLAG_RICH_FOREST,
-    HEXAW_FLAG_JUNGLE,
+        HEXAW_FLAG_DESERTIC,            ///< A desertic area stretches on the tile
+        HEXAW_FLAG_ARID_SHRUBLAND,      ///< This is an arid area with some stubborn vegetation
+        HEXAW_FLAG_ARID_FOREST,         ///< This forest clings for its life on an hostile soil
+        HEXAW_FLAG_STEPPES,             ///< Windy, dry steppes 
+        HEXAW_FLAG_SPARSE_FOREST,       ///< Some trees are here and there, populating the landscape
+        HEXAW_FLAG_DRY_FOREST,          ///< Some of the most stubborn species of trees have created some forests hre and there
+        HEXAW_FLAG_PLAINS,              ///< Grassy plains
+        HEXAW_FLAG_FOREST,              ///< Some good old forest
+        HEXAW_FLAG_DENSE_FOREST,        ///< A dense and difficult to navigate forest
+        HEXAW_FLAG_HIGH_GRASS_PLAINS,   ///< Plains of high rising grasses
+        HEXAW_FLAG_RICH_FOREST,         ///< A forest teeming with life
+        HEXAW_FLAG_JUNGLE,              ///< A dense and generaly humid jungle
 
-    HEXAW_FLAG_BOG,
-    HEXAW_FLAG_MARSH,
-    HEXAW_FLAG_SWAMP,
+        HEXAW_FLAG_BOG,                 ///< Some treeless, flat swamp
+        HEXAW_FLAG_MARSH,               ///< A swamp of not many trees
+        HEXAW_FLAG_SWAMP,               ///< A swamp
 
-    HEXAW_FLAG_MANGROVE,
-    HEXAW_FLAG_DELTA,
-    HEXAW_FLAG_BRACKISH_MARSH,
+        HEXAW_FLAG_MANGROVE,            ///< The river creates a labyrinth of shallow canals and trees
+        HEXAW_FLAG_DELTA,               ///< The river carved a delta here
+        HEXAW_FLAG_BRACKISH_MARSH,      ///< The river mixes with seawater here 
 
-    HEXAW_FLAGS_NB,     ///< Total number of flags
+        HEXAW_FLAGS_NB,     ///< Total number of flags
 } hexaworld_cell_flag_t;
 
 /**
@@ -80,11 +80,11 @@ typedef enum hexagon_draw_fillmode_t {
     DRAW_HEXAGON_LINES
 } hexagon_draw_fillmode_t;
 
-/// @brief a 16-width set of bit flags
-typedef u16 flag_set16_t;
-
 /// @brief a 32-width set of bit flags
 typedef u32 flag_set32_t;
+
+/// @brief a 16-width set of bit flags
+typedef u16 flag_set16_t;
 
 /// @brief a 8-width set of bit flags
 typedef u8  flag_set8_t;
@@ -139,7 +139,9 @@ typedef struct hexa_cell_t {
  * @brief just the shape of an hexagon.
  */
 typedef struct hexagon_shape_t {
+    /// center of the shape
     vector_2d_cartesian_t center;
+    /// radius of the shape to the hexagon's furthest points
     f32 radius;
 } hexagon_shape_t;
 
