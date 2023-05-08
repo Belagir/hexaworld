@@ -110,7 +110,14 @@ static void winregion_infopanel_on_refresh(vector_2d_cartesian_t target_dim, voi
 hexaworld_raylib_app_handle_t * hexaworld_raylib_app_init(i32 random_seed, u32 window_width, u32 window_height, u32 world_width, u32 world_height) {
     hexaworld_raylib_app_handle_t *handle = &module_data.real_app;
 
-    i32 real_seed = (random_seed == 0) ? time(NULL) : random_seed;
+    i32 real_seed = 0;
+
+    // computing seed
+    real_seed = random_seed;
+    if (random_seed == 0) {
+        srand(time(NULL));
+        real_seed = rand();
+    }
 
     end_of_the_line_register_call(application_end_of_the_line_destroy, &(module_data.real_app));
 
@@ -123,7 +130,7 @@ hexaworld_raylib_app_handle_t * hexaworld_raylib_app_init(i32 random_seed, u32 w
     if (!IsWindowReady()) {
         end_of_the_line(END_OF_THE_LINE_EXIT_RAYLIB_FAILED, "failure during application initialisation");
     }
-    
+
     for (size_t i = 0u ; i < WINREGIONS_NUMBER ; i++) {
         handle->window_regions[i] = NULL;
     }

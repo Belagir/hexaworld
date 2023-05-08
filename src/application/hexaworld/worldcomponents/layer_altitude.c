@@ -6,7 +6,7 @@
 #include <raylib.h>
 #include <colorpalette.h>
 
-#define ITERATION_NB_ALTITUDE (10u)   ///< number of automaton iteration for the altitude layer
+#define ITERATION_NB_ALTITUDE (30u)   ///< number of automaton iteration for the altitude layer
 
 // -------------------------------------------------------------------------------------------------
 // -- ALTITUDE -------------------------------------------------------------------------------------
@@ -81,5 +81,5 @@ const layer_calls_t altitude_layer_calls = {
         .automaton_func     = &altitude_apply,
         .flag_gen_func      = NULL, 
         .automaton_iter     = ITERATION_NB_ALTITUDE,
-        .iteration_flavour  = LAYER_GEN_ITERATE_RELATIVE
+        .iteration_flavour  = LAYER_GEN_ITERATE_ABSOLUTE
 };
