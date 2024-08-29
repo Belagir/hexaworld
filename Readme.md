@@ -62,9 +62,15 @@ You can navigate the layers with the left and right arrows. You also can re-gene
 
 The program also accepts some options :
 
-- `-s seed` with `seed` as any integer. The program will use this to seed the RNG.
-- `-x width` with `width` as a non-zero unsigned integer. This will set the horizontal number of tiles.
+- `-s seed` with `seed` as any integer. The program will use this to seed the RNG ;
+- `-x width` with `width` as a non-zero unsigned integer. This will set the horizontal number of tiles ;
 - `-y height` with `height` as a non-zero unsigned integer. This will set the vertical number of tiles.
+
+Some keybinds are also available :
+
+- `shift + enter` to generate a new world ;
+- `left` or `right` to check out the generated layers ;
+- click on any cells to see some information about it.
 
 # WIP
 
@@ -83,3 +89,4 @@ Here is my rough roadmap :
 - `[x]` basic UI to give info on the tiles
 - `[ ]` tweaks to layers generation to make it as good as I can
 - `[ ]` sprite "stickers" proceduraly added on certain tiles for looks
+- `[ ]` PNG export
